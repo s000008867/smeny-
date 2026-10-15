@@ -760,13 +760,8 @@ summary{cursor:pointer;font-weight:600}
   const sb=$("soundBtn"); sb.setAttribute("aria-pressed", sfx.on);
   sb.onclick = ()=>{ sfx.set(!sfx.on); sb.setAttribute("aria-pressed", sfx.on); sb.setAttribute("aria-label", sfx.on?"Звук включён":"Звук выключен"); if(sfx.on) sfx.good(); };
   renderBrushes(); renderTypeSettings(); renderQuick(); render();
-  // Отдельное приложение: всё хранится на этом телефоне. При первом запуске — сентябрь и октябрь.
-  const SEED = {"2026-09": {"days": {"1": "w", "2": "w", "3": "w", "4": "o", "5": "o", "6": "w", "7": "o", "8": "w", "9": "w", "10": "w", "11": "o", "12": "w", "13": "w", "14": "w", "15": "o", "16": "w", "17": "w", "18": "o", "19": "o", "20": "w", "21": "w", "22": "o", "23": "o", "24": "w", "25": "w", "26": "o", "27": "o", "28": "w", "29": "w", "30": "o"}, "points": {"21": 26, "24": 26, "25": 26, "28": 26, "29": 26}}, "2026-10": {"days": {"1": "o", "2": "w", "3": "w", "4": "o", "5": "o", "6": "w", "7": "w", "8": "o", "9": "o", "10": "o", "11": "w", "12": "w", "13": "o", "14": "w", "15": "w", "16": "x", "17": "o", "18": "w", "19": "w", "20": "x", "21": "o", "22": "w", "23": "w", "24": "x", "25": "o", "26": "w", "27": "w", "28": "x", "29": "o", "30": "w", "31": "w"}, "points": {"2": 26, "3": 26, "6": 26, "7": 26, "11": 26, "12": 26, "14": 25, "15": 32}, "total": {"pts": 343, "upTo": "2026-10-15"}}};
+  // Отдельное приложение: всё хранится на телефоне каждого пользователя, у каждого свои данные.
   (async ()=>{
-    try{
-      let has=false; for(let i=0;i<localStorage.length;i++) if(/^salary:\d{4}-\d{2}$/.test(localStorage.key(i))) has=true;
-      if(!has && !localStorage.getItem("salary:seeded")){ for(const k in SEED) localStorage.setItem("salary:"+k, JSON.stringify(SEED[k])); localStorage.setItem("salary:seeded","1"); }
-    }catch(e){}
     loadLocal(); render(); status("Данные хранятся на этом телефоне");
     try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}
     if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
