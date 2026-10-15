@@ -1,0 +1,787 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#eef1ef" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111614" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Смены">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,sans-serif;-webkit-tap-highlight-color:transparent}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Календарь смен</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Unbounded:wght@500;700&display=swap">
+<style>
+/* Layout: одна колонка — итог месяца, выбор отметки, сетка дней, расшифровка, год, настройки. */
+:root{
+  --bg:#eef1ef; --surface:#ffffff; --fg:#17201c; --muted:#5f6d66; --line:#d6ddd9;
+  --accent:#1f7a4d; --accent-fg:#ffffff; --weekend:#a24a3a;
+  --extra:#2b63c9; --sick:#7a4fc4; --absent:#c23b2a; --off:#c9d1cd; --off-fg:#3d4843; --mid:#b06f00;
+  --font-display:"Unbounded", "Golos Text", system-ui, sans-serif;
+  --font-body:"Golos Text", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111614; --surface:#1a211e; --fg:#e7eeea; --muted:#93a39b; --line:#2b3530;
+  --accent:#46b980; --accent-fg:#0d1511; --weekend:#e08a78;
+  --extra:#6f9ff5; --sick:#b49af0; --absent:#ef7a66; --off:#3a4540; --off-fg:#d3ddd8; --mid:#e8b04a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111614; --surface:#1a211e; --fg:#e7eeea; --muted:#93a39b; --line:#2b3530;
+  --accent:#46b980; --accent-fg:#0d1511; --weekend:#e08a78;
+  --extra:#6f9ff5; --sick:#b49af0; --absent:#ef7a66; --off:#3a4540; --off-fg:#d3ddd8; --mid:#e8b04a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.45}
+.wrap{max-width:680px;margin:0 auto;padding-block:20px 40px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));
+  display:flex;flex-direction:column;gap:18px}
+.num{font-variant-numeric:tabular-nums}
+header.month{display:flex;align-items:center;justify-content:space-between;gap:8px}
+header.month h1{font-family:var(--font-display);font-weight:500;font-size:20px;margin:0;text-transform:capitalize}
+.nav{display:flex;gap:6px}
+button{font:inherit;color:inherit;cursor:pointer}
+#soundBtn{display:inline-flex;align-items:center;justify-content:center}
+#soundBtn .mute{display:none} #soundBtn[aria-pressed="false"] .mute{display:inline} #soundBtn[aria-pressed="false"] .wave{display:none}
+#soundBtn[aria-pressed="false"]{color:var(--muted)}
+.icon-btn{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:18px;line-height:1}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.total{display:flex;flex-direction:column;gap:2px}
+.total .label{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.total .value{font-family:var(--font-display);font-weight:700;font-size:clamp(34px,10vw,46px);line-height:1.1}
+.total .sub{color:var(--muted)}
+
+.cal{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px;margin-inline:-8px;display:flex;flex-direction:column;gap:10px}
+.brushes{display:flex;flex-wrap:wrap;gap:6px}
+.brush{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:transparent;font-size:14px}
+.brush .sw{width:12px;height:12px;border-radius:3px;background:var(--c)}
+.brush[aria-pressed="true"]{border-color:var(--c);box-shadow:inset 0 0 0 1px var(--c);font-weight:600}
+.dow,.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.dow span{text-align:center;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.dow span:nth-child(n+6){color:var(--weekend)}
+.day{aspect-ratio:1;min-width:0;max-width:100%;padding:0;overflow:hidden;border-radius:10px;border:1px solid var(--line);background:transparent;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:16px;font-weight:500;
+  transition:background .12s,border-color .12s}
+.day.we .d{color:var(--weekend)}
+.day .mark{font-size:10px;font-weight:600;height:12px;line-height:12px}
+.day.np:not([data-t]){border-style:dashed}
+.day[data-t]{background:var(--c);border-color:var(--c);color:var(--accent-fg)}
+.day[data-t] .d{color:inherit}
+.day[data-t="o"]{color:var(--off-fg)}
+.day.today{border-width:2px;border-color:var(--fg)}
+.day.pad{visibility:hidden}
+.t-w{--c:var(--accent)} .t-x{--c:var(--extra)} .t-s{--c:var(--sick)} .t-a{--c:var(--absent)} .t-o{--c:var(--off)}
+.hint{font-size:13px;color:var(--muted);margin:0 2px}
+.tools{display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center}
+.link-btn{background:none;border:none;padding:4px 0;color:var(--accent);font-weight:500;text-decoration:underline;text-underline-offset:3px}
+
+.breakdown{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 12px;padding:0 2px;margin:0}
+.breakdown dt{color:var(--muted);min-width:0;display:flex;align-items:baseline;gap:8px}
+.breakdown dt .sw{flex:none;width:10px;height:10px;border-radius:3px;background:var(--c);align-self:center}
+.breakdown dd{margin:0;text-align:right;font-weight:500}
+.breakdown .sum{border-top:1px solid var(--line);padding-top:8px;font-weight:600;color:var(--fg)}
+
+details{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+summary{cursor:pointer;font-weight:600}
+.settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
+.settings label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+.settings input[type=number]{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+.types{display:flex;flex-direction:column;gap:12px;margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}
+.trow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px 12px;align-items:end}
+.trow .name{grid-column:1/-1;font-weight:600;display:flex;align-items:center;gap:8px}
+.trow .name .sw{width:12px;height:12px;border-radius:3px;background:var(--c)}
+.trow label.chk{flex-direction:row;align-items:center;gap:8px;color:var(--fg);padding-bottom:8px}
+.chk input{width:18px;height:18px;accent-color:var(--accent)}
+.year{width:100%;border-collapse:collapse;margin-top:10px}
+.year td{padding:6px 0;border-bottom:1px solid var(--line)}
+.year td:not(:first-child){text-align:right}
+.year tr.cur td{font-weight:600}
+.year tfoot td{border:none;font-weight:600;padding-top:10px}
+.savebar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.save-btn{padding:10px 18px;border-radius:10px;border:none;background:var(--accent);color:var(--accent-fg);font-weight:600}
+.save-btn:disabled{opacity:.6;cursor:default}
+.save-state{font-size:13px;color:var(--muted)}
+.save-state.warn{color:var(--absent)}
+.backup{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.backup p{margin:0;font-size:13px;color:var(--muted)}
+.backup .row{display:flex;flex-wrap:wrap;gap:8px}
+.ghost-btn{padding:9px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-weight:500}
+.file-in{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.brush.t-p{--c:var(--fg)}
+.brush.t-p .sw{border-radius:50%;background:none;box-shadow:inset 0 0 0 2px var(--fg)}
+.day .mark.pts{min-width:22px;height:15px;line-height:15px;padding:0 4px;border-radius:6px;background:var(--surface);color:var(--lv);font-size:11px;font-weight:700}
+.lv-low{--lv:var(--absent)} .lv-mid{--lv:var(--mid)} .lv-full{--lv:var(--accent)}
+.day.sel{outline:3px solid var(--fg);outline-offset:1px}
+.editor{display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:12px;background:var(--bg);border:1px solid var(--line)}
+.editor .head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.editor .head b{font-size:16px}
+.editor .head span{font-size:13px;color:var(--muted)}
+.stepper{display:flex;gap:8px;align-items:stretch}
+.stepper button{width:48px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:22px}
+.stepper input{flex:1;min-width:0;font:inherit;font-size:24px;font-weight:600;text-align:center;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px}
+.quick{display:flex;flex-wrap:wrap;gap:6px}
+.quick button{padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--surface);font-weight:500}
+.editor .actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.pct-preview{font-size:14px}
+.ptsbox{display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:14px;background:var(--surface);border:1px solid var(--line)}
+.ptsbox .lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.ptsbox .big{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.ptsbox .big b{font-family:var(--font-display);font-weight:700;font-size:30px;line-height:1.1}
+.ptsbox .big span{color:var(--muted)}
+.bar{height:10px;border-radius:999px;background:var(--bg);border:1px solid var(--line);overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--lv);border-radius:999px;transition:width .2s}
+.pgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.pgrid div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.pgrid small{font-size:12px;color:var(--muted)}
+.pgrid strong{font-size:17px}
+.ptsbox .note{font-size:13px;color:var(--muted);margin:0}
+.ptsbox .enter{align-self:flex-start}
+.analysis{display:flex;flex-direction:column;gap:12px;border-top:1px solid var(--line);padding-top:12px}
+.analysis h3{margin:0;font-size:14px;font-weight:600}
+.counts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.counts div{border-radius:10px;padding:8px 10px;background:var(--bg);border-left:4px solid var(--lv);display:flex;flex-direction:column;min-width:0}
+.counts small{font-size:12px;color:var(--muted)}
+.counts strong{font-size:20px}
+.grp{display:flex;flex-direction:column;gap:6px}
+.grp .gh{font-size:13px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;gap:6px;align-items:baseline;padding:4px 9px;border-radius:8px;background:var(--bg);border:1px solid var(--line);font-size:13px}
+.chip b{color:var(--lv)}
+.chip em{font-style:normal;color:var(--muted);font-size:12px}
+.extremes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;font-size:13px}
+.extremes div{display:flex;flex-direction:column;min-width:0}
+.extremes small{color:var(--muted)}
+@media (prefers-reduced-motion: reduce){.day{transition:none}.bar i{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="month">
+    <h1 id="monthTitle">Октябрь 2026</h1>
+    <div class="nav">
+      <button class="icon-btn" id="soundBtn" aria-label="Звук" aria-pressed="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path class="wave" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/><path class="mute" d="M16 9l6 6M22 9l-6 6"/></svg></button>
+      <button class="icon-btn" id="prev" aria-label="Предыдущий месяц">‹</button>
+      <button class="icon-btn" id="next" aria-label="Следующий месяц">›</button>
+    </div>
+  </header>
+
+  <section class="total" aria-live="polite">
+    <span class="label">Заработано за месяц</span>
+    <span class="value num" id="total">0 ₽</span>
+    <span class="sub num" id="totalSub">0 смен</span>
+  </section>
+
+  <div class="savebar">
+    <button class="save-btn" id="saveNow">Сохранить</button>
+    <span class="save-state" id="saveState" aria-live="polite">Изменения сохраняются автоматически</span>
+  </div>
+
+  <section class="cal">
+    <div class="brushes" id="brushes" role="group" aria-label="Что отмечать"></div>
+    <div>
+      <div class="dow"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span></div>
+      <div class="grid" id="grid" style="margin-top:6px"></div>
+    </div>
+    <div class="editor" id="editor" hidden>
+      <div class="head"><b id="edDay">2 октября</b><span id="edHint">Баллы за смену</span></div>
+      <div class="stepper">
+        <button id="edMinus" aria-label="Минус балл">−</button>
+        <input id="edInput" type="number" inputmode="numeric" min="0" step="1" aria-label="Баллы за смену">
+        <button id="edPlus" aria-label="Плюс балл">+</button>
+      </div>
+      <div class="quick" id="edQuick"></div>
+      <div class="pct-preview num" id="edPreview"></div>
+      <div class="actions">
+        <button class="save-btn" id="edNext">Готово, к следующей смене</button>
+        <button class="link-btn" id="edClear">Убрать баллы</button>
+        <button class="link-btn" id="edClose">Закрыть</button>
+      </div>
+    </div>
+    <p class="hint" id="calHint">Выберите, что отмечать, и нажимайте на дни. Повторное нажатие снимает отметку. Чтобы ввести баллы, выберите «Баллы» и нажмите на смену. Дни с пунктирной рамкой (с 21 числа) идут в премию следующего месяца.</p>
+    <div class="tools">
+      <button class="link-btn" id="fillOff">Пустые дни сделать выходными</button>
+      <button class="link-btn" id="clearMonth">Очистить месяц</button>
+    </div>
+    <div id="confirmClear" class="tools" hidden>
+      <span>Снять все отметки за месяц?</span>
+      <button class="link-btn" id="clearYes">Да, очистить</button>
+      <button class="link-btn" id="clearNo">Отмена</button>
+    </div>
+  </section>
+
+  <section class="ptsbox num" id="ptsBox" aria-live="polite">
+    <span class="lbl" id="ptsTitle">Баллы за период премии</span>
+    <div class="big"><b id="ptsTotal">0</b><span id="ptsGoal">из 0</span></div>
+    <div class="bar"><i id="ptsBar"></i></div>
+    <div class="pgrid">
+      <div><small>Средний за смену</small><strong id="ptsAvg">—</strong></div>
+      <div><small id="ptsTargetLbl">Нужно в день</small><strong id="ptsTarget">—</strong></div>
+      <div><small id="ptsDiffLbl">До цели</small><strong id="ptsDiff">—</strong></div>
+    </div>
+    <p class="note" id="ptsNote"></p>
+    <div class="analysis" id="analysis" hidden>
+      <h3>Анализ смен</h3>
+      <div class="counts">
+        <div class="lv-full"><small>Выше нормы</small><strong id="cAbove">0</strong></div>
+        <div class="lv-full"><small>Ровно норма</small><strong id="cEq">0</strong></div>
+        <div class="lv-low"><small>Ниже нормы</small><strong id="cBelow">0</strong></div>
+      </div>
+      <div class="extremes">
+        <div><small>Средний ниже нормы</small><span id="avgBelow">—</span></div>
+        <div><small>Средний выше нормы</small><span id="avgAbove">—</span></div>
+        <div><small>Лучшая смена</small><span id="best">—</span></div>
+        <div><small>Худшая смена</small><span id="worst">—</span></div>
+      </div>
+      <div class="grp" id="gAboveBox"><span class="gh" id="gAboveH">Выше нормы</span><div class="chips" id="gAbove"></div></div>
+      <div class="grp" id="gBelowBox"><span class="gh" id="gBelowH">Ниже нормы</span><div class="chips" id="gBelow"></div></div>
+    </div>
+    <div class="tools">
+      <button class="link-btn" id="ptsEnter">Ввести баллы за смены</button>
+      <button class="link-btn" id="totOpen">Ввести общее количество</button>
+      <button class="link-btn" id="totClear" hidden>Убрать общее</button>
+    </div>
+    <div class="editor" id="totForm" hidden>
+      <div class="head"><b>Общее количество баллов</b><span id="totHint">за период премии</span></div>
+      <div class="settings" style="margin-top:0">
+        <label for="totPts">Баллов набрано<input id="totPts" type="number" inputmode="numeric" min="0" step="1"></label>
+        <label for="totDate">По какое число включительно<input id="totDate" type="date"></label>
+      </div>
+      <div class="actions">
+        <button class="save-btn" id="totSave">Сохранить</button>
+        <button class="link-btn" id="totCancel">Отмена</button>
+      </div>
+    </div>
+  </section>
+
+  <dl class="breakdown num" id="breakdown"></dl>
+
+  <details id="yearBox">
+    <summary id="yearTitle">Итоги 2026 года</summary>
+    <table class="year num"><tbody id="yearBody"></tbody><tfoot><tr><td>Всего</td><td id="yearDays"></td><td id="yearSum"></td></tr></tfoot></table>
+  </details>
+
+  <details>
+    <summary>Оплата и премия</summary>
+    <div class="settings">
+      <label for="rate">Оплата за смену, ₽<input id="rate" type="number" inputmode="numeric" min="0" step="100" value="5800"></label>
+      <label for="pct">Максимальная премия, %<input id="pct" type="number" inputmode="decimal" min="0" step="1" value="27"></label>
+      <label for="minPts">Минимум баллов в день<input id="minPts" type="number" inputmode="numeric" min="0" step="1" value="18"></label>
+      <label for="maxPts">Баллы для полной премии<input id="maxPts" type="number" inputmode="numeric" min="0" step="1" value="24"></label>
+    </div>
+    <p class="hint" style="margin-top:10px">Процент премии зависит от среднего балла за смену за отчётный период (с 21 по 20): меньше минимума — 0%, от минимума до полной — растёт равномерно, от полной и выше — максимум. Пока баллов нет, премия считается по максимуму.</p>
+    <div class="types" id="typeSettings"></div>
+  </details>
+
+  <details>
+    <summary>Резервная копия</summary>
+    <div class="backup">
+      <p>Скачайте файл со всеми отметками и настройками. Из него можно восстановить календарь, если что-то пойдёт не так.</p>
+      <div class="row">
+        <button class="ghost-btn" id="exportBtn">Скачать копию</button>
+        <label class="ghost-btn" for="importFile" tabindex="0" id="importLabel">Восстановить из файла</label>
+        <input class="file-in" type="file" id="importFile" accept=".json,application/json">
+      </div>
+      <div class="row" id="importConfirm" hidden>
+        <span id="importInfo"></span>
+        <button class="link-btn" id="importYes">Заменить данные</button>
+        <button class="link-btn" id="importNo">Отмена</button>
+      </div>
+      <p id="backupMsg"></p>
+    </div>
+  </details>
+</div>
+
+<script>
+(function(){
+  const MONTHS = ["январь","февраль","март","апрель","май","июнь","июль","август","сентябрь","октябрь","ноябрь","декабрь"];
+  const GEN = ["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+  const TYPES = [
+    {k:"w", name:"Смена", plural:"Смены", mark:""},
+    {k:"x", name:"Доп. смена", plural:"Доп. смены", mark:"Д"},
+    {k:"s", name:"Больничный", plural:"Больничные", mark:"Б"},
+    {k:"a", name:"Прогул", plural:"Прогулы", mark:"П"},
+    {k:"o", name:"Выходной", plural:"Выходные", mark:"В"}
+  ];
+  const T = Object.fromEntries(TYPES.map(t=>[t.k,t]));
+  const fmt = n => Math.round(n).toLocaleString("ru-RU").replace(/ /g," ") + " ₽";
+  const plural = (n,a,b,c) => { const m10=n%10,m100=n%100;
+    return n+" "+((m10===1&&m100!==11)?a:(m10>=2&&m10<=4&&(m100<12||m100>14))?b:c); };
+  const shifts = n => plural(n,"смена","смены","смен");
+  const dayz = n => plural(n,"день","дня","дней");
+  const key = (y,m) => y+"-"+String(m+1).padStart(2,"0");
+
+  const now = new Date();
+  let view = {y: now.getFullYear(), m: now.getMonth()};
+  let brush = "w";
+  let months = {};   // "2026-10" -> {"1":"w","2":"o",...}
+  let pts = {};      // "2026-10" -> {"2":22,...} баллы за смену
+  let totals = {};   // "2026-10" -> {pts:343, upTo:"2026-10-15"} общее за период премии, введённое вручную
+  let sel = null;    // день, для которого открыт ввод баллов
+  let settings = {rate:5800, pct:27, minPts:18, maxPts:24, types:{
+    x:{pay:null, bonus:true}, s:{pay:0, bonus:false}, a:{pay:0, bonus:false}
+  }};
+  let db = null;
+  const $ = id => document.getElementById(id);
+  const hhmm = () => new Date().toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"});
+  const status = (t, warn) => { const el=$("saveState"); el.textContent = t || ""; el.classList.toggle("warn", !!warn); if(warn) sfx.error(); };
+
+  // Звуки: синтезируются в браузере, без файлов. Включаются только после нажатия.
+  const sfx = (()=>{
+    let ctx=null, on=true;
+    try{ on = localStorage.getItem("salary:sound")!=="off"; }catch(e){}
+    const ac = ()=>{ if(!ctx){ const C=window.AudioContext||window.webkitAudioContext; if(!C) return null; ctx=new C(); } if(ctx.state==="suspended") ctx.resume(); return ctx; };
+    function tone(freq, dur=0.08, type="sine", vol=0.12, delay=0, slide=0){
+      if(!on) return; const a=ac(); if(!a) return;
+      const t=a.currentTime+delay, o=a.createOscillator(), g=a.createGain();
+      o.type=type; o.frequency.setValueAtTime(freq,t); if(slide) o.frequency.exponentialRampToValueAtTime(freq*slide, t+dur);
+      g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(vol,t+0.008); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+      o.connect(g).connect(a.destination); o.start(t); o.stop(t+dur+0.02);
+    }
+    const PITCH={w:660,x:740,s:520,a:330,o:440};
+    return {
+      get on(){ return on; },
+      set(v){ on=v; try{ localStorage.setItem("salary:sound", v?"on":"off"); }catch(e){} },
+      click(){ tone(900,0.035,"triangle",0.07); },
+      mark(t){ tone(PITCH[t]||600,0.07,"triangle",0.11); tone((PITCH[t]||600)*1.5,0.06,"sine",0.05,0.03); },
+      unmark(){ tone(420,0.08,"triangle",0.08,0,0.6); },
+      nav(dir){ tone(dir>0?520:620,0.09,"sine",0.07,0,dir>0?1.4:0.7); },
+      save(){ tone(784,0.1,"sine",0.1); tone(1046,0.16,"sine",0.1,0.09); },
+      points(v, norm){ if(v==null) return this.unmark(); const r=Math.max(0.6, Math.min(1.8, v/norm)); tone(440*r,0.06,"triangle",0.09); },
+      good(){ tone(659,0.09,"sine",0.1); tone(784,0.09,"sine",0.1,0.08); tone(1046,0.18,"sine",0.1,0.16); },
+      error(){ tone(200,0.16,"square",0.05,0,0.8); },
+    };
+  })();
+  document.addEventListener("click", e=>{
+    const b=e.target.closest("button,label.ghost-btn"); if(!b) return;
+    if(b.classList.contains("day") || ["prev","next","saveNow","soundBtn","edNext","totSave","edMinus","edPlus"].includes(b.id) || b.closest("#edQuick")) return;
+    sfx.click();
+  }, true);
+
+  // Старые записи хранили true вместо типа — это обычная смена.
+  const norm = days => { const o={}; for(const d in (days||{})){ const v=days[d]; if(v===true) o[d]="w"; else if(T[v]) o[d]=v; } return o; };
+  const pay = t => t==="w" ? settings.rate : t==="o" ? 0 :
+    (settings.types[t].pay==null || settings.types[t].pay==="" ? settings.rate : +settings.types[t].pay);
+  const inBonus = t => t==="w" ? true : t==="o" ? false : !!settings.types[t].bonus;
+  const isShift = t => t==="w" || t==="x";
+  // Процент премии за день по баллам: меньше минимума — 0, дальше равномерно до максимума.
+  function pctFor(p){
+    if(p==null) return settings.pct;
+    const lo=settings.minPts, hi=settings.maxPts;
+    if(p>=hi) return settings.pct;
+    if(p<lo || hi<=lo) return 0;
+    return settings.pct*(p-lo)/(hi-lo);
+  }
+  const level = p => p>=settings.maxPts ? "full" : p>=settings.minPts ? "mid" : "low";
+  const pctTxt = v => (Math.round(v*10)/10).toString().replace(".",",")+"%";
+
+  // Оплата — за календарный месяц. Премия — с 21 числа прошлого месяца по 20 число этого, включительно.
+  function calc(y, m){
+    const cur = months[key(y,m)] || {};
+    const py = m===0 ? y-1 : y, pm = m===0 ? 11 : m-1, prev = months[key(py,pm)] || {};
+    const cnt = {w:0,x:0,s:0,a:0,o:0}; let base = 0;
+    for(const d in cur){ cnt[cur[d]]++; base += pay(cur[d]); }
+    let bonusBase = 0, bonusDays = 0, scored = 0, ptsSum = 0, lv = {full:0, mid:0, low:0}, list = [], dates = [];
+    const add = (days, P, from, to, mo, yy) => { for(const d in days){
+      if(+d<from || +d>to || !inBonus(days[d])) continue;
+      const p = P && P[d]!=null ? +P[d] : null, b = pay(days[d]);
+      bonusBase += b; bonusDays++; dates.push(new Date(yy,mo,+d));
+      if(p!=null){ scored++; ptsSum+=p; lv[level(p)]++; list.push({mo, d:+d, p}); }
+    } };
+    add(prev, pts[key(py,pm)], 21, 31, pm, py); add(cur, pts[key(y,m)], 1, 20, m, y);
+    // Премия за отчётный период: процент зависит от среднего балла за смену за весь период.
+    // Если введено общее количество — среднее = общее / смены по указанную дату; иначе по дневным баллам.
+    const T0 = totals[key(y,m)];
+    let avgP = scored ? ptsSum/scored : null, avgSrc = scored ? "daily" : "none";
+    if(T0 && T0.pts!=null){ const lim=new Date(T0.upTo+"T23:59:59"), done=dates.filter(d=>d<=lim).length; if(done){ avgP = +T0.pts/done; avgSrc="manual"; } }
+    const bonusPct = pctFor(avgP), bonus = bonusBase*bonusPct/100, bonusMax = bonusBase*settings.pct/100;
+    return {cnt, base, bonus, bonusMax, bonusPct, avgP, avgSrc, bonusDays, scored, avg: scored? ptsSum/scored : null, lv, ptsSum, list, dates, total: base+bonus, pm};
+  }
+
+  function renderBrushes(){
+    const box = $("brushes"); box.textContent = "";
+    TYPES.forEach(t=>{
+      const b = document.createElement("button");
+      b.className = "brush t-"+t.k; b.setAttribute("aria-pressed", brush===t.k);
+      b.innerHTML = '<span class="sw"></span>'; b.appendChild(document.createTextNode(t.name));
+      b.onclick = ()=>{ brush = t.k; closeEditor(); renderBrushes(); };
+      box.appendChild(b);
+    });
+    const b = document.createElement("button");
+    b.className = "brush t-p"; b.setAttribute("aria-pressed", brush==="p");
+    b.innerHTML = '<span class="sw"></span>Баллы';
+    b.onclick = ()=>{ brush = "p"; renderBrushes(); };
+    box.appendChild(b);
+  }
+
+  function render(){
+    const {y,m} = view, days = months[key(y,m)] || {}, P = pts[key(y,m)] || {};
+    $("monthTitle").textContent = MONTHS[m] + " " + y;
+    const grid = $("grid"); grid.textContent = "";
+    const first = (new Date(y,m,1).getDay()+6)%7, dim = new Date(y,m+1,0).getDate();
+    for(let i=0;i<first;i++){ const p=document.createElement("div"); p.className="day pad"; grid.appendChild(p); }
+    for(let d=1; d<=dim; d++){
+      const b = document.createElement("button"), t = days[d], wd = (first+d-1)%7;
+      const p = isShift(t) && P[d]!=null ? +P[d] : null;
+      b.className = "day" + (wd>=5?" we":"") + (d>=21?" np":"") + (t?" t-"+t:"") + (sel===d?" sel":"") +
+        (y===now.getFullYear()&&m===now.getMonth()&&d===now.getDate()?" today":"");
+      if(t) b.dataset.t = t;
+      b.setAttribute("aria-label", d+" "+GEN[m]+(t?", "+T[t].name.toLowerCase():"")+(p!=null?", "+p+" баллов":""));
+      b.innerHTML = '<span class="d num">'+d+'</span>' + (p!=null
+        ? '<span class="mark pts num lv-'+level(p)+'">'+p+'</span>'
+        : '<span class="mark">'+(t?T[t].mark:"")+'</span>');
+      b.addEventListener("click", ()=>tap(d));
+      grid.appendChild(b);
+    }
+    const c = calc(y, m), parts = [];
+    if(c.cnt.w) parts.push(shifts(c.cnt.w));
+    if(c.cnt.x) parts.push(c.cnt.x+" доп.");
+    if(c.cnt.s) parts.push(c.cnt.s+" больн.");
+    if(c.cnt.a) parts.push(c.cnt.a+" прогул"+(c.cnt.a===1?"":c.cnt.a<5?"а":"ов"));
+    $("total").textContent = fmt(c.total);
+    $("totalSub").textContent = parts.length ? parts.join(" · ") : "Пока нет отметок";
+
+    const dl = $("breakdown"); dl.textContent = "";
+    const row = (label, val, cls, tk) => {
+      const dt=document.createElement("dt"), dd=document.createElement("dd");
+      if(tk){ const s=document.createElement("span"); s.className="sw t-"+tk; dt.appendChild(s); }
+      dt.appendChild(document.createTextNode(label)); dd.textContent=val;
+      if(cls){ dt.classList.add(cls); dd.classList.add(cls); } dl.append(dt,dd);
+    };
+    TYPES.forEach(t=>{
+      const n = c.cnt[t.k]; if(!n && t.k!=="w") return;
+      if(t.k==="o"){ row(t.plural+": "+dayz(n), "—", null, t.k); return; }
+      const p = pay(t.k);
+      row(t.plural+": "+n+(p? " × "+fmt(p) : " (без оплаты)"), fmt(n*p), null, t.k);
+    });
+    row("Премия "+pctTxt(c.bonusPct)+": 21 "+GEN[c.pm]+" – 20 "+GEN[m]+", "+shifts(c.bonusDays)+" × "+fmt(settings.rate)+" × "+pctTxt(c.bonusPct), fmt(c.bonus));
+    if(c.avgP!=null) row("Средний балл за период: "+(Math.round(c.avgP*10)/10).toString().replace(".",",")+" (полная премия от "+settings.maxPts+")", "");
+    else row("Баллов за период пока нет, премия посчитана по "+settings.pct+"%", "");
+    if(c.bonusMax-c.bonus>0.5) row("Недобрано до максимума", "−"+fmt(c.bonusMax-c.bonus));
+    row("Итого", fmt(c.total), "sum");
+    renderPoints(c);
+    renderYear();
+  }
+
+  function renderAnalysis(c){
+    const box=$("analysis"); box.hidden = !c.scored; if(!c.scored) return;
+    const N=settings.maxPts, L=c.list;
+    const above=L.filter(x=>x.p>N), eq=L.filter(x=>x.p===N), below=L.filter(x=>x.p<N);
+    $("cAbove").textContent=above.length; $("cEq").textContent=eq.length; $("cBelow").textContent=below.length;
+    const avg = a => a.length ? "≈ "+Math.round(a.reduce((s,x)=>s+x.p,0)/a.length)+" баллов" : "—";
+    $("avgAbove").textContent=avg(above); $("avgBelow").textContent=avg(below);
+    const lab = x => x.d+" "+GEN[x.mo].slice(0,3)+" — "+x.p;
+    const sorted=[...L].sort((a,b)=>b.p-a.p);
+    $("best").textContent=lab(sorted[0]); $("worst").textContent=lab(sorted[sorted.length-1]);
+    const chips=(el, arr)=>{ el.textContent=""; arr.forEach(x=>{
+      const c=document.createElement("span"); c.className="chip lv-"+level(x.p);
+      const diff=x.p-N;
+      c.innerHTML="<span></span><b></b><em></em>";
+      c.children[0].textContent=x.d+" "+GEN[x.mo].slice(0,3);
+      c.children[1].textContent=x.p;
+      c.children[2].textContent=(diff>0?"+":"")+diff;
+      el.appendChild(c); }); };
+    $("gAboveBox").hidden=!above.length; $("gBelowBox").hidden=!below.length;
+    $("gAboveH").textContent="Выше нормы ("+N+"): +"+above.reduce((s,x)=>s+x.p-N,0)+" баллов сверх";
+    $("gBelowH").textContent="Ниже нормы: не хватило "+below.reduce((s,x)=>s+N-x.p,0)+" баллов";
+    chips($("gAbove"), above); chips($("gBelow"), below);
+  }
+
+  const iso = d => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  const shortDate = str => { const [yy,mm,dd]=str.split("-").map(Number); return dd+" "+GEN[mm-1]; };
+  function renderPoints(c){
+    const k = key(view.y, view.m), T0 = totals[k];
+    const goal = c.bonusDays*settings.maxPts;
+    let sum, done, avg, source;
+    if(T0 && T0.pts!=null){
+      const lim = new Date(T0.upTo+"T23:59:59");
+      done = c.dates.filter(d=>d<=lim).length; sum = +T0.pts; avg = done ? sum/done : null; source = "manual";
+    } else { sum = c.ptsSum; done = c.scored; avg = c.avg; source = "daily"; }
+    const left = c.bonusDays - done;
+    $("ptsTitle").textContent = "Баллы · 21 "+GEN[c.pm]+" – 20 "+GEN[view.m];
+    $("ptsTotal").textContent = sum;
+    $("ptsGoal").textContent = c.bonusDays ? "из "+goal+" ("+settings.maxPts+" × "+shifts(c.bonusDays)+" периода)" : "смен в периоде нет";
+    const ratio = goal ? Math.min(1, sum/goal) : 0, bar=$("ptsBar");
+    bar.style.width = (ratio*100)+"%";
+    bar.className = avg!=null ? "lv-"+level(avg) : "";
+    // Сколько нужно набирать в каждую оставшуюся смену, чтобы в среднем выйти на норму за период
+    const need = goal - sum;
+    if(!c.bonusDays){ $("ptsTargetLbl").textContent="Нужно в день"; $("ptsTarget").textContent="—"; }
+    else if(need<=0){ $("ptsTargetLbl").textContent="Нужно в день"; $("ptsTarget").textContent="цель есть ✓"; }
+    else if(left<=0){ $("ptsTargetLbl").textContent="Нужно в день"; $("ptsTarget").textContent="смен не осталось"; }
+    else { $("ptsTargetLbl").textContent="Нужно в день ("+shifts(left)+")"; $("ptsTarget").textContent=Math.ceil(need/left); }
+    $("ptsAvg").textContent = avg!=null ? "≈ "+Math.round(avg)+" ("+(Math.round(avg*10)/10).toString().replace(".",",")+")" : "—";
+    const diff = sum-goal;
+    $("ptsDiffLbl").textContent = diff>=0 ? "Сверх цели" : "До цели";
+    $("ptsDiff").textContent = c.bonusDays ? (diff>=0? "+"+diff : String(-diff)) : "—";
+    renderAnalysis(c);
+    if(source==="manual") $("ptsNote").textContent = "Общее количество введено вручную: "+sum+" баллов по "+shortDate(T0.upTo)+" включительно, это "+shifts(done)+". Осталось "+shifts(left)+".";
+    else $("ptsNote").textContent = left>0 ? "Без баллов ещё "+shifts(left)+" в этом периоде." : (c.bonusDays? "Баллы внесены за все смены периода." : "");
+    $("totClear").hidden = source!=="manual";
+  }
+
+  function renderYear(){
+    const y = view.y, body = $("yearBody"); body.textContent = "";
+    $("yearTitle").textContent = "Итоги "+y+" года";
+    let tw=0, ts=0;
+    for(let m=0;m<12;m++){
+      const c = calc(y, m), worked = c.cnt.w + c.cnt.x;
+      if(!worked && !c.total && m!==view.m) continue;
+      tw+=worked; ts+=c.total;
+      const tr=document.createElement("tr"); if(m===view.m) tr.className="cur";
+      tr.innerHTML="<td></td><td></td><td></td>";
+      tr.children[0].textContent = MONTHS[m][0].toUpperCase()+MONTHS[m].slice(1);
+      tr.children[1].textContent = shifts(worked);
+      tr.children[2].textContent = fmt(c.total);
+      body.appendChild(tr);
+    }
+    $("yearDays").textContent = shifts(tw);
+    $("yearSum").textContent = fmt(ts);
+  }
+
+  function renderTypeSettings(){
+    const box = $("typeSettings"); box.textContent = "";
+    ["x","s","a"].forEach(k=>{
+      const t = T[k], st = settings.types[k];
+      const r = document.createElement("div"); r.className = "trow t-"+k;
+      r.innerHTML =
+        '<div class="name"><span class="sw"></span></div>'+
+        '<label for="pay-'+k+'">Оплата за день, ₽<input id="pay-'+k+'" type="number" inputmode="numeric" min="0" step="100"></label>'+
+        '<label class="chk" for="bonus-'+k+'"><input id="bonus-'+k+'" type="checkbox">Входит в премию</label>';
+      r.querySelector(".name").appendChild(document.createTextNode(t.name));
+      const inp = r.querySelector("#pay-"+k), chk = r.querySelector("#bonus-"+k);
+      if(k==="x"){ inp.placeholder = "как смена"; inp.value = st.pay==null ? "" : st.pay; }
+      else inp.value = st.pay==null ? "" : st.pay;
+      chk.checked = !!st.bonus;
+      inp.addEventListener("input", ()=>{ const v=inp.value.trim(); st.pay = v==="" ? (k==="x"?null:0) : Math.max(0, parseFloat(v)||0); render(); saveSettings(); });
+      chk.addEventListener("change", ()=>{ st.bonus = chk.checked; render(); saveSettings(); });
+      box.appendChild(r);
+    });
+  }
+
+  // Сохранение: одна запись за раз на документ, серия нажатий склеивается.
+  const pending = {}, timers = {}, busy = {};
+  function scheduleSave(k){ pending[k] = true; status("Сохраняю…"); clearTimeout(timers[k]); timers[k] = setTimeout(()=>flush(k), 500); }
+  async function flush(k){
+    if(busy[k]) { timers[k] = setTimeout(()=>flush(k), 300); return; }
+    if(!pending[k]) return;
+    pending[k] = false; busy[k] = true;
+    const body = {days: Object.assign({}, months[k]||{}), points: Object.assign({}, pts[k]||{})};
+    if(totals[k]) body.total = Object.assign({}, totals[k]);
+    try{
+      if(db){ await db.doc("months/"+k).set(body); status("Сохранено в "+hhmm()); }
+      else { try{ localStorage.setItem("salary:"+k, JSON.stringify(body)); }catch(e){} status("Сохранено на этом устройстве в "+hhmm()); }
+    }catch(e){ pending[k] = true; status("Не сохранено. Проверьте интернет и нажмите «Сохранить».", true); }
+    busy[k] = false;
+  }
+
+  function tap(d){
+    const k = key(view.y, view.m), days = Object.assign({}, months[k]||{});
+    if(brush==="p"){
+      if(!isShift(days[d])){ status("Баллы ставятся только на смены. Сначала отметьте этот день как смену.", true); return; }
+      sfx.click(); openEditor(d); return;
+    }
+    if(days[d]===brush){ delete days[d]; sfx.unmark(); } else { days[d] = brush; sfx.mark(brush); }
+    if(!isShift(days[d]) && pts[k] && pts[k][d]!=null){ pts[k]=Object.assign({},pts[k]); delete pts[k][d]; }
+    months[k] = days; render(); scheduleSave(k);
+  }
+
+  // Ввод баллов
+  function openEditor(d){
+    sel = d; const k=key(view.y,view.m), P=pts[k]||{};
+    $("editor").hidden=false; $("edDay").textContent = d+" "+GEN[view.m];
+    $("edInput").value = P[d]!=null ? P[d] : "";
+    updatePreview(); render();
+    try{ $("edInput").focus({preventScroll:true}); }catch(e){}
+  }
+  function closeEditor(){ if(sel==null) return; sel=null; $("editor").hidden=true; render(); }
+  function setPoints(v){
+    const k=key(view.y,view.m); pts[k]=Object.assign({}, pts[k]||{});
+    if(v==null) delete pts[k][sel]; else pts[k][sel]=v;
+    render(); scheduleSave(k); updatePreview();
+  }
+  function readInput(){ const v=$("edInput").value.trim(); if(v==="") return null; const n=Math.max(0, Math.round(parseFloat(v))); return isFinite(n)? n : null; }
+  function updatePreview(){
+    const v=readInput(), el=$("edPreview");
+    if(v==null){ el.textContent="Введите баллы за эту смену. Норма — "+settings.maxPts+"."; return; }
+    const diff=v-settings.maxPts, c=calc(view.y, view.m);
+    const dayTxt = diff>=0 ? "норма выполнена, +"+diff : "до нормы не хватило "+(-diff);
+    const per = c.avgP!=null ? " · средний за период "+(Math.round(c.avgP*10)/10).toString().replace(".",",")+", премия "+pctTxt(c.bonusPct) : "";
+    el.textContent = v+" баллов: "+dayTxt+per+(c.avgSrc==="manual" ? " (по введённому общему количеству)" : "");
+  }
+  function renderQuick(){
+    const box=$("edQuick"); box.textContent="";
+    const lo=settings.minPts, hi=settings.maxPts, vals=[lo, Math.round((lo+hi)/2), hi, hi+2].filter((v,i,a)=>a.indexOf(v)===i);
+    vals.forEach(v=>{ const b=document.createElement("button"); b.textContent=v; b.className="num";
+      b.onclick=()=>{ $("edInput").value=v; setPoints(v); sfx.points(v, settings.maxPts); }; box.appendChild(b); });
+  }
+  $("edInput").addEventListener("input", ()=>{ const v=readInput(); setPoints(v); });
+  $("edInput").addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); $("edNext").click(); } });
+  $("edMinus").onclick = ()=>{ const v=Math.max(0,(readInput()??settings.maxPts)-1); $("edInput").value=v; setPoints(v); sfx.points(v, settings.maxPts); };
+  $("edPlus").onclick = ()=>{ const v=(readInput()??(settings.minPts-1))+1; $("edInput").value=v; setPoints(v); sfx.points(v, settings.maxPts); };
+  $("edClear").onclick = ()=>{ $("edInput").value=""; setPoints(null); };
+  $("edClose").onclick = closeEditor;
+  // Открыть ввод на первой смене месяца без баллов (или на первой смене)
+  $("totOpen").onclick = ()=>{
+    const k=key(view.y,view.m), T0=totals[k], pm = view.m===0?11:view.m-1, py = view.m===0?view.y-1:view.y;
+    const start=new Date(py,pm,21), end=new Date(view.y,view.m,20), today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+    const def = T0 ? T0.upTo : iso(today<start?start:today>end?end:today);
+    $("totPts").value = T0 ? T0.pts : ""; $("totDate").value = def;
+    $("totDate").min = iso(start); $("totDate").max = iso(end);
+    $("totHint").textContent = "21 "+GEN[pm]+" – 20 "+GEN[view.m];
+    $("totForm").hidden=false; try{ $("totPts").focus({preventScroll:true}); }catch(e){}
+  };
+  $("totCancel").onclick = ()=>{ $("totForm").hidden=true; };
+  $("totSave").onclick = ()=>{
+    const v=parseFloat($("totPts").value), dt=$("totDate").value;
+    if(!isFinite(v) || v<0){ status("Введите количество баллов числом.", true); return; }
+    if(!dt){ status("Укажите, по какое число посчитаны баллы.", true); return; }
+    const k=key(view.y,view.m); totals[k]={pts:Math.round(v), upTo:dt};
+    $("totForm").hidden=true; render(); scheduleSave(k); sfx.save();
+  };
+  $("totClear").onclick = ()=>{ const k=key(view.y,view.m); delete totals[k]; render(); scheduleSave(k); };
+  $("ptsEnter").onclick = ()=>{
+    const k=key(view.y,view.m), days=months[k]||{}, P=pts[k]||{}, dim=new Date(view.y,view.m+1,0).getDate();
+    let first=null, empty=null;
+    for(let d=1; d<=dim; d++) if(isShift(days[d])){ if(first==null) first=d; if(P[d]==null && empty==null) empty=d; }
+    const d = empty ?? first;
+    if(d==null){ status("В этом месяце нет смен. Сначала отметьте смены."); return; }
+    brush="p"; renderBrushes(); openEditor(d);
+    $("editor").scrollIntoView({block:"center", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"});
+  };
+  $("edNext").onclick = ()=>{
+    const cur=readInput(); if(cur!=null && cur>=settings.maxPts) sfx.good(); else sfx.save();
+    const days=months[key(view.y,view.m)]||{}, dim=new Date(view.y,view.m+1,0).getDate();
+    for(let d=sel+1; d<=dim; d++) if(isShift(days[d])){ openEditor(d); return; }
+    closeEditor(); status("Баллы за месяц внесены");
+  };
+
+  $("prev").onclick = ()=>{ sfx.nav(-1); closeEditor(); view.m--; if(view.m<0){view.m=11;view.y--;} render(); };
+  $("next").onclick = ()=>{ sfx.nav(1); closeEditor(); view.m++; if(view.m>11){view.m=0;view.y++;} render(); };
+  $("fillOff").onclick = ()=>{
+    const {y,m}=view, k=key(y,m), days=Object.assign({}, months[k]||{}), dim=new Date(y,m+1,0).getDate();
+    for(let d=1; d<=dim; d++) if(!days[d]) days[d]="o";
+    months[k]=days; render(); scheduleSave(k);
+  };
+  $("clearMonth").onclick = ()=>{ $("confirmClear").hidden=false; };
+  $("clearNo").onclick = ()=>{ $("confirmClear").hidden=true; };
+  $("clearYes").onclick = ()=>{ const k=key(view.y,view.m); months[k]={}; pts[k]={}; closeEditor(); $("confirmClear").hidden=true; render(); scheduleSave(k); };
+
+  let setTimer=null, setBusy=false, setPending=false;
+  function saveSettings(){ setPending=true; clearTimeout(setTimer); setTimer=setTimeout(flushSettings, 700); }
+  async function flushSettings(){
+    if(setBusy){ setTimer=setTimeout(flushSettings,300); return; }
+    if(!setPending) return; setPending=false; setBusy=true;
+    const body = JSON.parse(JSON.stringify(settings));
+    try{ if(db) await db.doc("settings/main").set(body); else localStorage.setItem("salary:settings", JSON.stringify(body)); status("Сохранено в "+hhmm()); }
+    catch(e){ setPending=true; status("Настройки не сохранены. Нажмите «Сохранить».", true); }
+    setBusy=false;
+  }
+
+  // Кнопка «Сохранить»: сразу отправляет всё, что ещё не записано.
+  $("saveNow").onclick = async ()=>{
+    const btn=$("saveNow"); btn.disabled=true; status("Сохраняю…");
+    const waitIdle = async ()=>{ for(let i=0;i<50 && (Object.values(busy).some(Boolean)||setBusy);i++) await new Promise(r=>setTimeout(r,100)); };
+    await waitIdle();
+    for(const k in timers) clearTimeout(timers[k]);
+    clearTimeout(setTimer);
+    for(const k of Object.keys(pending)) if(pending[k]) await flush(k);
+    if(setPending) await flushSettings();
+    const failed = Object.values(pending).some(Boolean) || setPending;
+    if(!failed){ status((db?"Всё сохранено в ":"Всё сохранено на этом устройстве в ")+hhmm()); sfx.save(); }
+    btn.disabled=false;
+  };
+
+  // Резервная копия
+  const bmsg = t => { $("backupMsg").textContent = t||""; };
+  $("exportBtn").onclick = async ()=>{
+    const data = JSON.stringify({app:"salary-calendar", version:1, exportedAt:new Date().toISOString(), settings, months, points:pts, totals}, null, 2);
+    const d = new Date(), name = "смены-"+d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")+".json";
+    const file = new File([data], name, {type:"application/json"});
+    try{
+      if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], title:name}); bmsg("Копия готова: сохраните её в «Файлы»."); return; }
+    }catch(e){ if(e && e.name==="AbortError"){ bmsg("Сохранение отменено."); return; } }
+    const url = URL.createObjectURL(file), a = document.createElement("a");
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 4000);
+    bmsg("Копия сохранена: "+name);
+  };
+  $("importLabel").addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); $("importFile").click(); } });
+  let imported=null;
+  $("importFile").addEventListener("change", async e=>{
+    const f = e.target.files && e.target.files[0]; e.target.value=""; if(!f) return;
+    try{
+      const j = JSON.parse(await f.text());
+      if(!j || typeof j.months!=="object") throw 0;
+      const ms={}; for(const k in j.months) if(/^\d{4}-\d{2}$/.test(k)) ms[k]=norm(j.months[k]);
+      const ps={}; for(const k in (j.points||{})) if(/^\d{4}-\d{2}$/.test(k)) ps[k]=j.points[k]||{};
+      imported={months:ms, points:ps, totals:j.totals||{}, settings:j.settings};
+      $("importInfo").textContent = "В файле "+Object.keys(ms).length+" мес. Текущие отметки за эти месяцы заменятся.";
+      $("importConfirm").hidden=false; bmsg("");
+    }catch(err){ imported=null; bmsg("Это не файл копии календаря. Выберите файл, скачанный кнопкой «Скачать копию»."); }
+  });
+  $("importNo").onclick = ()=>{ imported=null; $("importConfirm").hidden=true; };
+  $("importYes").onclick = async ()=>{
+    if(!imported) return; $("importConfirm").hidden=true;
+    for(const k in imported.months){ months[k]=imported.months[k]; pts[k]=imported.points[k]||{}; if(imported.totals[k]) totals[k]=imported.totals[k]; else delete totals[k]; pending[k]=true; }
+    if(imported.settings){ applySettings(imported.settings); setPending=true; }
+    imported=null; render(); bmsg("Восстанавливаю…");
+    await $("saveNow").onclick();
+    bmsg("Данные восстановлены из файла.");
+  };
+  function onRate(){
+    const r = parseFloat($("rate").value), p = parseFloat($("pct").value), lo=parseFloat($("minPts").value), hi=parseFloat($("maxPts").value);
+    if(isFinite(r)&&r>=0) settings.rate=r; if(isFinite(p)&&p>=0) settings.pct=p;
+    if(isFinite(lo)&&lo>=0) settings.minPts=lo; if(isFinite(hi)&&hi>=0) settings.maxPts=hi;
+    renderQuick(); updatePreview(); render(); saveSettings();
+  }
+  ["rate","pct","minPts","maxPts"].forEach(id=>$(id).addEventListener("input", onRate));
+
+  function applySettings(s){
+    if(!s) return;
+    if(s.rate!=null) settings.rate = +s.rate;
+    if(s.pct!=null) settings.pct = +s.pct;
+    if(s.minPts!=null) settings.minPts = +s.minPts;
+    if(s.maxPts!=null) settings.maxPts = +s.maxPts;
+    if(s.types) for(const k of ["x","s","a"]) if(s.types[k]) settings.types[k] = Object.assign({}, settings.types[k], s.types[k]);
+    $("rate").value=settings.rate; $("pct").value=settings.pct; $("minPts").value=settings.minPts; $("maxPts").value=settings.maxPts; renderTypeSettings(); renderQuick();
+  }
+
+  function loadLocal(){
+    try{
+      applySettings(JSON.parse(localStorage.getItem("salary:settings")||"null"));
+      for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i);
+        if(/^salary:\d{4}-\d{2}$/.test(k)) { const j=JSON.parse(localStorage.getItem(k))||{}; months[k.slice(7)] = norm(j.days); pts[k.slice(7)] = j.points||{}; if(j.total) totals[k.slice(7)] = j.total; } }
+    }catch(e){}
+  }
+
+  const sb=$("soundBtn"); sb.setAttribute("aria-pressed", sfx.on);
+  sb.onclick = ()=>{ sfx.set(!sfx.on); sb.setAttribute("aria-pressed", sfx.on); sb.setAttribute("aria-label", sfx.on?"Звук включён":"Звук выключен"); if(sfx.on) sfx.good(); };
+  renderBrushes(); renderTypeSettings(); renderQuick(); render();
+  // Отдельное приложение: всё хранится на этом телефоне. При первом запуске — сентябрь и октябрь.
+  const SEED = {"2026-09": {"days": {"1": "w", "2": "w", "3": "w", "4": "o", "5": "o", "6": "w", "7": "o", "8": "w", "9": "w", "10": "w", "11": "o", "12": "w", "13": "w", "14": "w", "15": "o", "16": "w", "17": "w", "18": "o", "19": "o", "20": "w", "21": "w", "22": "o", "23": "o", "24": "w", "25": "w", "26": "o", "27": "o", "28": "w", "29": "w", "30": "o"}, "points": {"21": 26, "24": 26, "25": 26, "28": 26, "29": 26}}, "2026-10": {"days": {"1": "o", "2": "w", "3": "w", "4": "o", "5": "o", "6": "w", "7": "w", "8": "o", "9": "o", "10": "o", "11": "w", "12": "w", "13": "o", "14": "w", "15": "w", "16": "x", "17": "o", "18": "w", "19": "w", "20": "x", "21": "o", "22": "w", "23": "w", "24": "x", "25": "o", "26": "w", "27": "w", "28": "x", "29": "o", "30": "w", "31": "w"}, "points": {"2": 26, "3": 26, "6": 26, "7": 26, "11": 26, "12": 26, "14": 25, "15": 32}, "total": {"pts": 343, "upTo": "2026-10-15"}}};
+  (async ()=>{
+    try{
+      let has=false; for(let i=0;i<localStorage.length;i++) if(/^salary:\d{4}-\d{2}$/.test(localStorage.key(i))) has=true;
+      if(!has && !localStorage.getItem("salary:seeded")){ for(const k in SEED) localStorage.setItem("salary:"+k, JSON.stringify(SEED[k])); localStorage.setItem("salary:seeded","1"); }
+    }catch(e){}
+    loadLocal(); render(); status("Данные хранятся на этом телефоне");
+    try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}
+    if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
+    return;
+    db.collection("months").onSnapshot(snap=>{
+      snap.docs.forEach(doc=>{ const k=doc.id; if(pending[k]||busy[k]) return; const j=doc.data()||{}; months[k] = norm(j.days); pts[k] = Object.assign({}, j.points||{}); if(j.total) totals[k] = Object.assign({}, j.total); else delete totals[k]; });
+      render();
+    }, ()=>status("Нет связи с хранилищем. Обновите страницу."));
+    db.doc("settings/main").onSnapshot(doc=>{
+      if(!doc.exists || setPending || setBusy) return;
+      if(document.activeElement && document.activeElement.closest && document.activeElement.closest(".settings,.types,.editor")) return;
+      applySettings(doc.data()); render();
+    }, ()=>{});
+  })();
+})();
+</script>
+</body>
+</html>
