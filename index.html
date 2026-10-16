@@ -22,18 +22,18 @@
 :root{
   --bg:#eef1ef; --surface:#ffffff; --fg:#17201c; --muted:#5f6d66; --line:#d6ddd9;
   --accent:#1f7a4d; --accent-fg:#ffffff; --weekend:#a24a3a;
-  --extra:#2b63c9; --sick:#7a4fc4; --absent:#c23b2a; --off:#c9d1cd; --off-fg:#3d4843; --mid:#b06f00;
+  --extra:#2b63c9; --sick:#7a4fc4; --absent:#c23b2a; --off:#c9d1cd; --off-fg:#3d4843; --mid:#b06f00; --hot:#e0603f; --hot-fg:#ffffff;
   --font-display:"Unbounded", "Golos Text", system-ui, sans-serif;
   --font-body:"Golos Text", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#111614; --surface:#1a211e; --fg:#e7eeea; --muted:#93a39b; --line:#2b3530;
   --accent:#46b980; --accent-fg:#0d1511; --weekend:#e08a78;
-  --extra:#6f9ff5; --sick:#b49af0; --absent:#ef7a66; --off:#3a4540; --off-fg:#d3ddd8; --mid:#e8b04a; color-scheme:dark}}
+  --extra:#6f9ff5; --sick:#b49af0; --absent:#ef7a66; --off:#3a4540; --off-fg:#d3ddd8; --mid:#e8b04a; --hot:#e8704e; --hot-fg:#1a0d08; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#111614; --surface:#1a211e; --fg:#e7eeea; --muted:#93a39b; --line:#2b3530;
   --accent:#46b980; --accent-fg:#0d1511; --weekend:#e08a78;
-  --extra:#6f9ff5; --sick:#b49af0; --absent:#ef7a66; --off:#3a4540; --off-fg:#d3ddd8; --mid:#e8b04a; color-scheme:dark}
+  --extra:#6f9ff5; --sick:#b49af0; --absent:#ef7a66; --off:#3a4540; --off-fg:#d3ddd8; --mid:#e8b04a; --hot:#e8704e; --hot-fg:#1a0d08; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size:15px;line-height:1.45}
 .wrap{max-width:680px;margin:0 auto;padding-block:20px 40px;
@@ -110,6 +110,37 @@ summary{cursor:pointer;font-weight:600}
 .backup p{margin:0;font-size:13px;color:var(--muted)}
 .backup .row{display:flex;flex-wrap:wrap;gap:8px}
 .ghost-btn{padding:9px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-weight:500}
+.splash{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:center;transition:opacity .35s ease}
+.splash.out{opacity:0;pointer-events:none}
+.splash-in{display:flex;flex-direction:column;align-items:center;gap:14px;animation:splashIn .5s ease both}
+.splash-logo{width:128px;height:128px;border-radius:50%;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.splash-name{font-family:var(--font-display);font-weight:700;font-size:28px;color:var(--fg)}
+.splash-sub{font-size:14px;color:var(--muted);margin-top:-8px}
+@keyframes splashIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){.splash-in{animation:none}.splash{transition:none}}
+.tiles-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:-8px;padding:0 2px}
+.tiles-head span{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tile{min-width:0;display:flex;flex-direction:column;gap:2px;padding:14px;border-radius:20px;background:var(--surface);border:1px solid var(--line)}
+.tile small{font-size:13px;color:var(--muted)}
+.tile strong{font-family:var(--font-display);font-weight:700;font-size:26px;line-height:1.15}
+.tile strong.txt{font-family:var(--font-body);font-size:17px;line-height:1.3}
+.tile em{font-style:normal;font-size:12px;color:var(--muted)}
+.tile.ring{flex-direction:row;align-items:center;gap:12px}
+.tile.ring .rg{position:relative;width:64px;height:64px;flex:none}
+.tile.ring .rg b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px}
+.tile.ring .rg circle{fill:none;stroke-width:7}
+.tile.hot{background:var(--hot);border-color:var(--hot);color:var(--hot-fg)}
+.tile.hot small,.tile.hot em{color:var(--hot-fg);opacity:.9}
+.tile .up{color:var(--accent);font-weight:600;font-size:13px}
+.tile .down{color:var(--absent);font-weight:600;font-size:13px}
+.todaycard{display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:16px;background:var(--surface);border:1px solid var(--line)}
+.todaycard .chip{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:600;color:var(--accent-fg);background:var(--tc)}
+.todaycard.rest .chip{color:var(--off-fg)}
+.todaycard .big{font-family:var(--font-display);font-weight:700;font-size:30px;line-height:1.1}
+.todaycard .big small{font-family:var(--font-body);font-size:16px;font-weight:500;color:var(--muted)}
+.todaycard p{margin:0;color:var(--muted);font-size:14px}
+.todaycard .row{display:flex;flex-wrap:wrap;gap:8px}
 .notice{display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:14px;border:1px solid var(--absent);background:var(--surface)}
 .notice b{font-size:15px}
 .notice p{margin:0;font-size:14px;color:var(--fg)}
@@ -164,6 +195,7 @@ summary{cursor:pointer;font-weight:600}
 </style>
 </head>
 <body>
+<div class="splash" id="splash" aria-hidden="true"><div class="splash-in"><div class="splash-logo"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" aria-hidden="true" viewBox="0 0 640 640"><defs><radialGradient id="splbg" cx="50%" cy="45%" r="70%"><stop offset="0" stop-color="#2a241b"/><stop offset="1" stop-color="#0f0d0a"/></radialGradient></defs><rect width="640" height="640" fill="url(#splbg)"/><path d="M560.0,320.0 L559.8,330.1 L587.5,336.6 L585.6,355.9 L557.2,356.8 L555.4,366.8 L553.2,376.7 L579.1,388.4 L573.5,407.1 L545.4,402.4 L541.7,411.8 L537.7,421.1 L560.8,437.7 L551.6,454.8 L525.0,444.8 L519.6,453.3 L513.7,461.6 L533.2,482.4 L520.9,497.4 L496.7,482.4 L489.7,489.7 L482.4,496.7 L497.4,520.9 L482.4,533.2 L461.6,513.7 L453.3,519.6 L444.8,525.0 L454.8,551.6 L437.7,560.8 L421.1,537.7 L411.8,541.7 L402.4,545.4 L407.1,573.5 L388.4,579.1 L376.7,553.2 L366.8,555.4 L356.8,557.2 L355.9,585.6 L336.6,587.5 L330.1,559.8 L320.0,560.0 L309.9,559.8 L303.4,587.5 L284.1,585.6 L283.2,557.2 L273.2,555.4 L263.3,553.2 L251.6,579.1 L232.9,573.5 L237.6,545.4 L228.2,541.7 L218.9,537.7 L202.3,560.8 L185.2,551.6 L195.2,525.0 L186.7,519.6 L178.4,513.7 L157.6,533.2 L142.6,520.9 L157.6,496.7 L150.3,489.7 L143.3,482.4 L119.1,497.4 L106.8,482.4 L126.3,461.6 L120.4,453.3 L115.0,444.8 L88.4,454.8 L79.2,437.7 L102.3,421.1 L98.3,411.8 L94.6,402.4 L66.5,407.1 L60.9,388.4 L86.8,376.7 L84.6,366.8 L82.8,356.8 L54.4,355.9 L52.5,336.6 L80.2,330.1 L80.0,320.0 L80.2,309.9 L52.5,303.4 L54.4,284.1 L82.8,283.2 L84.6,273.2 L86.8,263.3 L60.9,251.6 L66.5,232.9 L94.6,237.6 L98.3,228.2 L102.3,218.9 L79.2,202.3 L88.4,185.2 L115.0,195.2 L120.4,186.7 L126.3,178.4 L106.8,157.6 L119.1,142.6 L143.3,157.6 L150.3,150.3 L157.6,143.3 L142.6,119.1 L157.6,106.8 L178.4,126.3 L186.7,120.4 L195.2,115.0 L185.2,88.4 L202.3,79.2 L218.9,102.3 L228.2,98.3 L237.6,94.6 L232.9,66.5 L251.6,60.9 L263.3,86.8 L273.2,84.6 L283.2,82.8 L284.1,54.4 L303.4,52.5 L309.9,80.2 L320.0,80.0 L330.1,80.2 L336.6,52.5 L355.9,54.4 L356.8,82.8 L366.8,84.6 L376.7,86.8 L388.4,60.9 L407.1,66.5 L402.4,94.6 L411.8,98.3 L421.1,102.3 L437.7,79.2 L454.8,88.4 L444.8,115.0 L453.3,120.4 L461.6,126.3 L482.4,106.8 L497.4,119.1 L482.4,143.3 L489.7,150.3 L496.7,157.6 L520.9,142.6 L533.2,157.6 L513.7,178.4 L519.6,186.7 L525.0,195.2 L551.6,185.2 L560.8,202.3 L537.7,218.9 L541.7,228.2 L545.4,237.6 L573.5,232.9 L579.1,251.6 L553.2,263.3 L555.4,273.2 L557.2,283.2 L585.6,284.1 L587.5,303.4 L559.8,309.9 Z" fill="#f2a33a"/><circle cx="320" cy="320" r="200" fill="#1b1712"/><circle cx="320.0" cy="534.0" r="9" fill="#16130f"/><circle cx="116.5" cy="386.1" r="9" fill="#16130f"/><circle cx="194.2" cy="146.9" r="9" fill="#16130f"/><circle cx="445.8" cy="146.9" r="9" fill="#16130f"/><circle cx="523.5" cy="386.1" r="9" fill="#16130f"/><rect x="195" y="208" width="250" height="238" rx="30" fill="#f1ece4"/><path d="M195 238 a30 30 0 0 1 30 -30 h190 a30 30 0 0 1 30 30 v28 h-250 z" fill="#2c261d"/><rect x="250" y="186" width="22" height="50" rx="11" fill="#f2a33a"/><rect x="368" y="186" width="22" height="50" rx="11" fill="#f2a33a"/><rect x="213" y="282" width="52" height="44" rx="10" fill="#16130f"/><rect x="273" y="282" width="52" height="44" rx="10" fill="#16130f"/><rect x="336" y="285" width="46" height="38" rx="8" fill="none" stroke="#c9bfae" stroke-width="5"/><rect x="393" y="282" width="52" height="44" rx="10" fill="#f2a33a"/><path d="M407 305 l9 9 l16 -18" stroke="#16130f" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/><rect x="213" y="334" width="52" height="44" rx="10" fill="#16130f"/><rect x="273" y="334" width="52" height="44" rx="10" fill="#16130f"/><rect x="333" y="334" width="52" height="44" rx="10" fill="#16130f"/><rect x="396" y="337" width="46" height="38" rx="8" fill="none" stroke="#c9bfae" stroke-width="5"/><rect x="216" y="389" width="46" height="38" rx="8" fill="none" stroke="#c9bfae" stroke-width="5"/><rect x="276" y="389" width="46" height="38" rx="8" fill="none" stroke="#c9bfae" stroke-width="5"/><rect x="333" y="386" width="52" height="44" rx="10" fill="#16130f"/><rect x="393" y="386" width="52" height="44" rx="10" fill="#16130f"/></svg></div><div class="splash-name">Смены</div><div class="splash-sub">календарь механика</div></div></div>
 <div class="wrap">
   <section class="notice" id="notice" hidden aria-live="polite">
     <b id="noticeTitle"></b>
@@ -182,10 +214,28 @@ summary{cursor:pointer;font-weight:600}
     </div>
   </header>
 
+  <section class="todaycard" id="today" aria-live="polite" hidden>
+    <span class="chip" id="tChip"></span>
+    <div class="big num" id="tBig"></div>
+    <p id="tText"></p>
+    <div class="row" id="tActions"></div>
+  </section>
+
   <section class="total" aria-live="polite">
     <span class="label">Заработано за месяц</span>
     <span class="value num" id="total">0 ₽</span>
     <span class="sub num" id="totalSub">0 смен</span>
+  </section>
+
+  <div class="tiles-head"><span id="ptsTitle">Баллы за период</span></div>
+  <section class="tiles num" aria-live="polite">
+    <div class="tile ring">
+      <div class="rg"><svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="26" stroke="var(--line)"></circle><circle id="ptsRing" cx="32" cy="32" r="26" stroke="var(--accent)" stroke-linecap="round" stroke-dasharray="0 164" transform="rotate(-90 32 32)"></circle></svg><b id="ptsPct">0%</b></div>
+      <div style="display:flex;flex-direction:column;gap:2px;min-width:0"><small>Баллы</small><strong id="ptsTotal">0</strong><em id="ptsGoal">из 0</em></div>
+    </div>
+    <div class="tile hot"><small id="ptsTargetLbl">Нужно в день</small><strong id="ptsTarget">—</strong><em id="ptsTargetSub"></em></div>
+    <div class="tile"><small>Средний балл</small><strong id="ptsAvg">—</strong><em id="ptsAvgSub"></em></div>
+    <div class="tile"><small>Следующая смена</small><strong class="txt" id="tileNext">—</strong><em id="tileNextSub"></em></div>
   </section>
 
   <div class="savebar">
@@ -227,14 +277,7 @@ summary{cursor:pointer;font-weight:600}
   </section>
 
   <section class="ptsbox num" id="ptsBox" aria-live="polite">
-    <span class="lbl" id="ptsTitle">Баллы за период премии</span>
-    <div class="big"><b id="ptsTotal">0</b><span id="ptsGoal">из 0</span></div>
-    <div class="bar"><i id="ptsBar"></i></div>
-    <div class="pgrid">
-      <div><small>Средний за смену</small><strong id="ptsAvg">—</strong></div>
-      <div><small id="ptsTargetLbl">Нужно в день</small><strong id="ptsTarget">—</strong></div>
-      <div><small id="ptsDiffLbl">До цели</small><strong id="ptsDiff">—</strong></div>
-    </div>
+    <span class="lbl">Баллы за период</span>
     <p class="note" id="ptsNote"></p>
     <div class="analysis" id="analysis" hidden>
       <h3>Анализ смен</h3>
@@ -338,6 +381,15 @@ summary{cursor:pointer;font-weight:600}
   const key = (y,m) => y+"-"+String(m+1).padStart(2,"0");
 
   const now = new Date();
+  const bootAt = (window.performance && performance.now()) || 0;
+  let splashGone=false;
+  function hideSplash(){
+    if(splashGone) return; splashGone=true;
+    const el=$("splash"); if(!el) return;
+    const wait=Math.max(0, 800-(((window.performance && performance.now())||0)-bootAt));
+    setTimeout(()=>{ el.classList.add("out"); setTimeout(()=>el.remove(), 400); }, wait);
+  }
+  setTimeout(hideSplash, 4000);
   let view = {y: now.getFullYear(), m: now.getMonth()};
   let brush = "w";
   let months = {};   // "2026-10" -> {"1":"w","2":"o",...}
@@ -500,6 +552,7 @@ summary{cursor:pointer;font-weight:600}
     if(c.bonusMax-c.bonus>0.5) row("Недобрано до максимума", "−"+fmt(c.bonusMax-c.bonus));
     row("Итого", fmt(c.total), "sum");
     renderPoints(c);
+    try{ renderToday(); }catch(e){ $("today").hidden=true; }
     renderYear();
   }
 
@@ -529,6 +582,69 @@ summary{cursor:pointer;font-weight:600}
 
   const iso = d => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
   const shortDate = str => { const [yy,mm,dd]=str.split("-").map(Number); return dd+" "+GEN[mm-1]; };
+  // Карточка «Сегодня»: смена и цель на день, или отдых и следующая смена
+  const dayKey = d => key(d.getFullYear(), d.getMonth());
+  const typeOn = d => (months[dayKey(d)]||{})[d.getDate()];
+  const ptsOn = d => { const P=pts[dayKey(d)]||{}; return P[d.getDate()]!=null ? +P[d.getDate()] : null; };
+  const periodOf = d => d.getDate()>=21 ? {y: d.getMonth()===11 ? d.getFullYear()+1 : d.getFullYear(), m:(d.getMonth()+1)%12} : {y:d.getFullYear(), m:d.getMonth()};
+  const WDN = ["воскресенье","понедельник","вторник","среда","четверг","пятница","суббота"];
+  function periodStats(y,m){
+    const c=calc(y,m), T0=totals[key(y,m)], goal=c.bonusDays*settings.maxPts;
+    let sum, done;
+    if(T0 && T0.pts!=null){ const lim=new Date(T0.upTo+"T23:59:59"); done=c.dates.filter(d=>d<=lim).length; sum=+T0.pts; }
+    else { sum=c.ptsSum; done=c.scored; }
+    const left=c.bonusDays-done, need=goal-sum;
+    const perDay = need<=0 ? 0 : left>0 ? Math.ceil(need/left) : null;
+    return {goal, sum, done, left, need, perDay};
+  }
+  const goalText = st => st.perDay==null ? "смен в периоде не осталось"
+    : st.perDay===0 ? "цель периода уже выполнена"
+    : Math.max(st.perDay, settings.minPts)+" баллов";
+  function renderToday(){
+    const el=$("today"), t0=new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const type=typeOn(t0), p=ptsOn(t0), per=periodOf(t0), st=periodStats(per.y, per.m), acts=$("tActions");
+    acts.textContent=""; el.hidden=false; el.classList.remove("rest");
+    const btn=(label, fn, cls)=>{ const b=document.createElement("button"); b.className=cls||"ghost-btn"; b.textContent=label; b.onclick=fn; acts.appendChild(b); };
+    const setChip=(txt, tk)=>{ const c=$("tChip"); c.textContent=txt; el.style.setProperty("--tc", "var(--"+tk+")"); };
+    const goToday=()=>{ view={y:t0.getFullYear(), m:t0.getMonth()}; render(); };
+    const mark=v=>{ goToday(); const k=key(view.y,view.m), days=Object.assign({}, months[k]||{}); days[t0.getDate()]=v; months[k]=days; sfx.mark(v); render(); scheduleSave(k); };
+    const enter=()=>{ goToday(); brush="p"; renderBrushes(); openEditor(t0.getDate()); $("editor").scrollIntoView({block:"center"}); };
+    if(isShift(type)){
+      setChip(type==="x" ? "Сегодня доп. смена" : "Сегодня смена", type==="x" ? "extra" : "accent");
+      if(p==null){
+        const g = goalText(st);
+        $("tBig").innerHTML = st.perDay>0 ? "Цель: "+Math.max(st.perDay, settings.minPts)+" <small>баллов</small>" : "Цель: норма "+settings.maxPts+" <small>баллов</small>";
+        $("tText").textContent = st.perDay>0
+          ? (st.perDay<settings.minPts ? "Чтобы выйти в среднем на "+settings.maxPts+", хватит "+st.perDay+", но минимум в день — "+settings.minPts+"." : "Столько нужно в каждую из оставшихся смен ("+st.left+"), чтобы в среднем выйти на "+settings.maxPts+" и получить полную премию.")
+          : (st.perDay===0 ? "Цель периода уже набрана: работайте в своём темпе." : g);
+        btn("Внести баллы за сегодня", enter, "save-btn");
+      } else {
+        $("tBig").innerHTML = p+" <small>баллов сегодня</small>";
+        $("tText").textContent = (p>=settings.maxPts ? "Норма "+settings.maxPts+" выполнена, +"+(p-settings.maxPts)+". " : "До нормы "+settings.maxPts+" не хватило "+(settings.maxPts-p)+". ")
+          + (st.perDay>0 && st.left>0 ? "В оставшиеся "+shifts(st.left)+" нужно по "+Math.max(st.perDay, settings.minPts)+"." : st.perDay===0 ? "Цель периода выполнена." : "");
+        btn("Изменить баллы", enter);
+      }
+      return;
+    }
+    // Следующая смена
+    let next=null; for(let i=1;i<=62;i++){ const d=new Date(t0); d.setDate(d.getDate()+i); if(isShift(typeOn(d))){ next=d; break; } }
+    let nextTxt="";
+    if(next){
+      const np=periodOf(next), ns=periodStats(np.y, np.m);
+      const when = (next-t0)===86400000 ? "завтра" : WDN[next.getDay()]+", "+next.getDate()+" "+GEN[next.getMonth()];
+      nextTxt = "Следующая смена — "+when+(ns.perDay>0 ? ", цель "+Math.max(ns.perDay, settings.minPts)+" баллов." : ".");
+    }
+    if(type==="o"){ el.classList.add("rest"); setChip("Сегодня выходной","off"); $("tBig").innerHTML="Отдыхайте"; $("tText").textContent = nextTxt || "Смены впереди пока не отмечены."; }
+    else if(type==="s"){ setChip("Больничный","sick"); $("tBig").innerHTML="Выздоравливайте"; $("tText").textContent = nextTxt; }
+    else if(type==="a"){ setChip("Прогул","absent"); $("tBig").innerHTML="Сегодня прогул"; $("tText").textContent = nextTxt; }
+    else {
+      el.classList.add("rest"); setChip("Сегодня не отмечено","off");
+      $("tBig").innerHTML = now.getDate()+" "+GEN[now.getMonth()];
+      $("tText").textContent = "Отметьте, что сегодня: смена или выходной."+(nextTxt ? " "+nextTxt : "");
+      btn("Я на смене", ()=>mark("w"), "save-btn"); btn("Выходной", ()=>mark("o"));
+    }
+  }
+
   function renderPoints(c){
     const k = key(view.y, view.m), T0 = totals[k];
     const goal = c.bonusDays*settings.maxPts;
@@ -538,22 +654,34 @@ summary{cursor:pointer;font-weight:600}
       done = c.dates.filter(d=>d<=lim).length; sum = +T0.pts; avg = done ? sum/done : null; source = "manual";
     } else { sum = c.ptsSum; done = c.scored; avg = c.avg; source = "daily"; }
     const left = c.bonusDays - done;
-    $("ptsTitle").textContent = "Баллы · 21 "+GEN[c.pm]+" – 20 "+GEN[view.m];
+    $("ptsTitle").textContent = "Баллы · 21 "+GEN[c.pm].slice(0,3)+" – 20 "+GEN[view.m].slice(0,3);
     $("ptsTotal").textContent = sum;
-    $("ptsGoal").textContent = c.bonusDays ? "из "+goal+" ("+settings.maxPts+" × "+shifts(c.bonusDays)+" периода)" : "смен в периоде нет";
-    const ratio = goal ? Math.min(1, sum/goal) : 0, bar=$("ptsBar");
-    bar.style.width = (ratio*100)+"%";
-    bar.className = avg!=null ? "lv-"+level(avg) : "";
+    $("ptsGoal").textContent = c.bonusDays ? "из "+goal : "смен нет";
+    const ratio = goal ? Math.min(1, sum/goal) : 0, ring=$("ptsRing");
+    ring.setAttribute("stroke-dasharray", (ratio*163.4).toFixed(1)+" 164");
+    ring.setAttribute("stroke", avg==null || level(avg)==="full" ? "var(--accent)" : level(avg)==="mid" ? "var(--mid)" : "var(--absent)");
+    $("ptsPct").textContent = Math.round(ratio*100)+"%";
     // Сколько нужно набирать в каждую оставшуюся смену, чтобы в среднем выйти на норму за период
-    const need = goal - sum;
-    if(!c.bonusDays){ $("ptsTargetLbl").textContent="Нужно в день"; $("ptsTarget").textContent="—"; }
-    else if(need<=0){ $("ptsTargetLbl").textContent="Нужно в день"; $("ptsTarget").textContent="цель есть ✓"; }
-    else if(left<=0){ $("ptsTargetLbl").textContent="Нужно в день"; $("ptsTarget").textContent="смен не осталось"; }
-    else { $("ptsTargetLbl").textContent="Нужно в день ("+shifts(left)+")"; $("ptsTarget").textContent=Math.ceil(need/left); }
-    $("ptsAvg").textContent = avg!=null ? "≈ "+Math.round(avg)+" ("+(Math.round(avg*10)/10).toString().replace(".",",")+")" : "—";
-    const diff = sum-goal;
-    $("ptsDiffLbl").textContent = diff>=0 ? "Сверх цели" : "До цели";
-    $("ptsDiff").textContent = c.bonusDays ? (diff>=0? "+"+diff : String(-diff)) : "—";
+    const need = goal - sum, tgt=$("ptsTarget"), tsub=$("ptsTargetSub");
+    tgt.classList.remove("txt");
+    if(!c.bonusDays){ tgt.textContent="—"; tsub.textContent=""; }
+    else if(need<=0){ tgt.textContent="Цель есть"; tgt.classList.add("txt"); tsub.textContent="набрано на "+(-need)+" больше"; }
+    else if(left<=0){ tgt.textContent="Смен нет"; tgt.classList.add("txt"); tsub.textContent="не хватило "+need; }
+    else { const pd=Math.ceil(need/left), one = left%10===1 && left%100!==11; tgt.textContent=Math.max(pd, settings.minPts); tsub.textContent = "в "+left+(one ? " оставшуюся смену" : " оставшиеся смены")+(pd<settings.minPts ? " · минимум "+settings.minPts : ""); }
+    if(avg!=null){
+      $("ptsAvg").textContent = (Math.round(avg*10)/10).toString().replace(".",",");
+      const sub=$("ptsAvgSub"); sub.textContent="";
+      const sp=document.createElement("span"); sp.className = avg>=settings.maxPts ? "up" : "down";
+      sp.textContent = (avg>=settings.maxPts ? "▲" : "▼")+" норма "+settings.maxPts; sub.appendChild(sp);
+    } else { $("ptsAvg").textContent="—"; $("ptsAvgSub").textContent="баллов пока нет"; }
+    // Следующая смена после сегодняшнего дня
+    const t0=new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    let nx=null; for(let i=1;i<=62;i++){ const d=new Date(t0); d.setDate(d.getDate()+i); if(isShift(typeOn(d))){ nx=d; break; } }
+    if(nx){
+      const WD2=["Вс","Пн","Вт","Ср","Чт","Пт","Сб"], np=periodOf(nx), ns=periodStats(np.y, np.m), dd=Math.round((nx-t0)/86400000);
+      $("tileNext").textContent = WD2[nx.getDay()]+", "+nx.getDate()+" "+GEN[nx.getMonth()].slice(0,3);
+      $("tileNextSub").textContent = (dd===1 ? "завтра" : "через "+dayz(dd))+(ns.perDay>0 ? " · цель "+Math.max(ns.perDay, settings.minPts) : "");
+    } else { $("tileNext").textContent="не отмечена"; $("tileNextSub").textContent="отметьте смены в календаре"; }
     renderAnalysis(c);
     if(source==="manual") $("ptsNote").textContent = "Общее количество введено вручную: "+sum+" баллов по "+shortDate(T0.upTo)+" включительно, это "+shifts(done)+". Осталось "+shifts(left)+".";
     else $("ptsNote").textContent = left>0 ? "Без баллов ещё "+shifts(left)+" в этом периоде." : (c.bonusDays? "Баллы внесены за все смены периода." : "");
@@ -902,7 +1030,7 @@ summary{cursor:pointer;font-weight:600}
         } else status("Данные хранятся в вашем аккаунте Telegram");
       }catch(e){ status("Не удалось загрузить данные из Telegram. Проверьте интернет и откройте календарь заново.", true); }
     } else status("Данные хранятся на этом телефоне");
-    setupNotice();
+    setupNotice(); hideSplash();
     try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}
     if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
     return;
