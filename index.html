@@ -330,6 +330,9 @@ button:active:not(:disabled):not(.day),.lk-card:active{transform:scale(.96)}
 @keyframes slR{from{opacity:.2;transform:translateX(-40px)}to{opacity:1;transform:none}}
 .pane:not([hidden]){animation:paneIn .26s ease}
 @keyframes paneIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.pane.p-l:not([hidden]){animation:paneL .26s ease}.pane.p-r:not([hidden]){animation:paneR .26s ease}
+@keyframes paneL{from{opacity:.3;transform:translateX(48px)}to{opacity:1;transform:none}}
+@keyframes paneR{from{opacity:.3;transform:translateX(-48px)}to{opacity:1;transform:none}}
 .tabbar button svg{box-sizing:content-box;padding:3px 14px;border-radius:14px;transition:background-color .25s, transform .25s}
 .tabbar button[aria-selected="true"] svg{background:color-mix(in srgb,var(--accent) 18%,transparent);transform:translateY(-1px)}
 #ptsRing{transition:stroke-dasharray .7s cubic-bezier(.3,.8,.3,1)}
@@ -2653,6 +2656,19 @@ window.LOOK = (function(){
   };
   $("tqClear").onclick = ()=>{ const k=$("tqForm").dataset.k; delete totals[k]; $("tqForm").hidden=true; render(); scheduleSave(k); sfx.unmark(); };
 
+  // Свайп влево-вправо по экрану — переход между вкладками (по календарю свайп листает месяцы)
+  { const ORDER=["main","rep","stat","ach","more"]; let sx=0, sy=0, st=0, on=false;
+    const skip = t => t.closest("#grid,input,textarea,select,.pop-menu,.story,.tabbar,.editor,.photo-panel");
+    document.addEventListener("touchstart", e=>{ on=false; if(e.touches.length!==1 || document.querySelector(".story,.pop-menu") || skip(e.target)) return; on=true; sx=e.touches[0].clientX; sy=e.touches[0].clientY; st=Date.now(); }, {passive:true});
+    document.addEventListener("touchend", e=>{
+      if(!on) return; on=false; const t=e.changedTouches[0], dx=t.clientX-sx, dy=t.clientY-sy;
+      if(Math.abs(dx)<70 || Math.abs(dy)>Math.abs(dx)*0.6 || Date.now()-st>700) return;
+      const i=ORDER.indexOf(tab), j=i+(dx<0?1:-1); if(j<0 || j>=ORDER.length) return;
+      const pane=$("pane-"+ORDER[j]); pane.classList.remove("p-l","p-r"); pane.classList.add(dx<0?"p-l":"p-r");
+      setTimeout(()=>pane.classList.remove("p-l","p-r"), 400);
+      haptic("s"); sfx.nav(dx<0?1:-1); setTab(ORDER[j]);
+    }, {passive:true}); }
+
   // ======== Живой интерфейс: свайпы, долгое нажатие, анимации, празднование нормы ========
   const reduceMotion = () => !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
   // Перелистывание месяцев с анимацией — кнопками и свайпом по календарю
@@ -2852,6 +2868,8 @@ window.LOOK = (function(){
     renderNotif();
     if(notifOn) scheduleSync();
     pullServer();
+    // Отметка «календарь открыт» — для статистики владельца бота (имя и время входа, без баллов и зарплаты)
+    if(API_URL && miniApp){ try{ fetch(API_URL.replace(/\/$/,"")+"/hello", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({initData: tg.initData, appUrl: location.origin+location.pathname})}).catch(()=>{}); }catch(e){} }
     setupNotice(); hideSplash();
     achReady=true; checkAch(); setAchDot(achDotN);
     // Кнопка «Внести баллы» из сообщения бота открывает ввод баллов за сегодня
