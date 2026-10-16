@@ -299,7 +299,7 @@ summary{cursor:pointer;font-weight:600}
       </div>
       <textarea class="code-box" id="codeOut" readonly hidden aria-label="Код переноса"></textarea>
       <div id="pasteBox" class="backup" style="margin-top:0" hidden>
-        <textarea class="code-box" id="codeIn" placeholder="Вставьте сюда код переноса" aria-label="Вставьте код переноса"></textarea>
+        <textarea class="code-box" id="codeIn" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" placeholder="Вставьте сюда код переноса" aria-label="Вставьте код переноса"></textarea>
         <div class="row"><button class="save-btn" id="codeLoad">Загрузить данные</button></div>
       </div>
       <p style="border-top:1px solid var(--line);padding-top:12px"><b style="color:var(--fg)">Резервная копия.</b> Раз в месяц сохраняйте копию в «Файлы» или iCloud.</p>
@@ -771,10 +771,20 @@ summary{cursor:pointer;font-weight:600}
   // Перенос кодом: работает между Telegram, Safari и иконкой на экране «Домой»
   const exportData = () => ({app:"salary-calendar", version:1, exportedAt:new Date().toISOString(), settings, months, points:pts, totals});
   const toCode = o => "SMENY1:" + btoa(unescape(encodeURIComponent(JSON.stringify(o))));
+  // Устойчиво к пробелам, переносам, лишним символам и к коду, вставленному дважды
   function fromCode(text){
-    const t = String(text||"").replace(/\s+/g,"");
-    if(t.startsWith("SMENY1:")) return JSON.parse(decodeURIComponent(escape(atob(t.slice(7)))));
-    return JSON.parse(String(text||""));
+    const raw = String(text||"");
+    const decode = b => JSON.parse(decodeURIComponent(escape(atob(b))));
+    const ok = j => j && typeof j.months==="object";
+    const clean = raw.replace(/[^A-Za-z0-9+/=:]/g,"");
+    const parts = clean.split("SMENY1:").map(p=>p.replace(/[^A-Za-z0-9+/=]/g,"")).filter(Boolean).reverse();
+    for(const b of parts){
+      try{ const j = decode(b); if(ok(j)) return j; }catch(e){}
+      // код вставлен дважды без разделителя: ищем начало JSON в base64 ("eyJ" = '{"')
+      for(let i=b.indexOf("eyJ",1); i>0; i=b.indexOf("eyJ",i+1)){ try{ const j = decode(b.slice(i)); if(ok(j)) return j; }catch(e){} }
+    }
+    try{ const j = JSON.parse(raw); if(ok(j)) return j; }catch(e){}
+    throw new Error("bad code");
   }
   async function copyTransferCode(){
     const code = toCode(exportData()), out = $("codeOut");
@@ -789,10 +799,15 @@ summary{cursor:pointer;font-weight:600}
     }
   }
   $("copyCode").onclick = copyTransferCode;
-  $("pasteToggle").onclick = ()=>{ const b=$("pasteBox"); b.hidden=!b.hidden; if(!b.hidden) $("codeIn").focus(); };
+  $("pasteToggle").onclick = ()=>{ const b=$("pasteBox"); b.hidden=!b.hidden; if(!b.hidden){ $("codeIn").value=""; $("codeIn").focus(); } };
   $("codeLoad").onclick = ()=>{
     try{ prepareImport(fromCode($("codeIn").value), "В коде"); $("codeIn").value=""; $("pasteBox").hidden=true; }
-    catch(err){ imported=null; bmsg("Код не подошёл. Скопируйте его заново целиком и вставьте ещё раз."); }
+    catch(err){
+      imported=null;
+      const f=$("codeIn"); f.value=""; f.focus();
+      bmsg("Код вставился не полностью. Поле очищено: скопируйте код заново (кнопка «Скопировать код» там, где ваши отметки) и вставьте один раз.");
+      sfx.error();
+    }
   };
   $("importNo").onclick = ()=>{ imported=null; $("importConfirm").hidden=true; };
   $("importYes").onclick = async ()=>{
