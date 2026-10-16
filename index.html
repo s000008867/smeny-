@@ -309,6 +309,62 @@ summary{cursor:pointer;font-weight:600}
 .ph-mode input{width:18px;height:18px;accent-color:var(--accent)}
 .ph-busy::after{content:"";display:inline-block;width:12px;height:12px;margin-left:8px;border-radius:50%;border:2px solid var(--muted);border-top-color:transparent;vertical-align:-1px;animation:phSpin .8s linear infinite}
 @keyframes phSpin{to{transform:rotate(360deg)}}
+.recap-ban{display:flex;align-items:center;gap:12px;width:100%;padding:14px;border-radius:16px;border:none;text-align:left;color:var(--accent-fg);background:linear-gradient(120deg,var(--accent),var(--extra))}
+.recap-ban .em{font-size:30px;line-height:1}
+.recap-ban span:nth-child(2){flex:1;display:flex;flex-direction:column;min-width:0}
+.recap-ban b{font-size:16px}
+.recap-ban small{font-size:13px;opacity:.85}
+.recap-ban>span:last-child{font-size:26px}
+.recap-card{display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:20px;color:var(--fg);background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 22%,var(--surface)),color-mix(in srgb,var(--hot) 18%,var(--surface)));border:1px solid var(--line)}
+.recap-card .rc-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.recap-card .rc-mid{display:flex;flex-direction:column;align-items:center;min-width:0}
+.recap-card .rc-mid small{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.recap-card .rc-mid b{font-family:var(--font-display);font-size:20px}
+.recap-card p{margin:0;font-size:14px;color:var(--muted);text-align:center}
+.recap-card .save-btn{align-self:center;padding:12px 22px}
+.story{position:fixed;inset:0;z-index:70;background:var(--bg);color:var(--fg);display:flex;flex-direction:column;overflow:hidden;isolation:isolate;-webkit-user-select:none;user-select:none}
+.story-bars{display:flex;gap:4px;padding:calc(10px + env(safe-area-inset-top,0px)) 12px 0}
+.story-bars i{flex:1;height:3px;border-radius:2px;background:color-mix(in srgb,var(--fg) 22%,transparent);overflow:hidden}
+.story-bars i b{display:block;height:100%;width:0;background:var(--fg);transition:width .35s}
+.story-bars i.on b{width:100%}
+.story-top{display:flex;justify-content:space-between;align-items:center;padding:8px 12px 0 16px;font-size:13px;color:var(--muted);font-weight:600}
+.story-x{width:40px;height:40px;border-radius:50%;border:none;background:color-mix(in srgb,var(--fg) 10%,transparent);color:var(--fg);font-size:20px;line-height:1}
+.story-slide{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:14px;padding:12px 24px calc(44px + env(safe-area-inset-bottom,0px));position:relative;overflow:hidden}
+.story-glow{position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(60% 45% at 85% 12%,color-mix(in srgb,var(--c1) 50%,transparent),transparent 70%),radial-gradient(55% 40% at 10% 90%,color-mix(in srgb,var(--c2) 45%,transparent),transparent 70%)}
+.story-slide .em{font-size:76px;line-height:1}
+.story-slide .kick{font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.story-slide .huge{font-family:var(--font-display);font-weight:700;font-size:clamp(64px,22vw,112px);line-height:1;font-variant-numeric:tabular-nums}
+.story-slide .huge.money{font-size:clamp(40px,12.5vw,68px)}
+.story-slide .huge small{font-size:.35em;font-weight:500;color:var(--muted);margin-left:6px}
+.story-slide h2{font-family:var(--font-display);font-size:30px;line-height:1.15;margin:0}
+.story-slide p{margin:0;font-size:17px;line-height:1.45}
+.story-slide p b{color:var(--accent)}
+.story-slide .facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.story-slide .facts div{padding:12px 14px;border-radius:16px;background:color-mix(in srgb,var(--fg) 8%,transparent);min-width:0}
+.story-slide .facts b{display:block;font-family:var(--font-display);font-size:24px;line-height:1.2;overflow-wrap:anywhere}
+.story-slide .facts small{color:var(--muted);font-size:13px}
+.story-slide .dots{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;max-width:300px}
+.story-slide .dots i{aspect-ratio:1;border-radius:6px;background:color-mix(in srgb,var(--fg) 10%,transparent)}
+.story-slide .dots i.t-w,.story-slide .dots i.t-x,.story-slide .dots i.t-s,.story-slide .dots i.t-a{background:var(--c)}
+.story-slide .mbars{display:flex;align-items:flex-end;gap:3px;height:110px;position:relative}
+.story-slide .mbars i{flex:1;min-width:0;border-radius:4px 4px 0 0;background:var(--lv);min-height:3px;transform-origin:bottom;animation:barUp .7s both}
+.story-slide .mbars .nl{position:absolute;left:0;right:0;border-top:2px dashed var(--accent);opacity:.7}
+.story-slide .alist{display:flex;flex-direction:column;gap:8px}
+.story-slide .alist div{display:flex;gap:12px;align-items:center;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--fg) 8%,transparent);font-size:16px}
+.story-slide .alist span{font-size:30px;line-height:1}
+.story-slide .alist em{font-style:normal;color:var(--muted);font-size:13px;display:block}
+.story-slide img.card{display:block;width:100%;max-height:56vh;object-fit:contain;border-radius:18px;box-shadow:0 12px 34px rgba(0,0,0,.28);-webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto}
+.story-slide .row{display:flex;gap:10px;flex-wrap:wrap}
+.story-hint{position:absolute;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom,0px));text-align:center;font-size:12px;color:var(--muted);pointer-events:none}
+.story .anim>*:not(.story-glow):not(.confetti){animation:stIn .55s both}
+.story .anim>*:nth-child(3){animation-delay:.08s}.story .anim>*:nth-child(4){animation-delay:.16s}.story .anim>*:nth-child(5){animation-delay:.24s}.story .anim>*:nth-child(6){animation-delay:.32s}.story .anim>*:nth-child(7){animation-delay:.4s}
+@keyframes stIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+@keyframes barUp{from{transform:scaleY(0)}to{transform:none}}
+.confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:2}
+.confetti i{position:absolute;top:-16px;width:8px;height:14px;border-radius:2px;animation:conf 2.6s cubic-bezier(.25,.6,.5,1) forwards}
+@keyframes conf{to{transform:translate(var(--dx),110vh) rotate(var(--rot));opacity:.9}}
+@media (prefers-reduced-motion: reduce){.story .anim>*,.story-slide .mbars i{animation:none!important}.confetti{display:none}}
+
 </style>
 <script>
 // Оформление: темы и шрифты. Применяется до отрисовки страницы, чтобы не было вспышки.
@@ -464,6 +520,7 @@ window.LOOK = (function(){
   </header>
 
   <div class="pane" id="pane-main" role="tabpanel">
+  <button class="recap-ban" id="recapBan" hidden><span class="em" aria-hidden="true">🎞️</span><span><b id="recapBanTx">Итоги месяца готовы</b><small>Нажмите, чтобы посмотреть</small></span><span aria-hidden="true">›</span></button>
   <section class="todaycard" id="today" aria-live="polite" hidden>
     <span class="chip" id="tChip"></span>
     <div class="big num" id="tBig"></div>
@@ -583,6 +640,15 @@ window.LOOK = (function(){
   </div>
 
   <div class="pane" id="pane-stat" role="tabpanel" hidden>
+  <section class="recap-card" id="recapBox">
+    <div class="rc-top">
+      <button class="icon-btn" id="rcPrev" aria-label="Предыдущий месяц">‹</button>
+      <div class="rc-mid"><small>Итоги месяца</small><b id="rcTitle">—</b></div>
+      <button class="icon-btn" id="rcNext" aria-label="Следующий месяц">›</button>
+    </div>
+    <p id="rcText"></p>
+    <button class="save-btn" id="rcOpen">▶ Смотреть итоги</button>
+  </section>
   <section class="tiles num" id="recBox" aria-live="polite">
     <div class="tile"><small>Серия с нормой</small><strong id="recCur">—</strong><em id="recCurSub"></em></div>
     <div class="tile"><small>Лучшая серия</small><strong id="recBest">—</strong><em id="recBestSub"></em></div>
@@ -674,6 +740,8 @@ window.LOOK = (function(){
     <div class="row" style="display:flex;margin-top:10px"><button class="ghost-btn" id="lookRandom">🎲 Случайная тема</button></div>
     <h3 class="look-h">Шрифт</h3>
     <div class="font-list" id="lookFonts" role="group" aria-label="Шрифт"></div>
+    <h3 class="look-h">Отклик</h3>
+    <label class="chk" for="hapToggle" style="display:flex;gap:8px;align-items:center;margin-top:10px"><input id="hapToggle" type="checkbox" checked>Вибрация при нажатиях</label>
   </details>
 
   <details id="goalBox" open>
@@ -876,6 +944,22 @@ window.LOOK = (function(){
       error(){ tone(200,0.16,"square",0.05,0,0.8); },
     };
   })();
+  // Вибрация: в Telegram — встроенный отклик телефона, в браузере на Android — navigator.vibrate
+  let hapOn = true; try{ hapOn = localStorage.getItem("salary:hap")!=="off"; }catch(e){}
+  function haptic(kind, arg){
+    if(!hapOn) return;
+    try{
+      const H = tg && tg.HapticFeedback;
+      if(H && miniApp && tgAtLeast("6.1")){
+        if(kind==="i") H.impactOccurred(arg||"light"); else if(kind==="n") H.notificationOccurred(arg||"success"); else H.selectionChanged();
+      } else if(navigator.vibrate){
+        navigator.vibrate(kind==="n" ? (arg==="error" ? [30,50,30] : [15,40,25]) : kind==="i" ? (arg==="heavy" ? 25 : 10) : 6);
+      }
+    }catch(e){}
+  }
+  { const HAP = {click:["i","light"], mark:["i","medium"], unmark:["i","soft"], nav:["s"], save:["n","success"], good:["n","success"], error:["n","error"]};
+    for(const k in HAP){ const f=sfx[k].bind(sfx); sfx[k]=(...a)=>{ haptic(...HAP[k]); return f(...a); }; }
+    const fp=sfx.points.bind(sfx); sfx.points=(v,nrm)=>{ if(v!=null) haptic("i", v>=nrm ? "heavy" : "light"); return fp(v,nrm); }; }
   // Щелчок кнопки звучит в момент касания, а не после отпускания пальца
   const clickSnd = b => !(b.classList.contains("day") || ["prev","next","saveNow","soundBtn","edNext","totSave","edMinus","edPlus"].includes(b.id) || b.closest("#edQuick") || b.disabled);
   document.addEventListener("pointerdown", e=>{
@@ -1003,6 +1087,7 @@ window.LOOK = (function(){
     renderPane();
     renderYear();
     try{ checkAch(); }catch(e){}
+    try{ renderRecapBan(); }catch(e){}
   }
 
   function renderAnalysis(c){
@@ -1426,6 +1511,7 @@ window.LOOK = (function(){
     if(s.types) for(const k of ["x","s","a"]) if(s.types[k]) settings.types[k] = Object.assign({}, settings.types[k], s.types[k]);
     if(s.goals && typeof s.goals==="object") settings.goals = Object.assign({}, s.goals);
     if(typeof s.fio==="string") settings.fio = s.fio;
+    if(typeof s.recapSeen==="string") settings.recapSeen = s.recapSeen;
     if(s.ach && typeof s.ach==="object") settings.ach = Object.assign({}, settings.ach||{}, s.ach);
     if(s.look && window.LOOK){ const L=LOOK.get(), t=s.look.t||"auto", f=s.look.f||"auto"; settings.look={t, f}; if(L.t!==t || L.f!==f){ LOOK.set(t, f); try{ renderLook(); }catch(e){} } }
     $("rate").value=settings.rate; $("pct").value=settings.pct; $("minPts").value=settings.minPts; $("maxPts").value=settings.maxPts; renderTypeSettings(); renderQuick();
@@ -1500,7 +1586,7 @@ window.LOOK = (function(){
   function renderPane(){
     try{
       if(tab==="rep"){ renderRep(); renderCat(); }
-      else if(tab==="stat") renderStat();
+      else if(tab==="stat"){ renderRecapCard(); renderStat(); }
       else if(tab==="ach") renderAch();
       else if(tab==="more"){ renderLook(); renderGoal(); renderPays(); renderRepeat(); }
     }catch(e){ console.error(e); }
@@ -2136,6 +2222,226 @@ window.LOOK = (function(){
     render(); sfx.good(); status("График с фото записан: изменено "+dayz(n));
     $("grid").scrollIntoView({block:"center", behavior:"smooth"});
   };
+
+  // ======== Итоги месяца: истории и карточка-картинка ========
+  $("hapToggle").checked = hapOn;
+  $("hapToggle").addEventListener("change", ()=>{ hapOn=$("hapToggle").checked; try{ localStorage.setItem("salary:hap", hapOn?"on":"off"); }catch(e){} if(hapOn) haptic("n","success"); });
+  const esc = t => String(t==null?"":t).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const Cap = t => t ? t[0].toUpperCase()+t.slice(1) : t;
+  const WDF = ["воскресенье","понедельник","вторник","среда","четверг","пятница","суббота"];
+  const WDP = ["по воскресеньям","по понедельникам","по вторникам","по средам","по четвергам","по пятницам","по субботам"];
+  function recapData(y, m){
+    const k=key(y,m), days=months[k]||{}, P=pts[k]||{}, dim=new Date(y,m+1,0).getDate(), c=calc(y,m);
+    const t0=new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const list=[]; let sick=0, absent=0;
+    for(let d=1; d<=dim; d++){
+      const t=days[d]; if(t==="s") sick++; if(t==="a") absent++;
+      if(!isShift(t)) continue;
+      list.push({d, t, p: P[d]!=null ? +P[d] : null, wd: new Date(y,m,d).getDay(), past: new Date(y,m,d)<=t0});
+    }
+    const wp=list.filter(x=>x.p!=null);
+    const sum=wp.reduce((s,x)=>s+x.p,0), avg=wp.length ? sum/wp.length : null;
+    let best=null, streak=0, cur=0;
+    wp.forEach(x=>{ if(!best || x.p>best.p) best=x; if(x.p>=settings.maxPts){ cur++; if(cur>streak) streak=cur; } else cur=0; });
+    const byWd={}; wp.forEach(x=>{ (byWd[x.wd]=byWd[x.wd]||[]).push(x.p); });
+    let bestWd=null; for(const w in byWd){ const a=byWd[w].reduce((s,v)=>s+v,0)/byWd[w].length; if(byWd[w].length>=2 && (!bestWd || a>bestWd.v)) bestWd={w:+w, v:a}; }
+    const pm=m===0?11:m-1, py=m===0?y-1:y, pc=calc(py,pm), pk=key(py,pm), PP=pts[pk]||{}, pdays=months[pk]||{};
+    const pvals=Object.keys(pdays).filter(d=>isShift(pdays[d]) && PP[d]!=null).map(d=>+PP[d]);
+    const prevAvg = pvals.length ? pvals.reduce((s,v)=>s+v,0)/pvals.length : null;
+    let reps=0, maxDay=0; const works={}, names={};
+    for(let d=1; d<=dim; d++){ const R=(dayx[ds(y,m,d)]||{}).reps||[]; reps+=R.length; if(R.length>maxDay) maxDay=R.length;
+      R.forEach(r=>(r.it||[]).forEach(x=>{ const w=x.i||x.nm; works[w]=(works[w]||0)+(+x.n||0); names[w]=x.nm; })); }
+    let top=null; for(const w in works) if(!top || works[w]>top.n) top={nm:names[w], n:works[w]};
+    const awards=[]; for(const id in (settings.ach||{})){ const r=settings.ach[id], x=(typeof ACH!=="undefined") ? ACH.find(a=>a.id===id) : null; if(x && r[1] && r[1].slice(0,7)===k) awards.push({x, lv:r[0]}); }
+    const curMonth = y===now.getFullYear() && m===now.getMonth();
+    return {y, m, k, c, list, wp, sum:Math.round(sum*10)/10, avg, best, streak, bestWd, norm: wp.filter(x=>x.p>=settings.maxPts).length,
+      low: wp.filter(x=>x.p<settings.minPts).length, shiftsN:list.length, extraN:list.filter(x=>x.t==="x").length, sick, absent,
+      prevTotal: pc.total, prevAvg, prevName: MONTHS[pm], reps, maxDay, top, awards, curMonth, days, dim};
+  }
+  const hasMonth = (y,m) => Object.values(months[key(y,m)]||{}).some(t=>isShift(t));
+
+  // ---- карточка в «Статистике» и баннер в начале месяца ----
+  var recapView = null;
+  function renderRecapCard(){
+    if(!recapView){ const pm=now.getMonth()===0?11:now.getMonth()-1, py=now.getMonth()===0?now.getFullYear()-1:now.getFullYear(); recapView = (now.getDate()<=10 && hasMonth(py,pm)) ? {y:py, m:pm} : {y:now.getFullYear(), m:now.getMonth()}; }
+    const {y,m}=recapView, R=recapData(y,m);
+    $("rcTitle").textContent = Cap(MONTHS[m])+" "+y;
+    $("rcText").textContent = !R.shiftsN ? "В этом месяце нет отмеченных смен." :
+      shifts(R.shiftsN)+" · "+fmt(R.c.total)+(R.avg!=null ? " · средний "+f1(R.avg) : "")+(R.curMonth ? " · месяц ещё идёт" : "");
+    $("rcOpen").disabled = !R.shiftsN;
+  }
+  $("rcPrev").onclick = ()=>{ let {y,m}=recapView; m--; if(m<0){m=11;y--;} recapView={y,m}; renderRecapCard(); };
+  $("rcNext").onclick = ()=>{ let {y,m}=recapView; m++; if(m>11){m=0;y++;} recapView={y,m}; renderRecapCard(); };
+  $("rcOpen").onclick = ()=>openRecap(recapView.y, recapView.m);
+  function renderRecapBan(){
+    const pm=now.getMonth()===0?11:now.getMonth()-1, py=now.getMonth()===0?now.getFullYear()-1:now.getFullYear(), k=key(py,pm);
+    const show = now.getDate()<=10 && hasMonth(py,pm) && settings.recapSeen!==k;
+    $("recapBan").hidden = !show;
+    if(show) $("recapBanTx").textContent = "Итоги "+GEN[pm]+" готовы";
+  }
+  $("recapBan").onclick = ()=>{ const pm=now.getMonth()===0?11:now.getMonth()-1, py=now.getMonth()===0?now.getFullYear()-1:now.getFullYear(); openRecap(py,pm); };
+
+  // ---- истории ----
+  function countUp(el){
+    const to=+el.dataset.to, dec=el.dataset.dec==="1", money=el.dataset.money==="1", t0=performance.now(), dur=1100;
+    const show = v => el.firstChild.nodeValue = money ? fmt(v) : dec ? f1(v) : String(Math.round(v));
+    if(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches){ show(to); return; }
+    const step = now2=>{ const k=Math.min(1,(now2-t0)/dur), e=1-Math.pow(1-k,3); show(to*e); if(k<1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  }
+  function confetti(box){
+    const cols=["var(--accent)","var(--hot)","var(--extra)","var(--mid)","var(--sick)"], wrap=el("div","confetti");
+    for(let i=0;i<46;i++){ const c=el("i"); c.style.left=(Math.random()*100)+"%"; c.style.background=cols[i%cols.length];
+      c.style.setProperty("--dx", (Math.random()*120-60)+"px"); c.style.setProperty("--rot", (Math.random()*900-450)+"deg");
+      c.style.animationDelay=(Math.random()*0.6)+"s"; c.style.width=(6+Math.random()*6)+"px"; wrap.appendChild(c); }
+    box.appendChild(wrap); haptic("n","success");
+  }
+  const num = (v, o={}) => '<span class="cu" data-to="'+v+'"'+(o.dec?' data-dec="1"':'')+(o.money?' data-money="1"':'')+'>'+(o.money?fmt(0):"0")+'</span>';
+  function buildSlides(R){
+    const S=[], mName=MONTHS[R.m], mGen=GEN[R.m], N=settings.maxPts;
+    S.push({c1:"var(--accent)", c2:"var(--hot)", html:
+      '<div class="em">🎞️</div><div class="kick">Итоги месяца</div><h2>'+Cap(mName)+' '+R.y+'</h2>'+
+      '<p>'+(settings.fio ? esc(settings.fio)+', смотрим' : 'Смотрим')+', как прошёл месяц.'+(R.curMonth ? ' Месяц ещё идёт — это итоги на сегодня.' : '')+'</p>'});
+    const first=(new Date(R.y,R.m,1).getDay()+6)%7; let dots='';
+    for(let i=0;i<first;i++) dots+='<i style="visibility:hidden"></i>';
+    for(let d=1; d<=R.dim; d++){ const t=R.days[d]; dots+='<i'+(t && t!=="o" ? ' class="t-'+t+'"' : '')+'></i>'; }
+    const extra=[]; if(R.extraN) extra.push('из них <b>'+R.extraN+' доп.</b>'); if(R.sick) extra.push('больничных: '+R.sick); if(R.absent) extra.push('прогулов: '+R.absent);
+    S.push({c1:"var(--accent)", c2:"var(--extra)", html:
+      '<div class="em">🛠️</div><div class="kick">Отработано</div><div class="huge">'+num(R.shiftsN)+'<small>'+wOnly(R.shiftsN,"смена","смены","смен")+'</small></div>'+
+      '<p>Это <b>'+(R.shiftsN*12)+' часов</b> в РЦ'+(extra.length ? ', '+extra.join(', ') : '')+(extra.length && !R.sick && !R.absent ? '' : '.')+'</p><div class="dots">'+dots+'</div>'});
+    const diff=R.c.total-R.prevTotal, full=R.c.bonusMax>0 && R.c.bonus>=R.c.bonusMax-0.5;
+    S.push({c1:"var(--hot)", c2:"var(--accent)", confetti: full, html:
+      '<div class="em">💰</div><div class="kick">Заработано'+(R.curMonth?' на сегодня':'')+'</div><div class="huge money">'+num(Math.round(R.c.total),{money:1})+'</div>'+
+      '<p>Премия <b>'+pctTxt(R.c.bonusPct)+'</b> — '+fmt(R.c.bonus)+(full ? '. Максимум! 🎉' : R.c.bonusMax>0 ? ' из '+fmt(R.c.bonusMax)+' возможных.' : '.')+'</p>'+
+      (R.prevTotal>0 ? '<p>'+(diff>=0 ? 'На <b>'+fmt(diff)+'</b> больше' : 'На '+fmt(-diff)+' меньше')+', чем за '+R.prevName+'.</p>' : '')});
+    if(R.wp.length){
+      const top=Math.max(N*1.25, ...R.wp.map(x=>x.p));
+      const bars=R.wp.map((x,i)=>'<i class="lv-'+level(x.p)+'" style="height:'+(x.p/top*100).toFixed(1)+'%;animation-delay:'+(0.3+i*0.03).toFixed(2)+'s"></i>').join('');
+      const avgCmp = R.prevAvg!=null && R.avg!=null ? (R.avg>=R.prevAvg ? ' Это на <b>'+f1(R.avg-R.prevAvg)+'</b> выше, чем за '+R.prevName+'.' : ' За '+R.prevName+' было '+f1(R.prevAvg)+'.') : '';
+      S.push({c1:"var(--extra)", c2:"var(--accent)", confetti: R.avg>=N, html:
+        '<div class="em">🎯</div><div class="kick">Средний балл</div><div class="huge">'+num(Math.round(R.avg*10)/10,{dec:1})+'</div>'+
+        '<p>Всего '+plural(Math.round(R.sum),"балл","балла","баллов")+'. Норма '+N+'+ — в <b>'+R.norm+' из '+R.wp.length+'</b> смен.'+avgCmp+'</p>'+
+        '<div class="mbars">'+bars+'<span class="nl" style="bottom:'+(N/top*100).toFixed(1)+'%"></span></div>'});
+      const wdTxt = R.bestWd ? '<p>Сильнее всего вы работаете '+WDP[R.bestWd.w]+': в среднем <b>'+f1(R.bestWd.v)+'</b>.</p>' : '';
+      S.push({c1:"var(--hot)", c2:"var(--extra)", confetti: R.best && R.best.p>=30, html:
+        '<div class="em">🚀</div><div class="kick">Лучшая смена</div><div class="huge">'+num(R.best.p,{dec: R.best.p%1!==0 ? 1 : 0})+'<small>'+wOnly(Math.round(R.best.p),"балл","балла","баллов")+'</small></div>'+
+        '<p>'+R.best.d+' '+mGen+', '+WDF[R.best.wd]+'.</p>'+wdTxt+
+        (R.streak>=2 ? '<p>Лучшая серия: норма <b>'+shifts(R.streak)+' подряд</b> 🔥</p>' : '')});
+    } else {
+      S.push({c1:"var(--extra)", c2:"var(--accent)", html:'<div class="em">🎯</div><div class="kick">Баллы</div><h2>Баллы не вносились</h2><p>Вносите баллы после каждой смены — в следующем месяце здесь будет средний балл, рекорд и график.</p>'});
+    }
+    if(R.reps){
+      S.push({c1:"var(--accent)", c2:"var(--mid)", html:
+        '<div class="em">🔧</div><div class="kick">Ремонты</div><div class="huge">'+num(R.reps)+'<small>'+wOnly(R.reps,"ремонт","ремонта","ремонтов")+'</small></div>'+
+        '<div class="facts">'+(R.top ? '<div><small>Чаще всего</small><b>'+esc(R.top.nm)+'</b><small>'+times(R.top.n)+'</small></div>' : '')+
+        '<div><small>Больше всего за смену</small><b>'+R.maxDay+'</b><small>'+wOnly(R.maxDay,"ремонт","ремонта","ремонтов")+'</small></div></div>'});
+    }
+    if(R.awards.length){
+      S.push({c1:"var(--mid)", c2:"var(--hot)", confetti:true, html:
+        '<div class="em">🏆</div><div class="kick">Награды месяца</div><h2>'+plural(R.awards.length,"новая награда","новые награды","новых наград")+'</h2>'+
+        '<div class="alist">'+R.awards.slice(0,5).map(a=>'<div><span>'+a.x.ic+'</span><div>'+esc(a.x.nm)+'<em>'+(a.x.tiers.length>1 ? TIER[tierOf(a.x,a.lv)].nm : 'получено')+'</em></div></div>').join('')+'</div>'});
+    }
+    S.push({c1:"var(--accent)", c2:"var(--hot)", final:true, html:
+      '<div class="kick">Ваша карточка месяца</div><img class="card" id="rcImg" alt="Карточка с итогами месяца">'+
+      '<div class="row"><button class="save-btn" id="rcShare">Поделиться</button><button class="ghost-btn" id="rcAgain">Сначала</button></div>'+
+      '<p class="hint" id="rcMsg" style="margin:0">Чтобы сохранить в «Фото», нажмите и подержите картинку.</p>'});
+    return S;
+  }
+  var storyEl=null, storyI=0, storyS=null, storyR=null;
+  function openRecap(y, m){
+    storyR=recapData(y,m); storyS=buildSlides(storyR); storyI=0;
+    const k=key(y,m); if(!storyR.curMonth && settings.recapSeen!==k && k<key(now.getFullYear(),now.getMonth())){ settings.recapSeen=k; saveSettings(); }
+    renderRecapBan();
+    storyEl=el("div","story"); storyEl.setAttribute("role","dialog"); storyEl.setAttribute("aria-label","Итоги месяца");
+    storyEl.innerHTML='<div class="story-bars">'+storyS.map(()=>'<i><b></b></i>').join('')+'</div>'+
+      '<div class="story-top"><span>'+Cap(MONTHS[m])+' '+y+'</span><button class="story-x" aria-label="Закрыть">✕</button></div><div class="story-slide"></div>';
+    document.body.appendChild(storyEl); document.body.style.overflow="hidden";
+    storyEl.querySelector(".story-x").onclick = e=>{ e.stopPropagation(); closeRecap(); };
+    storyEl.querySelector(".story-slide").addEventListener("click", e=>{
+      if(e.target.closest("button,img")) return;
+      const r=storyEl.getBoundingClientRect(); showSlide(e.clientX < r.width*0.3 ? storyI-1 : storyI+1);
+    });
+    showSlide(0);
+  }
+  function closeRecap(){ if(storyEl){ storyEl.remove(); storyEl=null; document.body.style.overflow=""; } }
+  document.addEventListener("keydown", e=>{ if(!storyEl) return; if(e.key==="Escape") closeRecap(); else if(e.key==="ArrowRight") showSlide(storyI+1); else if(e.key==="ArrowLeft") showSlide(storyI-1); });
+  function showSlide(i){
+    if(i<0) i=0; if(i>=storyS.length){ closeRecap(); return; }
+    const moved = i!==storyI; storyI=i; const S=storyS[i], box=storyEl.querySelector(".story-slide");
+    storyEl.querySelectorAll(".story-bars i").forEach((b,j)=>b.classList.toggle("on", j<=i));
+    box.style.setProperty("--c1", S.c1); box.style.setProperty("--c2", S.c2);
+    box.className="story-slide"; void box.offsetWidth; box.className="story-slide anim";
+    box.innerHTML='<div class="story-glow"></div>'+S.html+(S.final?'':'<div class="story-hint">Нажмите, чтобы дальше</div>');
+    box.querySelectorAll(".cu").forEach(countUp);
+    if(S.confetti) setTimeout(()=>{ if(storyEl && storyI===i) confetti(box); }, 450);
+    if(moved || i===0) sfx.nav(1);
+    if(S.final){
+      $("rcAgain").onclick = ()=>showSlide(0);
+      recapImage(storyR).then(url=>{ const im=$("rcImg"); if(im) im.src=url; storyR.img=url; }).catch(()=>{ const msg=$("rcMsg"); if(msg) msg.textContent="Не получилось нарисовать карточку."; });
+      $("rcShare").onclick = shareRecap;
+    }
+  }
+  async function shareRecap(){
+    const msg=$("rcMsg"); if(!storyR || !storyR.img) return;
+    try{
+      const blob = await (await fetch(storyR.img)).blob();
+      const file = new File([blob], "итоги-"+storyR.k+".png", {type:"image/png"});
+      if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], title:"Итоги "+GEN[storyR.m]}); return; }
+    }catch(e){ if(e && e.name==="AbortError") return; }
+    msg.textContent="Здесь нельзя поделиться напрямую. Нажмите и подержите картинку → «Сохранить в Фото», потом отправьте её из галереи.";
+  }
+
+  // ---- карточка-картинка 1080×1350 ----
+  function rr(g,x,y,w,h,r){ g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); }
+  function alpha(col, a){
+    const c=document.createElement("canvas").getContext("2d"); c.fillStyle=col; const v=c.fillStyle;
+    if(v[0]==="#"){ const n=parseInt(v.slice(1),16); return "rgba("+(n>>16&255)+","+(n>>8&255)+","+(n&255)+","+a+")"; }
+    return v.replace(/rgba?\(([^)]+)\)/, (m0,p)=>{ const q=p.split(",").slice(0,3).join(","); return "rgba("+q+","+a+")"; });
+  }
+  async function recapImage(R){
+    try{ if(document.fonts && document.fonts.ready) await Promise.race([document.fonts.ready, new Promise(r=>setTimeout(r,1500))]); }catch(e){}
+    const cs=getComputedStyle(document.documentElement), V=n=>cs.getPropertyValue("--"+n).trim();
+    const bg=V("bg")||"#111", fg=V("fg")||"#fff", muted=V("muted")||"#999", acc=V("accent")||"#3c3", hot=V("hot")||"#e63", ext=V("extra")||"#36f", mid=V("mid")||"#fa0", low=V("absent")||"#e33";
+    const fD=V("font-display")||"sans-serif", fB=V("font-body")||"sans-serif";
+    const W=1080, H=1350, cv=document.createElement("canvas"); cv.width=W; cv.height=H; const g=cv.getContext("2d");
+    g.fillStyle=bg; g.fillRect(0,0,W,H);
+    let gr=g.createRadialGradient(W*0.9,H*0.08,0,W*0.9,H*0.08,W*0.75); gr.addColorStop(0,alpha(acc,.55)); gr.addColorStop(1,alpha(acc,0)); g.fillStyle=gr; g.fillRect(0,0,W,H);
+    gr=g.createRadialGradient(W*0.05,H*0.95,0,W*0.05,H*0.95,W*0.8); gr.addColorStop(0,alpha(hot,.45)); gr.addColorStop(1,alpha(hot,0)); g.fillStyle=gr; g.fillRect(0,0,W,H);
+    const P=72; g.textBaseline="alphabetic";
+    g.fillStyle=muted; g.font="600 32px "+fB; g.fillText("ИТОГИ МЕСЯЦА"+(R.curMonth?" · НА "+now.getDate()+" "+GEN[now.getMonth()].toUpperCase():""), P, 118);
+    g.fillStyle=fg; g.font="700 88px "+fD; g.fillText(Cap(MONTHS[R.m])+" "+R.y, P, 214);
+    if(settings.fio){ g.fillStyle=muted; g.font="500 36px "+fB; g.fillText(settings.fio, P, 268); }
+    g.fillStyle=fg; let fs=150; g.font="700 "+fs+"px "+fD; const money=fmt(R.c.total);
+    while(g.measureText(money).width>W-2*P && fs>60){ fs-=6; g.font="700 "+fs+"px "+fD; }
+    g.fillText(money, P, 430);
+    g.fillStyle=muted; g.font="500 36px "+fB; g.fillText("заработано · премия "+pctTxt(R.c.bonusPct)+" ("+fmt(R.c.bonus)+")", P, 488);
+    const cells=[
+      [String(R.shiftsN), wOnly(R.shiftsN,"смена","смены","смен")+(R.extraN?" (доп. "+R.extraN+")":"")],
+      [R.avg!=null ? f1(R.avg) : "—", "средний балл"],
+      [R.wp.length ? R.norm+" из "+R.wp.length : "—", "смен с нормой "+settings.maxPts+"+"],
+      [R.best ? f1(R.best.p) : "—", R.best ? "рекорд, "+R.best.d+" "+GEN[R.m].slice(0,3) : "рекорд смены"],
+      [String(R.shiftsN*12), "часов в РЦ"],
+      [R.reps ? String(R.reps) : (R.streak ? String(R.streak) : "—"), R.reps ? wOnly(R.reps,"ремонт","ремонта","ремонтов") : "норма подряд"]
+    ];
+    const cw=(W-2*P-2*24)/3, ch=170, cy=548;
+    cells.forEach((c,i)=>{ const x=P+(i%3)*(cw+24), y=cy+Math.floor(i/3)*(ch+24);
+      g.fillStyle=alpha(fg,.08); rr(g,x,y,cw,ch,28); g.fill();
+      g.fillStyle=fg; let f=64; g.font="700 "+f+"px "+fD; while(g.measureText(c[0]).width>cw-48 && f>30){ f-=4; g.font="700 "+f+"px "+fD; }
+      g.fillText(c[0], x+28, y+92);
+      g.fillStyle=muted; let f2=28; g.font="500 "+f2+"px "+fB; while(g.measureText(c[1]).width>cw-48 && f2>18){ f2-=2; g.font="500 "+f2+"px "+fB; }
+      g.fillText(c[1], x+28, y+138); });
+    const by=cy+2*(ch+24)+30, bh=200;
+    if(R.wp.length){
+      const top=Math.max(settings.maxPts*1.25, ...R.wp.map(x=>x.p)), n=R.wp.length, gap=6, bw=Math.max(6,(W-2*P-gap*(n-1))/n);
+      R.wp.forEach((x,i)=>{ const h=Math.max(6, x.p/top*bh); g.fillStyle = x.p>=settings.maxPts ? acc : x.p>=settings.minPts ? mid : low; rr(g, P+i*(bw+gap), by+bh-h, bw, h, Math.min(8,bw/2)); g.fill(); });
+      const ny=by+bh-settings.maxPts/top*bh; g.strokeStyle=alpha(fg,.55); g.setLineDash([12,10]); g.lineWidth=3; g.beginPath(); g.moveTo(P,ny); g.lineTo(W-P,ny); g.stroke(); g.setLineDash([]);
+      g.fillStyle=muted; g.font="500 26px "+fB; g.fillText("баллы по сменам · пунктир — норма "+settings.maxPts, P, by+bh+44);
+    } else { g.fillStyle=muted; g.font="500 30px "+fB; g.fillText("Баллы за этот месяц не вносились", P, by+bh/2); }
+    if(R.awards.length){ g.font="56px "+fB; g.fillStyle=fg; g.fillText(R.awards.slice(0,8).map(a=>a.x.ic).join(" "), P, H-110); }
+    g.fillStyle=muted; g.font="600 28px "+fB; g.fillText("Смены — календарь механика", P, H-50);
+    g.textAlign="right"; g.fillText("@smeny_mechanic_bot", W-P, H-50); g.textAlign="left";
+    return cv.toDataURL("image/png");
+  }
 
   const sb=$("soundBtn"); sb.setAttribute("aria-pressed", sfx.on);
   sb.onclick = ()=>{ sfx.set(!sfx.on); sb.setAttribute("aria-pressed", sfx.on); sb.setAttribute("aria-label", sfx.on?"Звук включён":"Звук выключен"); if(sfx.on) sfx.good(); };
