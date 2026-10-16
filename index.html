@@ -10,6 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Смены">
 <link rel="manifest" href="manifest.webmanifest">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,sans-serif;-webkit-tap-highlight-color:transparent}img{max-width:100%}[hidden]{display:none!important}</style>
@@ -109,6 +110,11 @@ summary{cursor:pointer;font-weight:600}
 .backup p{margin:0;font-size:13px;color:var(--muted)}
 .backup .row{display:flex;flex-wrap:wrap;gap:8px}
 .ghost-btn{padding:9px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-weight:500}
+.notice{display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:14px;border:1px solid var(--absent);background:var(--surface)}
+.notice b{font-size:15px}
+.notice p{margin:0;font-size:14px;color:var(--fg)}
+.notice .row{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
+.code-box{width:100%;min-height:96px;box-sizing:border-box;font:12px/1.4 ui-monospace,Menlo,monospace;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;word-break:break-all;resize:vertical}
 .file-in{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 .brush.t-p{--c:var(--fg)}
 .brush.t-p .sw{border-radius:50%;background:none;box-shadow:inset 0 0 0 2px var(--fg)}
@@ -159,6 +165,14 @@ summary{cursor:pointer;font-weight:600}
 </head>
 <body>
 <div class="wrap">
+  <section class="notice" id="notice" hidden aria-live="polite">
+    <b id="noticeTitle"></b>
+    <p id="noticeText"></p>
+    <div class="row">
+      <button class="save-btn" id="noticeAction" hidden></button>
+      <button class="link-btn" id="noticeClose">Понятно, скрыть</button>
+    </div>
+  </section>
   <header class="month">
     <h1 id="monthTitle">Октябрь 2026</h1>
     <div class="nav">
@@ -276,9 +290,19 @@ summary{cursor:pointer;font-weight:600}
   </details>
 
   <details>
-    <summary>Резервная копия</summary>
+    <summary>Перенос и резервная копия</summary>
     <div class="backup">
-      <p>Скачайте файл со всеми отметками и настройками. Из него можно восстановить календарь, если что-то пойдёт не так.</p>
+      <p><b style="color:var(--fg)">Перенос данных.</b> Данные в Telegram, в Safari и в иконке на экране «Домой» хранятся отдельно. Чтобы перенести отметки, нажмите «Скопировать код» там, где они есть, и «Вставить код» там, куда переносите.</p>
+      <div class="row">
+        <button class="ghost-btn" id="copyCode">Скопировать код</button>
+        <button class="ghost-btn" id="pasteToggle">Вставить код</button>
+      </div>
+      <textarea class="code-box" id="codeOut" readonly hidden aria-label="Код переноса"></textarea>
+      <div id="pasteBox" class="backup" style="margin-top:0" hidden>
+        <textarea class="code-box" id="codeIn" placeholder="Вставьте сюда код переноса" aria-label="Вставьте код переноса"></textarea>
+        <div class="row"><button class="save-btn" id="codeLoad">Загрузить данные</button></div>
+      </div>
+      <p style="border-top:1px solid var(--line);padding-top:12px"><b style="color:var(--fg)">Резервная копия.</b> Раз в месяц сохраняйте копию в «Файлы» или iCloud.</p>
       <div class="row">
         <button class="ghost-btn" id="exportBtn">Скачать копию</button>
         <label class="ghost-btn" for="importFile" tabindex="0" id="importLabel">Восстановить из файла</label>
@@ -324,6 +348,20 @@ summary{cursor:pointer;font-weight:600}
     x:{pay:null, bonus:true}, s:{pay:0, bonus:false}, a:{pay:0, bonus:false}
   }};
   let db = null;
+
+  // Telegram Mini App: внутри бота данные хранятся в облаке Telegram (у каждого в своём аккаунте)
+  const tg = (window.Telegram && window.Telegram.WebApp) || null;
+  const miniApp = !!(tg && tg.initData);
+  const tgAtLeast = v => { try{ return !!(tg && tg.isVersionAtLeast && tg.isVersionAtLeast(v)); }catch(e){ return false; } };
+  const cloud = miniApp && tg.CloudStorage && tgAtLeast("6.9") ? tg.CloudStorage : null;
+  const cset = (k,v) => new Promise((res,rej)=>{ try{ cloud.setItem(k, v, (e,ok)=> e ? rej(e) : res(ok)); }catch(e){ rej(e); } });
+  const ckeys = () => new Promise((res,rej)=>{ try{ cloud.getKeys((e,v)=> e ? rej(e) : res(v||[])); }catch(e){ rej(e); } });
+  const cget = keys => new Promise((res,rej)=>{ try{ cloud.getItems(keys, (e,v)=> e ? rej(e) : res(v||{})); }catch(e){ rej(e); } });
+  if(miniApp){
+    try{ tg.ready(); tg.expand(); }catch(e){}
+    try{ if(tgAtLeast("7.7")) tg.disableVerticalSwipes(); }catch(e){}
+    try{ if(tg.colorScheme) document.documentElement.setAttribute("data-theme", tg.colorScheme); }catch(e){}
+  }
   const $ = id => document.getElementById(id);
   const hhmm = () => new Date().toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"});
   const status = (t, warn) => { const el=$("saveState"); el.textContent = t || ""; el.classList.toggle("warn", !!warn); if(warn) sfx.error(); };
@@ -572,7 +610,12 @@ summary{cursor:pointer;font-weight:600}
     if(totals[k]) body.total = Object.assign({}, totals[k]);
     try{
       if(db){ await db.doc("months/"+k).set(body); status("Сохранено в "+hhmm()); }
-      else { try{ localStorage.setItem("salary:"+k, JSON.stringify(body)); }catch(e){} status("Сохранено на этом устройстве в "+hhmm()); }
+      else {
+        const json = JSON.stringify(body);
+        try{ localStorage.setItem("salary:"+k, json); }catch(e){}
+        if(cloud){ await cset("m_"+k, json); status("Сохранено в Telegram в "+hhmm()); }
+        else status("Сохранено на этом устройстве в "+hhmm());
+      }
     }catch(e){ pending[k] = true; status("Не сохранено. Проверьте интернет и нажмите «Сохранить».", true); }
     busy[k] = false;
   }
@@ -675,7 +718,7 @@ summary{cursor:pointer;font-weight:600}
     if(setBusy){ setTimer=setTimeout(flushSettings,300); return; }
     if(!setPending) return; setPending=false; setBusy=true;
     const body = JSON.parse(JSON.stringify(settings));
-    try{ if(db) await db.doc("settings/main").set(body); else localStorage.setItem("salary:settings", JSON.stringify(body)); status("Сохранено в "+hhmm()); }
+    try{ if(db) await db.doc("settings/main").set(body); else { const json = JSON.stringify(body); try{ localStorage.setItem("salary:settings", json); }catch(e){} if(cloud) await cset("settings", json); } status("Сохранено в "+hhmm()); }
     catch(e){ setPending=true; status("Настройки не сохранены. Нажмите «Сохранить».", true); }
     setBusy=false;
   }
@@ -690,7 +733,7 @@ summary{cursor:pointer;font-weight:600}
     for(const k of Object.keys(pending)) if(pending[k]) await flush(k);
     if(setPending) await flushSettings();
     const failed = Object.values(pending).some(Boolean) || setPending;
-    if(!failed){ status((db?"Всё сохранено в ":"Всё сохранено на этом устройстве в ")+hhmm()); sfx.save(); }
+    if(!failed){ status((db||cloud?"Всё сохранено в Telegram в ":"Всё сохранено на этом устройстве в ")+hhmm()); sfx.save(); }
     btn.disabled=false;
   };
 
@@ -710,18 +753,47 @@ summary{cursor:pointer;font-weight:600}
   };
   $("importLabel").addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); $("importFile").click(); } });
   let imported=null;
+  function prepareImport(j, src){
+    if(!j || typeof j.months!=="object") throw 0;
+    const ms={}; for(const k in j.months) if(/^\d{4}-\d{2}$/.test(k)) ms[k]=norm(j.months[k]);
+    const ps={}; for(const k in (j.points||{})) if(/^\d{4}-\d{2}$/.test(k)) ps[k]=j.points[k]||{};
+    imported={months:ms, points:ps, totals:j.totals||{}, settings:j.settings};
+    $("importInfo").textContent = src+": "+Object.keys(ms).length+" мес. Текущие отметки за эти месяцы заменятся.";
+    $("importConfirm").hidden=false; bmsg("");
+    $("importConfirm").scrollIntoView({block:"center"});
+  }
   $("importFile").addEventListener("change", async e=>{
     const f = e.target.files && e.target.files[0]; e.target.value=""; if(!f) return;
-    try{
-      const j = JSON.parse(await f.text());
-      if(!j || typeof j.months!=="object") throw 0;
-      const ms={}; for(const k in j.months) if(/^\d{4}-\d{2}$/.test(k)) ms[k]=norm(j.months[k]);
-      const ps={}; for(const k in (j.points||{})) if(/^\d{4}-\d{2}$/.test(k)) ps[k]=j.points[k]||{};
-      imported={months:ms, points:ps, totals:j.totals||{}, settings:j.settings};
-      $("importInfo").textContent = "В файле "+Object.keys(ms).length+" мес. Текущие отметки за эти месяцы заменятся.";
-      $("importConfirm").hidden=false; bmsg("");
-    }catch(err){ imported=null; bmsg("Это не файл копии календаря. Выберите файл, скачанный кнопкой «Скачать копию»."); }
+    try{ prepareImport(JSON.parse(await f.text()), "В файле"); }
+    catch(err){ imported=null; bmsg("Это не файл копии календаря. Выберите файл, скачанный кнопкой «Скачать копию»."); }
   });
+
+  // Перенос кодом: работает между Telegram, Safari и иконкой на экране «Домой»
+  const exportData = () => ({app:"salary-calendar", version:1, exportedAt:new Date().toISOString(), settings, months, points:pts, totals});
+  const toCode = o => "SMENY1:" + btoa(unescape(encodeURIComponent(JSON.stringify(o))));
+  function fromCode(text){
+    const t = String(text||"").replace(/\s+/g,"");
+    if(t.startsWith("SMENY1:")) return JSON.parse(decodeURIComponent(escape(atob(t.slice(7)))));
+    return JSON.parse(String(text||""));
+  }
+  async function copyTransferCode(){
+    const code = toCode(exportData()), out = $("codeOut");
+    try{
+      await navigator.clipboard.writeText(code);
+      out.hidden = true;
+      bmsg("Код скопирован. Откройте календарь с иконки на экране «Домой» → «Перенос и резервная копия» → «Вставить код».");
+      sfx.save();
+    }catch(e){
+      out.value = code; out.hidden = false; out.focus(); out.select();
+      bmsg("Скопируйте код вручную: нажмите на поле с кодом → «Выбрать все» → «Скопировать».");
+    }
+  }
+  $("copyCode").onclick = copyTransferCode;
+  $("pasteToggle").onclick = ()=>{ const b=$("pasteBox"); b.hidden=!b.hidden; if(!b.hidden) $("codeIn").focus(); };
+  $("codeLoad").onclick = ()=>{
+    try{ prepareImport(fromCode($("codeIn").value), "В коде"); $("codeIn").value=""; $("pasteBox").hidden=true; }
+    catch(err){ imported=null; bmsg("Код не подошёл. Скопируйте его заново целиком и вставьте ещё раз."); }
+  };
   $("importNo").onclick = ()=>{ imported=null; $("importConfirm").hidden=true; };
   $("importYes").onclick = async ()=>{
     if(!imported) return; $("importConfirm").hidden=true;
@@ -729,7 +801,7 @@ summary{cursor:pointer;font-weight:600}
     if(imported.settings){ applySettings(imported.settings); setPending=true; }
     imported=null; render(); bmsg("Восстанавливаю…");
     await $("saveNow").onclick();
-    bmsg("Данные восстановлены из файла.");
+    bmsg("Данные загружены."); $("notice").hidden = true;
   };
   function onRate(){
     const r = parseFloat($("rate").value), p = parseFloat($("pct").value), lo=parseFloat($("minPts").value), hi=parseFloat($("maxPts").value);
@@ -759,10 +831,63 @@ summary{cursor:pointer;font-weight:600}
 
   const sb=$("soundBtn"); sb.setAttribute("aria-pressed", sfx.on);
   sb.onclick = ()=>{ sfx.set(!sfx.on); sb.setAttribute("aria-pressed", sfx.on); sb.setAttribute("aria-label", sfx.on?"Звук включён":"Звук выключен"); if(sfx.on) sfx.good(); };
+  // Подсказка: где открыт календарь и как не потерять данные
+  function openTransfer(){ const d=$("copyCode").closest("details"); d.open=true; d.scrollIntoView({block:"start"}); }
+  function setupNotice(){
+    let hidden=false; try{ hidden = localStorage.getItem("salary:noticeHidden")==="1"; }catch(e){}
+    const standalone = navigator.standalone===true || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
+    const telegram = !miniApp && typeof window.TelegramWebviewProxy!=="undefined" || typeof window.TelegramWebview!=="undefined" || /Telegram/i.test(navigator.userAgent||"");
+    const hasData = Object.values(months).some(m=>Object.keys(m||{}).length);
+    const n=$("notice"), act=$("noticeAction");
+    let title="", text="", btn="", fn=null;
+    if(telegram){
+      title="Календарь открыт внутри Telegram";
+      text="Отметки отсюда не попадут в иконку на экране «Домой». Нажмите «•••» вверху и выберите «Открыть в Safari», затем в Safari «Поделиться» → «На экран «Домой»».";
+      if(hasData){ text+=" Ваши отметки сначала перенесите: скопируйте код и вставьте его в приложении с иконки."; btn="Скопировать код переноса"; fn=copyTransferCode; }
+    } else if(!standalone && !miniApp){
+      if(hidden && !hasData) return;
+      title="Календарь открыт в браузере";
+      text="Данные в браузере и в иконке на экране «Домой» хранятся отдельно. Добавьте иконку: «Поделиться» → «На экран «Домой»» и пользуйтесь только ей.";
+      if(hasData){ text+=" Ваши отметки перенесите: скопируйте код и вставьте его в приложении с иконки."; btn="Скопировать код переноса"; fn=copyTransferCode; }
+    } else if(!hasData){
+      if(hidden) return;
+      title="Добро пожаловать";
+      text = miniApp
+        ? "Данные сохраняются в вашем аккаунте Telegram и не пропадут. Если вы уже отмечали смены в приложении с иконки или в Safari, перенесите их: там нажмите «Скопировать код», а здесь «Вставить код»."
+        : "Если вы уже отмечали смены в Telegram или в Safari, перенесите их: там нажмите «Скопировать код», а здесь «Вставить код».";
+      btn="Вставить код"; fn=()=>{ openTransfer(); $("pasteBox").hidden=false; $("codeIn").focus(); };
+    } else return;
+    $("noticeTitle").textContent=title; $("noticeText").textContent=text;
+    act.hidden=!btn; act.textContent=btn; act.onclick=fn;
+    n.hidden=false;
+  }
+  $("noticeClose").onclick = ()=>{ $("notice").hidden=true; try{ localStorage.setItem("salary:noticeHidden","1"); }catch(e){} };
+
   renderBrushes(); renderTypeSettings(); renderQuick(); render();
   // Отдельное приложение: всё хранится на телефоне каждого пользователя, у каждого свои данные.
   (async ()=>{
-    loadLocal(); render(); status("Данные хранятся на этом телефоне");
+    loadLocal(); render();
+    if(cloud){
+      status("Загружаю данные из Telegram…");
+      try{
+        const keys = (await ckeys()).filter(k => /^m_\d{4}-\d{2}$/.test(k) || k==="settings");
+        if(keys.length){
+          const vals = await cget(keys);
+          for(const k of keys){
+            const v = vals[k]; if(!v) continue;
+            const j = JSON.parse(v);
+            if(k==="settings"){ applySettings(j); try{ localStorage.setItem("salary:settings", v); }catch(e){} }
+            else { const mk=k.slice(2); months[mk]=norm(j.days); pts[mk]=j.points||{}; if(j.total) totals[mk]=j.total; else delete totals[mk]; try{ localStorage.setItem("salary:"+mk, v); }catch(e){} }
+          }
+          render(); status("Данные загружены из Telegram");
+        } else if(Object.values(months).some(m=>Object.keys(m||{}).length)){
+          // Первый запуск в боте, а на телефоне уже есть отметки: сохраняем их в облако
+          for(const mk in months) pending[mk]=true; setPending=true;
+          await $("saveNow").onclick();
+        } else status("Данные хранятся в вашем аккаунте Telegram");
+      }catch(e){ status("Не удалось загрузить данные из Telegram. Проверьте интернет и откройте календарь заново.", true); }
+    } else status("Данные хранятся на этом телефоне");
+    setupNotice();
     try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}
     if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
     return;
