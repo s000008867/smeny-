@@ -201,7 +201,7 @@ summary{cursor:pointer;font-weight:600}
 .day{position:relative}
 .day.has-note::after{content:"";position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.75}
 .note-lbl{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
-.note-lbl textarea,.cat-add input,.pay-add input,.pay-add select,.rep-card input{font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%;box-sizing:border-box;min-width:0}
+.note-lbl textarea,.note-lbl input,.cat-add input,.pay-add input,.pay-add select,.rep-card input{font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px;width:100%;box-sizing:border-box;min-width:0}
 .rep{display:flex;flex-direction:column;gap:12px}
 .rep-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .rep-day{display:flex;flex-direction:column;align-items:center;min-width:0}
@@ -296,6 +296,19 @@ summary{cursor:pointer;font-weight:600}
 .toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
 .toast .em{font-size:26px;line-height:1}
 @media (prefers-reduced-motion: reduce){.toast{transition:none}}
+.photo{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:16px;background:var(--surface);border:1px solid var(--line)}
+.photo .ghost-btn{align-self:stretch;text-align:center}
+.photo-panel{display:flex;flex-direction:column;gap:10px}
+.photo .row{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center}
+.ph-thumb{width:100%;max-height:180px;object-fit:contain;border-radius:10px;background:var(--bg);border:1px solid var(--line)}
+.ph-thumb[src=""],.ph-thumb:not([src]){display:none}
+#phGrid .day{font-size:14px}
+#phGrid .day.ph-chg{outline:2px dashed var(--fg);outline-offset:-4px}
+.ph-mode{display:flex;flex-direction:column;gap:8px;font-size:14px}
+.ph-mode label{display:flex;gap:8px;align-items:center}
+.ph-mode input{width:18px;height:18px;accent-color:var(--accent)}
+.ph-busy::after{content:"";display:inline-block;width:12px;height:12px;margin-left:8px;border-radius:50%;border:2px solid var(--muted);border-top-color:transparent;vertical-align:-1px;animation:phSpin .8s linear infinite}
+@keyframes phSpin{to{transform:rotate(360deg)}}
 </style>
 <script>
 // Оформление: темы и шрифты. Применяется до отрисовки страницы, чтобы не было вспышки.
@@ -512,6 +525,29 @@ window.LOOK = (function(){
       <button class="link-btn" id="clearYes">Да, очистить</button>
       <button class="link-btn" id="clearNo">Отмена</button>
     </div>
+  </section>
+
+  <section class="photo" id="phBox">
+    <button class="ghost-btn" id="phBtn">📷 Заполнить смены по фото графика</button>
+    <input class="file-in" type="file" id="phFile" accept="image/*" aria-label="Фото графика">
+    <div id="phPanel" class="photo-panel" hidden>
+      <label for="phName" class="note-lbl">Ваша фамилия, как в графике<input id="phName" maxlength="60" autocomplete="family-name" placeholder="Например: Жиляков"></label>
+      <img id="phImg" class="ph-thumb" alt="Выбранное фото графика">
+      <p class="hint" id="phMsg" aria-live="polite"></p>
+      <div class="row" id="phStart"><button class="save-btn" id="phGo">Распознать</button><button class="link-btn" id="phOther">Другое фото</button><button class="link-btn" id="phCancel">Отмена</button></div>
+      <div id="phResult" hidden>
+        <b id="phTitle"></b>
+        <div class="dow" style="margin-top:8px"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span></div>
+        <div class="grid" id="phGrid" style="margin-top:6px"></div>
+        <p class="hint" id="phSum"></p>
+        <div class="ph-mode" role="radiogroup" aria-label="Как записать">
+          <label><input type="radio" name="phMode" value="empty" checked> Только пустые дни</label>
+          <label><input type="radio" name="phMode" value="all"> Заменить отметки месяца</label>
+        </div>
+        <div class="row"><button class="save-btn" id="phApply">Применить</button><button class="link-btn" id="phRetry">Распознать ещё раз</button><button class="link-btn" id="phClose">Отмена</button></div>
+      </div>
+    </div>
+    <p class="hint" id="phHint">Сделайте скриншот графика, где видны даты и ваша строка, — смены расставятся сами. Перед записью вы всё проверите.</p>
   </section>
 
   <dl class="breakdown num" id="breakdown"></dl>
@@ -1389,6 +1425,7 @@ window.LOOK = (function(){
     if(s.maxPts!=null) settings.maxPts = +s.maxPts;
     if(s.types) for(const k of ["x","s","a"]) if(s.types[k]) settings.types[k] = Object.assign({}, settings.types[k], s.types[k]);
     if(s.goals && typeof s.goals==="object") settings.goals = Object.assign({}, s.goals);
+    if(typeof s.fio==="string") settings.fio = s.fio;
     if(s.ach && typeof s.ach==="object") settings.ach = Object.assign({}, settings.ach||{}, s.ach);
     if(s.look && window.LOOK){ const L=LOOK.get(), t=s.look.t||"auto", f=s.look.f||"auto"; settings.look={t, f}; if(L.t!==t || L.f!==f){ LOOK.set(t, f); try{ renderLook(); }catch(e){} } }
     $("rate").value=settings.rate; $("pct").value=settings.pct; $("minPts").value=settings.minPts; $("maxPts").value=settings.maxPts; renderTypeSettings(); renderQuick();
@@ -1978,6 +2015,127 @@ window.LOOK = (function(){
       if(tab==="ach") renderAch();
     }, 900);
   }
+
+  // ======== Смены по фото графика ========
+  // Значение ячейки графика → отметка календаря
+  function mapCell(v){
+    const s = String(v==null ? "" : v).trim().toLowerCase().replace(/\s+/g,"").replace(/b/g,"в").replace(/o/g,"о").replace(/p/g,"р");
+    if(!s || s==="-" || s==="—") return null;
+    if(/^\d+([.,]\d+)?[дd]$/.test(s) || /^д(оп)?/.test(s)) return "x";
+    if(/^\d+([.,]\d+)?[нnч]?$/.test(s)) return parseFloat(s.replace(",","."))>0 ? "w" : "o";
+    if(/^в(ых)?/.test(s)) return "o";
+    if(/^(от|отп|о$|ок$|к$|уд|дод)/.test(s)) return "o";       // отпуск, учебный и т. п. — без оплаты смены
+    if(/^(б|бл|б\/л|больн)/.test(s)) return "s";
+    if(/^(п$|пр|прог|нн)/.test(s)) return "a";
+    return null;
+  }
+  let phData = null, phPlan = null;   // phData: {y, m, cells:{d:{v,t}}, fio, shifts}
+  const phMsg = (t, busy) => { const e=$("phMsg"); e.textContent=t||""; e.classList.toggle("ph-busy", !!busy); };
+  function phReset(){ phData=null; phPlan=null; $("phResult").hidden=true; $("phStart").hidden=false; phMsg(""); }
+  function phOpen(){
+    if(!$("phName").value) $("phName").value = settings.fio || (miniApp && tg.initDataUnsafe && tg.initDataUnsafe.user && /[а-яё]/i.test(tg.initDataUnsafe.user.last_name||"") ? tg.initDataUnsafe.user.last_name : "");
+    $("phFile").click();
+  }
+  $("phBtn").onclick = phOpen;
+  $("phOther").onclick = ()=>$("phFile").click();
+  $("phCancel").onclick = $("phClose").onclick = ()=>{ phReset(); $("phPanel").hidden=true; $("phHint").hidden=false; $("phImg").removeAttribute("src"); $("phImg").dataset.url=""; };
+  // Фото уменьшаем до 2000 px по длинной стороне — так быстрее и нейросеть читает не хуже
+  function prepImage(file){
+    return new Promise((res, rej)=>{
+      const url = URL.createObjectURL(file), img = new Image();
+      img.onload = ()=>{
+        const k = Math.min(1, 2000/Math.max(img.naturalWidth, img.naturalHeight)), w=Math.round(img.naturalWidth*k), h=Math.round(img.naturalHeight*k);
+        const c=document.createElement("canvas"); c.width=w; c.height=h;
+        const g=c.getContext("2d"); g.fillStyle="#fff"; g.fillRect(0,0,w,h); g.drawImage(img,0,0,w,h);
+        URL.revokeObjectURL(url); res(c.toDataURL("image/jpeg", 0.9));
+      };
+      img.onerror = ()=>{ URL.revokeObjectURL(url); rej(new Error("img")); };
+      img.src = url;
+    });
+  }
+  $("phFile").addEventListener("change", async e=>{
+    const f = e.target.files && e.target.files[0]; e.target.value=""; if(!f) return;
+    $("phPanel").hidden=false; $("phHint").hidden=true; phReset();
+    try{ const data = await prepImage(f); $("phImg").src = data; $("phImg").dataset.url = data; }
+    catch(err){ phMsg("Не получилось открыть картинку. Выберите скриншот или фото в формате JPG или PNG."); return; }
+    if($("phName").value.trim().length>=2) phRun(); else { phMsg("Напишите фамилию, как она указана в графике, и нажмите «Распознать»."); $("phName").focus(); }
+  });
+  $("phGo").onclick = ()=>phRun();
+  $("phRetry").onclick = ()=>phRun();
+  async function phRun(){
+    const name=$("phName").value.trim(), image=$("phImg").dataset.url;
+    if(name.length<2){ phMsg("Напишите фамилию, как в графике."); $("phName").focus(); return; }
+    if(!image){ $("phFile").click(); return; }
+    if(!API_URL){ phMsg("Сервер не подключён."); return; }
+    if(settings.fio!==name){ settings.fio=name; saveSettings(); }
+    $("phStart").hidden=true; $("phResult").hidden=true; phMsg("Распознаю график… обычно 10–40 секунд", true);
+    let j=null;
+    try{
+      const r = await fetch(API_URL.replace(/\/$/,"")+"/schedule", {method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({initData: miniApp ? tg.initData : "", image, name, hint: MONTHS[view.m]+" "+view.y})});
+      j = await r.json().catch(()=>null);
+    }catch(e){ j=null; }
+    $("phStart").hidden=false;
+    if(!j){ phMsg("Нет связи с сервером. Проверьте интернет и попробуйте ещё раз."); sfx.error(); return; }
+    if(!j.ok){
+      const E = {no_ai:"Распознавание пока не включено на сервере. Нужно добавить привязку AI в Cloudflare.", limit:"На сегодня лимит распознаваний исчерпан. Попробуйте завтра.",
+        bad_image:"Картинка слишком большая или в неподдерживаемом формате.", ai_failed:"Нейросеть не смогла прочитать таблицу. Попробуйте скриншот крупнее: чтобы были видны даты и ваша строка."};
+      phMsg(E[j.error] || "Не получилось распознать. Попробуйте ещё раз."); sfx.error(); return;
+    }
+    const res = j.result || {};
+    if(!res.fio || !Array.isArray(res.cells) || !res.cells.length){ phMsg("Не нашёл в графике «"+name+"». Проверьте фамилию или сделайте скриншот крупнее, чтобы ваша строка и даты были хорошо видны."); sfx.error(); return; }
+    let m = +res.month>=1 && +res.month<=12 ? +res.month-1 : view.m;
+    let y = +res.year>=2020 && +res.year<=2100 ? +res.year : (Math.abs(m-view.m)>6 ? (m>view.m ? view.y-1 : view.y+1) : view.y);
+    const dim = new Date(y,m+1,0).getDate(), cells = {};
+    for(const c of res.cells){ const d=parseInt(c && c.d,10); if(d>=1 && d<=dim && !cells[d]) cells[d] = {v:String(c.v==null?"":c.v), t:mapCell(c.v)}; }
+    phData = {y, m, cells, fio:String(res.fio), shifts: res.shifts!=null && isFinite(+res.shifts) ? +res.shifts : null};
+    phMsg(""); phShow(); sfx.good();
+  }
+  function phModeAll(){ const r=document.querySelector('input[name="phMode"]:checked'); return !!(r && r.value==="all"); }
+  function phShow(){
+    const {y, m, cells} = phData, k=key(y,m), cur=months[k]||{}, all=phModeAll(), dim=new Date(y,m+1,0).getDate();
+    $("phResult").hidden=false; $("phStart").hidden=true;
+    $("phTitle").textContent = MONTHS[m][0].toUpperCase()+MONTHS[m].slice(1)+" "+y+" · "+phData.fio;
+    const grid=$("phGrid"); grid.textContent="";
+    const first=(new Date(y,m,1).getDay()+6)%7;
+    for(let i=0;i<first;i++){ const p=el("div","day pad"); grid.appendChild(p); }
+    let chg=0, cnt={w:0,x:0,o:0,s:0,a:0}, vac=0, unread=0;
+    phPlan = {};
+    for(let d=1; d<=dim; d++){
+      const c=cells[d], t=c ? c.t : null, was=cur[d];
+      if(c && /^(от|отп)/i.test(c.v.trim())) vac++;
+      if(!c || (c.v.trim() && !t)) unread++;
+      if(t) cnt[t]++;
+      const will = t && (all || !was) ? t : null;
+      if(will && will!==was){ phPlan[d]=will; chg++; }
+      const b=el("button","day"+(t?" t-"+t:"")+(will && will!==was?" ph-chg":""));
+      if(t) b.dataset.t=t;
+      b.innerHTML='<span class="d num">'+d+'</span><span class="mark">'+(t ? (T[t].mark || (c.v.length<=3 ? c.v : "")) : (c && c.v ? "?" : ""))+'</span>';
+      b.setAttribute("aria-label", d+" "+GEN[m]+": "+(t ? T[t].name : "не распознано")+(c && c.v ? " («"+c.v+"»)" : "")+". Нажмите, чтобы изменить.");
+      // Нажатие на день меняет отметку по кругу — если нейросеть ошиблась
+      b.onclick=()=>{ const order=["w","x","o","s","a",null], i=order.indexOf(t); const nt=order[(i+1)%order.length]; phData.cells[d]={v:c?c.v:"", t:nt}; phShow(); };
+      grid.appendChild(b);
+    }
+    const parts=[];
+    if(cnt.w) parts.push(shifts(cnt.w)); if(cnt.x) parts.push(cnt.x+" доп."); if(cnt.o) parts.push(plural(cnt.o,"выходной","выходных","выходных")); if(cnt.s) parts.push(cnt.s+" больн."); if(cnt.a) parts.push(cnt.a+" прогул.");
+    let txt = "Распознано: "+(parts.join(", ")||"ничего")+".";
+    if(phData.shifts!=null) txt += (phData.shifts===cnt.w+cnt.x ? " Совпадает со столбцом «Смены» в графике ("+phData.shifts+") ✓" : " ⚠ В графике в столбце «Смены» указано "+phData.shifts+" — проверьте дни.");
+    if(vac) txt += " Отпуск ("+dayz(vac)+") отмечен как выходные.";
+    if(unread) txt += " Не прочитано дней: "+unread+" — отметьте их сами.";
+    txt += " Нажмите на день, чтобы исправить. Изменятся дни с пунктирной рамкой: "+chg+".";
+    $("phSum").textContent = txt;
+    $("phApply").disabled = !chg;
+  }
+  document.querySelectorAll('input[name="phMode"]').forEach(r=>r.addEventListener("change", ()=>{ if(phData) phShow(); }));
+  $("phApply").onclick = ()=>{
+    if(!phData || !phPlan) return;
+    const {y, m}=phData, k=key(y,m), n=Object.keys(phPlan).length;
+    months[k]=Object.assign({}, months[k]||{}, phPlan);
+    scheduleSave(k);
+    view={y, m}; phReset(); $("phPanel").hidden=true; $("phHint").hidden=false;
+    render(); sfx.good(); status("График с фото записан: изменено "+dayz(n));
+    $("grid").scrollIntoView({block:"center", behavior:"smooth"});
+  };
 
   const sb=$("soundBtn"); sb.setAttribute("aria-pressed", sfx.on);
   sb.onclick = ()=>{ sfx.set(!sfx.on); sb.setAttribute("aria-pressed", sfx.on); sb.setAttribute("aria-label", sfx.on?"Звук включён":"Звук выключен"); if(sfx.on) sfx.good(); };
