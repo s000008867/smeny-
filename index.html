@@ -318,6 +318,38 @@ summary{cursor:pointer;font-weight:600}
 .ph-mode input{width:18px;height:18px;accent-color:var(--accent)}
 .ph-busy::after{content:"";display:inline-block;width:12px;height:12px;margin-left:8px;border-radius:50%;border:2px solid var(--muted);border-top-color:transparent;vertical-align:-1px;animation:phSpin .8s linear infinite}
 @keyframes phSpin{to{transform:rotate(360deg)}}
+/* ---- живой интерфейс ---- */
+button,.tile,.lk-card{transition:transform .14s ease, background-color .2s, border-color .2s, box-shadow .2s}
+button:active:not(:disabled):not(.day),.lk-card:active{transform:scale(.96)}
+.tile.ring:active{transform:scale(.97)}
+.day:active{transform:scale(.9)}
+.day.pop{animation:dayPop .38s cubic-bezier(.3,1.6,.5,1)}
+@keyframes dayPop{0%{transform:scale(.7)}60%{transform:scale(1.12)}100%{transform:none}}
+.grid.g-sl{animation:slL .28s ease}.grid.g-sr{animation:slR .28s ease}
+@keyframes slL{from{opacity:.2;transform:translateX(40px)}to{opacity:1;transform:none}}
+@keyframes slR{from{opacity:.2;transform:translateX(-40px)}to{opacity:1;transform:none}}
+.pane:not([hidden]){animation:paneIn .26s ease}
+@keyframes paneIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.tabbar button svg{box-sizing:content-box;padding:3px 14px;border-radius:14px;transition:background-color .25s, transform .25s}
+.tabbar button[aria-selected="true"] svg{background:color-mix(in srgb,var(--accent) 18%,transparent);transform:translateY(-1px)}
+#ptsRing{transition:stroke-dasharray .7s cubic-bezier(.3,.8,.3,1)}
+.bar i{transition:width .6s cubic-bezier(.3,.8,.3,1)}
+.pop-menu{position:fixed;z-index:66;width:min(320px,calc(100vw - 24px));padding:12px;border-radius:18px;background:var(--surface);border:1px solid var(--line);box-shadow:0 18px 50px rgba(0,0,0,.35);display:flex;flex-direction:column;gap:10px;animation:menuIn .18s ease}
+@keyframes menuIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
+.pop-menu .pm-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.pop-menu .pm-h b{font-size:16px}.pop-menu .pm-h span{font-size:12px;color:var(--muted)}
+.pop-menu .pm-types{display:flex;flex-wrap:wrap;gap:6px}
+.pop-menu .pm-types button{display:flex;align-items:center;gap:6px;padding:8px 10px;white-space:nowrap;border-radius:12px;border:1px solid var(--line);background:var(--bg);font-size:13px;font-weight:600;min-width:0;text-align:left}
+.pop-menu .pm-types button i{flex:none;width:12px;height:12px;border-radius:4px;background:var(--c)}
+.pop-menu .pm-types button[aria-pressed="true"]{border-color:var(--c);box-shadow:inset 0 0 0 1px var(--c)}
+.pop-menu .pm-pts{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.pop-menu .pm-pts button{min-width:0;padding:9px 0;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-weight:700;color:var(--lv)}
+.pop-menu .pm-pts button[aria-pressed="true"]{background:var(--lv);color:var(--accent-fg);border-color:var(--lv)}
+.pop-menu .pm-row{display:flex;gap:14px;flex-wrap:wrap}
+.pop-shade{position:fixed;inset:0;z-index:65;background:rgba(0,0,0,.18)}
+.burst{position:fixed;inset:0;pointer-events:none;z-index:68}
+@media (prefers-reduced-motion: reduce){.day.pop,.grid.g-sl,.grid.g-sr,.pane:not([hidden]),.pop-menu{animation:none!important}button:active,.day:active,.tile.ring:active{transform:none!important}}
+
 .totq{display:flex;flex-direction:column;gap:10px}
 .totq:has(#tqForm[hidden]){display:none}
 .tq-btn{flex:none;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--accent);font-size:12px;font-weight:600;line-height:1.3;white-space:nowrap}
@@ -1104,6 +1136,7 @@ window.LOOK = (function(){
       b.className = "day" + (wd>=5?" we":"") + (d>=21?" np":"") + (t?" t-"+t:"") + (sel===d?" sel":"") + ((dayx[ds(y,m,d)]||{}).note?" has-note":"") +
         (y===now.getFullYear()&&m===now.getMonth()&&d===now.getDate()?" today":"");
       if(t) b.dataset.t = t;
+      b.dataset.d = d;
       b.setAttribute("aria-label", d+" "+GEN[m]+(t?", "+T[t].name.toLowerCase():"")+(p!=null?", "+p+" баллов":""));
       b.innerHTML = '<span class="d num">'+d+'</span>' + (p!=null
         ? '<span class="mark pts num lv-'+level(p)+'">'+p+'</span>'
@@ -1144,6 +1177,7 @@ window.LOOK = (function(){
     try{ checkAch(); }catch(e){}
     try{ renderRecapBan(); }catch(e){}
     try{ renderTq(); }catch(e){}
+    try{ liveAfterRender(); }catch(e){}
   }
 
   function renderAnalysis(c){
@@ -1364,6 +1398,7 @@ window.LOOK = (function(){
   function closeEditor(){ if(sel==null) return; sel=null; $("editor").hidden=true; render(); }
   function setPoints(v){
     const k=key(view.y,view.m); pts[k]=Object.assign({}, pts[k]||{});
+    try{ normCheck(k+"-"+sel, pts[k][sel], v); }catch(e){}
     if(v==null) delete pts[k][sel]; else pts[k][sel]=v;
     render(); scheduleSave(k); updatePreview();
   }
@@ -1668,7 +1703,8 @@ window.LOOK = (function(){
     return {y, m, d, id: ds(y,m,d), k: key(y,m)};
   }
   function changeReps(fn){
-    const c=repCtx(), dd=dayData(c.id), hadReps=!!(dd.reps&&dd.reps.length);
+    const c=repCtx(), dd=dayData(c.id), hadReps=!!(dd.reps&&dd.reps.length), before=daySum(c.id);
+    setTimeout(()=>{ try{ normCheck(c.id, before, daySum(c.id), true); }catch(e){} }, 0);
     const reps=JSON.parse(JSON.stringify(dd.reps||[]));
     fn(reps);
     setDay(c.id, Object.assign({}, dd, {reps}));
@@ -2616,6 +2652,97 @@ window.LOOK = (function(){
     status("Общее сохранено: "+f1(v)+" · средний "+(c.avgP!=null?f1(c.avgP):"—"));
   };
   $("tqClear").onclick = ()=>{ const k=$("tqForm").dataset.k; delete totals[k]; $("tqForm").hidden=true; render(); scheduleSave(k); sfx.unmark(); };
+
+  // ======== Живой интерфейс: свайпы, долгое нажатие, анимации, празднование нормы ========
+  const reduceMotion = () => !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+  // Перелистывание месяцев с анимацией — кнопками и свайпом по календарю
+  function animGrid(cls){ const g=$("grid"); g.classList.remove("g-sl","g-sr"); void g.offsetWidth; g.classList.add(cls); }
+  { const P=$("prev").onclick, N=$("next").onclick;
+    $("prev").onclick = ()=>{ P(); animGrid("g-sr"); }; $("next").onclick = ()=>{ N(); animGrid("g-sl"); }; }
+  { let sx=0, sy=0, st=0, on=false; const g=$("grid");
+    g.addEventListener("touchstart", e=>{ if(e.touches.length!==1) return; on=true; sx=e.touches[0].clientX; sy=e.touches[0].clientY; st=Date.now(); }, {passive:true});
+    g.addEventListener("touchend", e=>{
+      if(!on) return; on=false; const t=e.changedTouches[0], dx=t.clientX-sx, dy=t.clientY-sy;
+      if(Math.abs(dx)>60 && Math.abs(dy)<45 && Date.now()-st<700){ cancelLong(); suppressClick=true; setTimeout(()=>suppressClick=false, 350); (dx<0 ? $("next") : $("prev")).onclick(); }
+    }, {passive:true}); }
+  // Долгое нажатие на день — быстрое меню: что за день и сколько баллов
+  let longTimer=null, suppressClick=false, lpX=0, lpY=0;
+  function cancelLong(){ clearTimeout(longTimer); longTimer=null; }
+  $("grid").addEventListener("pointerdown", e=>{
+    const b=e.target.closest(".day:not(.pad)"); if(!b || !b.dataset.d) return;
+    lpX=e.clientX; lpY=e.clientY; cancelLong();
+    longTimer=setTimeout(()=>{ longTimer=null; suppressClick=true; haptic("i","medium"); openDayMenu(+b.dataset.d, b); }, 450);
+  });
+  $("grid").addEventListener("pointermove", e=>{ if(longTimer && Math.hypot(e.clientX-lpX, e.clientY-lpY)>10) cancelLong(); });
+  ["pointerup","pointercancel","pointerleave"].forEach(ev=>$("grid").addEventListener(ev, ()=>cancelLong()));
+  $("grid").addEventListener("click", e=>{ if(suppressClick){ e.stopPropagation(); e.preventDefault(); suppressClick=false; } }, true);
+  $("grid").addEventListener("contextmenu", e=>e.preventDefault());
+  let dayMenu=null;
+  function closeDayMenu(){ if(dayMenu){ dayMenu.forEach(x=>x.remove()); dayMenu=null; } }
+  function openDayMenu(d, anchor){
+    closeDayMenu();
+    const k=key(view.y,view.m), t=(months[k]||{})[d], P=pts[k]||{}, wd=WDF[new Date(view.y,view.m,d).getDay()];
+    const shade=el("div","pop-shade"), m=el("div","pop-menu"); m.setAttribute("role","dialog"); m.setAttribute("aria-label","День "+d);
+    const h=el("div","pm-h"); h.append(el("b","", d+" "+GEN[view.m]), el("span","", wd+(t ? " · "+T[t].name.toLowerCase() : ""))); m.appendChild(h);
+    const types=el("div","pm-types");
+    TYPES.forEach(tp=>{ const b=el("button","t-"+tp.k); b.innerHTML='<i></i>'; b.appendChild(document.createTextNode(tp.name)); b.setAttribute("aria-pressed", String(t===tp.k));
+      b.onclick=()=>{ const days=Object.assign({}, months[k]||{}); if(days[d]===tp.k){ delete days[d]; sfx.unmark(); } else { days[d]=tp.k; sfx.mark(tp.k); }
+        if(!isShift(days[d]) && pts[k] && pts[k][d]!=null){ pts[k]=Object.assign({},pts[k]); delete pts[k][d]; }
+        months[k]=days; render(); scheduleSave(k); closeDayMenu(); if(isShift(days[d])) openDayMenu(d, anchor); };
+      types.appendChild(b); });
+    m.appendChild(types);
+    if(isShift(t)){
+      const ptsRow=el("div","pm-pts"), cur=P[d]!=null ? +P[d] : null, N=settings.maxPts, base=[N-6,N-4,N-2,N,N+2,N+4,N+6].filter(v=>v>0);
+      base.forEach(v=>{ const b=el("button","num lv-"+level(v), String(v)); b.setAttribute("aria-pressed", String(cur===v));
+        b.onclick=()=>{ pts[k]=Object.assign({}, pts[k]||{}); const old=pts[k][d]; pts[k][d]=v; normCheck(k+"-"+d, old, v); render(); scheduleSave(k); sfx.points(v, N); closeDayMenu(); };
+        ptsRow.appendChild(b); });
+      m.appendChild(el("span","hint","Баллы за смену"+(cur!=null ? ": сейчас "+f1(cur) : ""))); m.appendChild(ptsRow);
+    }
+    const row=el("div","pm-row");
+    if(isShift(t)){ const e2=el("button","link-btn","Другое число и заметка"); e2.onclick=()=>{ closeDayMenu(); brush="p"; renderBrushes(); openEditor(d); setTimeout(()=>$("editor").scrollIntoView({block:"center", behavior:"smooth"}), 50); }; row.appendChild(e2); }
+    const rp=el("button","link-btn","Ремонты дня"); rp.onclick=()=>{ closeDayMenu(); repDate=new Date(view.y,view.m,d); activeRep=-1; setTab("rep"); }; row.appendChild(rp);
+    const cl=el("button","link-btn","Закрыть"); cl.onclick=closeDayMenu; row.appendChild(cl);
+    m.appendChild(row);
+    shade.onclick=closeDayMenu;
+    document.body.append(shade, m); dayMenu=[shade, m];
+    const r=anchor.getBoundingClientRect(), mw=m.offsetWidth, mh=m.offsetHeight, W=window.innerWidth, H=window.innerHeight;
+    let left=Math.min(Math.max(12, r.left+r.width/2-mw/2), W-mw-12), top=r.bottom+8;
+    if(top+mh>H-80) top=Math.max(12, r.top-mh-8);
+    m.style.left=left+"px"; m.style.top=top+"px";
+  }
+  document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeDayMenu(); });
+  // Подпрыгивание изменившихся дней
+  var gridSnap={};
+  function popChanged(){
+    const k=key(view.y,view.m), snap={};
+    document.querySelectorAll("#grid .day[data-d]").forEach(b=>{ const v=(b.dataset.t||"")+"|"+(b.querySelector(".mark")||{}).textContent; snap[b.dataset.d]=v;
+      if(gridSnap.k===k && gridSnap.v && gridSnap.v[b.dataset.d]!==undefined && gridSnap.v[b.dataset.d]!==v && !reduceMotion()){ b.classList.add("pop"); } });
+    gridSnap={k, v:snap};
+  }
+  // Плавно «набегающие» цифры заработка и баллов
+  var numPrev={};
+  function rollNum(id, parse, format){
+    const e=$(id); if(!e) return; const to=parse(e.textContent); if(!isFinite(to)) return;
+    const from=numPrev[id]; numPrev[id]=to;
+    if(from==null || from===to || reduceMotion()) return;
+    const t0=performance.now(), dur=550;
+    const step=n=>{ const q=Math.min(1,(n-t0)/dur), v=from+(to-from)*(1-Math.pow(1-q,3)); if(numPrev[id]!==to) return; e.textContent=format(q<1?v:to); if(q<1) requestAnimationFrame(step); };
+    e.textContent=format(from); requestAnimationFrame(step);
+  }
+  const pNum = t => parseFloat(String(t).replace(/[^\d,.-]/g,"").replace(",","."));
+  function liveAfterRender(){
+    popChanged();
+    rollNum("total", pNum, v=>fmt(v));
+    rollNum("ptsTotal", pNum, v=>f1(Math.round(v*10)/10));
+  }
+  // Празднование: дневная норма в баллах — конфетти и вибрация
+  var normSeen={};
+  function normCheck(id, before, after, isRep){
+    const N=settings.maxPts, M=settings.minPts, b=+before||0, a=+after||0;
+    if(a>=N && b<N && !normSeen[id+"N"]){ normSeen[id+"N"]=1; burst(); toast("🎉", "Норма "+N+"+ за смену! "+f1(a)+" "+pW(a)); sfx.good(); }
+    else if(isRep && a>=M && b<M && !normSeen[id+"M"]){ normSeen[id+"M"]=1; toast("💪", "Минимум "+M+" набран. До нормы "+N+" осталось "+f1(N-a)); haptic("n","success"); }
+  }
+  function burst(){ if(reduceMotion()) return; const w=el("div","burst"); document.body.appendChild(w); confetti(w); setTimeout(()=>w.remove(), 3500); }
 
   const sb=$("soundBtn"); sb.setAttribute("aria-pressed", sfx.on);
   sb.onclick = ()=>{ sfx.set(!sfx.on); sb.setAttribute("aria-pressed", sfx.on); sb.setAttribute("aria-label", sfx.on?"Звук включён":"Звук выключен"); if(sfx.on) sfx.good(); };
