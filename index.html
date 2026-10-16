@@ -332,6 +332,18 @@ summary{cursor:pointer;font-weight:600}
     <div class="types" id="typeSettings"></div>
   </details>
 
+  <details id="notifBox" hidden>
+    <summary>Уведомления в Telegram</summary>
+    <div class="backup">
+      <p>Бот будет присылать сообщения в чат:</p>
+      <p style="margin-top:-4px">· в 21:00 — что завтра: смена, доп. смена или выходной, и цель на смену;<br>· в 21:45 — статистику за смену или напоминание внести баллы;<br>· в 22:00 — повторное напоминание, если баллы не внесены.</p>
+      <div class="row">
+        <button class="save-btn" id="notifToggle">Включить уведомления</button>
+      </div>
+      <p id="notifMsg"></p>
+    </div>
+  </details>
+
   <details>
     <summary>Перенос и резервная копия</summary>
     <div class="backup">
@@ -409,6 +421,10 @@ summary{cursor:pointer;font-weight:600}
   const cset = (k,v) => new Promise((res,rej)=>{ try{ cloud.setItem(k, v, (e,ok)=> e ? rej(e) : res(ok)); }catch(e){ rej(e); } });
   const ckeys = () => new Promise((res,rej)=>{ try{ cloud.getKeys((e,v)=> e ? rej(e) : res(v||[])); }catch(e){ rej(e); } });
   const cget = keys => new Promise((res,rej)=>{ try{ cloud.getItems(keys, (e,v)=> e ? rej(e) : res(v||{})); }catch(e){ rej(e); } });
+  // Сервер уведомлений (Cloudflare Worker). Пусто — уведомления скрыты.
+  const API_URL = "";
+  let notifOn = false;
+  try{ notifOn = localStorage.getItem("salary:notif")==="1"; }catch(e){}
   if(miniApp){
     try{ tg.ready(); tg.expand(); }catch(e){}
     try{ if(tgAtLeast("7.7")) tg.disableVerticalSwipes(); }catch(e){}
@@ -478,16 +494,22 @@ summary{cursor:pointer;font-weight:600}
       if(+d<from || +d>to || !inBonus(days[d])) continue;
       const p = P && P[d]!=null ? +P[d] : null, b = pay(days[d]);
       bonusBase += b; bonusDays++; dates.push(new Date(yy,mo,+d));
-      if(p!=null){ scored++; ptsSum+=p; lv[level(p)]++; list.push({mo, d:+d, p}); }
+      if(p!=null){ scored++; ptsSum+=p; lv[level(p)]++; list.push({yy, mo, d:+d, p}); }
     } };
     add(prev, pts[key(py,pm)], 21, 31, pm, py); add(cur, pts[key(y,m)], 1, 20, m, y);
     // Премия за отчётный период: процент зависит от среднего балла за смену за весь период.
     // Если введено общее количество — среднее = общее / смены по указанную дату; иначе по дневным баллам.
     const T0 = totals[key(y,m)];
-    let avgP = scored ? ptsSum/scored : null, avgSrc = scored ? "daily" : "none";
-    if(T0 && T0.pts!=null){ const lim=new Date(T0.upTo+"T23:59:59"), done=dates.filter(d=>d<=lim).length; if(done){ avgP = +T0.pts/done; avgSrc="manual"; } }
+    // Баллы за период: общее количество, введённое вручную (по дату включительно) + дневные баллы после этой даты
+    let pSum = ptsSum, pDone = scored;
+    if(T0 && T0.pts!=null){
+      const lim=new Date(T0.upTo+"T23:59:59"); let aSum=0, aCnt=0;
+      for(const it of list){ if(new Date(it.yy, it.mo, it.d) > lim){ aSum+=it.p; aCnt++; } }
+      pSum = +T0.pts + aSum; pDone = dates.filter(d=>d<=lim).length + aCnt;
+    }
+    const avgP = pDone ? pSum/pDone : null, avgSrc = T0 && T0.pts!=null ? "manual" : (scored ? "daily" : "none");
     const bonusPct = pctFor(avgP), bonus = bonusBase*bonusPct/100, bonusMax = bonusBase*settings.pct/100;
-    return {cnt, base, bonus, bonusMax, bonusPct, avgP, avgSrc, bonusDays, scored, avg: scored? ptsSum/scored : null, lv, ptsSum, list, dates, total: base+bonus, pm};
+    return {cnt, base, bonus, bonusMax, bonusPct, avgP, avgSrc, bonusDays, scored, avg: scored? ptsSum/scored : null, lv, ptsSum, pSum, pDone, list, dates, total: base+bonus, pm};
   }
 
   function renderBrushes(){
@@ -590,16 +612,17 @@ summary{cursor:pointer;font-weight:600}
   const WDN = ["воскресенье","понедельник","вторник","среда","четверг","пятница","суббота"];
   function periodStats(y,m){
     const c=calc(y,m), T0=totals[key(y,m)], goal=c.bonusDays*settings.maxPts;
-    let sum, done;
-    if(T0 && T0.pts!=null){ const lim=new Date(T0.upTo+"T23:59:59"); done=c.dates.filter(d=>d<=lim).length; sum=+T0.pts; }
-    else { sum=c.ptsSum; done=c.scored; }
+    const sum=c.pSum, done=c.pDone;
     const left=c.bonusDays-done, need=goal-sum;
-    const perDay = need<=0 ? 0 : left>0 ? Math.ceil(need/left) : null;
+    const perDay = need<=0 ? 0 : left>0 ? Math.ceil(need/left*10-1e-9)/10 : null;
     return {goal, sum, done, left, need, perDay};
   }
+  const f1 = v => (Math.round(v*10)/10).toString().replace(".",",");
+  // Цель на смену: фактически нужное, округлённое вверх, но не ниже дневного минимума
+  const goalDay = v => Math.max(Math.ceil(v-1e-9), settings.minPts);
   const goalText = st => st.perDay==null ? "смен в периоде не осталось"
     : st.perDay===0 ? "цель периода уже выполнена"
-    : Math.max(st.perDay, settings.minPts)+" баллов";
+    : goalDay(st.perDay)+" баллов";
   function renderToday(){
     const el=$("today"), t0=new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const type=typeOn(t0), p=ptsOn(t0), per=periodOf(t0), st=periodStats(per.y, per.m), acts=$("tActions");
@@ -613,15 +636,15 @@ summary{cursor:pointer;font-weight:600}
       setChip(type==="x" ? "Сегодня доп. смена" : "Сегодня смена", type==="x" ? "extra" : "accent");
       if(p==null){
         const g = goalText(st);
-        $("tBig").innerHTML = st.perDay>0 ? "Цель: "+Math.max(st.perDay, settings.minPts)+" <small>баллов</small>" : "Цель: норма "+settings.maxPts+" <small>баллов</small>";
+        $("tBig").innerHTML = st.perDay>0 ? "Цель: "+goalDay(st.perDay)+" <small>баллов</small>" : "Цель: норма "+settings.maxPts+" <small>баллов</small>";
         $("tText").textContent = st.perDay>0
-          ? (st.perDay<settings.minPts ? "Чтобы выйти в среднем на "+settings.maxPts+", хватит "+st.perDay+", но минимум в день — "+settings.minPts+"." : "Столько нужно в каждую из оставшихся смен ("+st.left+"), чтобы в среднем выйти на "+settings.maxPts+" и получить полную премию.")
+          ? (st.perDay<settings.minPts ? "Чтобы выйти в среднем на "+settings.maxPts+", хватит "+f1(st.perDay)+", но минимум в день — "+settings.minPts+"." : "Столько нужно в каждую из оставшихся смен ("+st.left+"), чтобы в среднем выйти на "+settings.maxPts+" и получить полную премию.")
           : (st.perDay===0 ? "Цель периода уже набрана: работайте в своём темпе." : g);
         btn("Внести баллы за сегодня", enter, "save-btn");
       } else {
         $("tBig").innerHTML = p+" <small>баллов сегодня</small>";
         $("tText").textContent = (p>=settings.maxPts ? "Норма "+settings.maxPts+" выполнена, +"+(p-settings.maxPts)+". " : "До нормы "+settings.maxPts+" не хватило "+(settings.maxPts-p)+". ")
-          + (st.perDay>0 && st.left>0 ? "В оставшиеся "+shifts(st.left)+" нужно по "+Math.max(st.perDay, settings.minPts)+"." : st.perDay===0 ? "Цель периода выполнена." : "");
+          + (st.perDay>0 && st.left>0 ? "В оставшиеся "+shifts(st.left)+" нужно по "+goalDay(st.perDay)+"." : st.perDay===0 ? "Цель периода выполнена." : "");
         btn("Изменить баллы", enter);
       }
       return;
@@ -632,7 +655,7 @@ summary{cursor:pointer;font-weight:600}
     if(next){
       const np=periodOf(next), ns=periodStats(np.y, np.m);
       const when = (next-t0)===86400000 ? "завтра" : WDN[next.getDay()]+", "+next.getDate()+" "+GEN[next.getMonth()];
-      nextTxt = "Следующая смена — "+when+(ns.perDay>0 ? ", цель "+Math.max(ns.perDay, settings.minPts)+" баллов." : ".");
+      nextTxt = "Следующая смена — "+when+(ns.perDay>0 ? ", цель "+goalDay(ns.perDay)+" баллов." : ".");
     }
     if(type==="o"){ el.classList.add("rest"); setChip("Сегодня выходной","off"); $("tBig").innerHTML="Отдыхайте"; $("tText").textContent = nextTxt || "Смены впереди пока не отмечены."; }
     else if(type==="s"){ setChip("Больничный","sick"); $("tBig").innerHTML="Выздоравливайте"; $("tText").textContent = nextTxt; }
@@ -649,10 +672,10 @@ summary{cursor:pointer;font-weight:600}
     const k = key(view.y, view.m), T0 = totals[k];
     const goal = c.bonusDays*settings.maxPts;
     let sum, done, avg, source;
-    if(T0 && T0.pts!=null){
+    if(false){
       const lim = new Date(T0.upTo+"T23:59:59");
       done = c.dates.filter(d=>d<=lim).length; sum = +T0.pts; avg = done ? sum/done : null; source = "manual";
-    } else { sum = c.ptsSum; done = c.scored; avg = c.avg; source = "daily"; }
+    } else { sum = c.pSum; done = c.pDone; avg = c.avgP; source = T0 && T0.pts!=null ? "manual" : "daily"; }
     const left = c.bonusDays - done;
     $("ptsTitle").textContent = "Баллы · 21 "+GEN[c.pm].slice(0,3)+" – 20 "+GEN[view.m].slice(0,3);
     $("ptsTotal").textContent = sum;
@@ -667,7 +690,7 @@ summary{cursor:pointer;font-weight:600}
     if(!c.bonusDays){ tgt.textContent="—"; tsub.textContent=""; }
     else if(need<=0){ tgt.textContent="Цель есть"; tgt.classList.add("txt"); tsub.textContent="набрано на "+(-need)+" больше"; }
     else if(left<=0){ tgt.textContent="Смен нет"; tgt.classList.add("txt"); tsub.textContent="не хватило "+need; }
-    else { const pd=Math.ceil(need/left), one = left%10===1 && left%100!==11; tgt.textContent=Math.max(pd, settings.minPts); tsub.textContent = "в "+left+(one ? " оставшуюся смену" : " оставшиеся смены")+(pd<settings.minPts ? " · минимум "+settings.minPts : ""); }
+    else { const pd=Math.ceil(need/left*10-1e-9)/10, one = left%10===1 && left%100!==11; tgt.textContent=f1(pd); tsub.textContent = need+" за "+left+(one ? " оставшуюся смену" : " оставшиеся смены"); }
     if(avg!=null){
       $("ptsAvg").textContent = (Math.round(avg*10)/10).toString().replace(".",",");
       const sub=$("ptsAvgSub"); sub.textContent="";
@@ -680,10 +703,10 @@ summary{cursor:pointer;font-weight:600}
     if(nx){
       const WD2=["Вс","Пн","Вт","Ср","Чт","Пт","Сб"], np=periodOf(nx), ns=periodStats(np.y, np.m), dd=Math.round((nx-t0)/86400000);
       $("tileNext").textContent = WD2[nx.getDay()]+", "+nx.getDate()+" "+GEN[nx.getMonth()].slice(0,3);
-      $("tileNextSub").textContent = (dd===1 ? "завтра" : "через "+dayz(dd))+(ns.perDay>0 ? " · цель "+Math.max(ns.perDay, settings.minPts) : "");
+      $("tileNextSub").textContent = (dd===1 ? "завтра" : "через "+dayz(dd))+(ns.perDay>0 ? " · цель "+goalDay(ns.perDay) : "");
     } else { $("tileNext").textContent="не отмечена"; $("tileNextSub").textContent="отметьте смены в календаре"; }
     renderAnalysis(c);
-    if(source==="manual") $("ptsNote").textContent = "Общее количество введено вручную: "+sum+" баллов по "+shortDate(T0.upTo)+" включительно, это "+shifts(done)+". Осталось "+shifts(left)+".";
+    if(source==="manual") $("ptsNote").textContent = "Общее количество введено вручную: "+T0.pts+" по "+shortDate(T0.upTo)+" включительно"+(sum>+T0.pts ? ", плюс "+(sum-T0.pts)+" за смены после этой даты" : "")+". Отработано "+shifts(done)+", осталось "+shifts(left)+".";
     else $("ptsNote").textContent = left>0 ? "Без баллов ещё "+shifts(left)+" в этом периоде." : (c.bonusDays? "Баллы внесены за все смены периода." : "");
     $("totClear").hidden = source!=="manual";
   }
@@ -743,6 +766,7 @@ summary{cursor:pointer;font-weight:600}
         try{ localStorage.setItem("salary:"+k, json); }catch(e){}
         if(cloud){ await cset("m_"+k, json); status("Сохранено в Telegram в "+hhmm()); }
         else status("Сохранено на этом устройстве в "+hhmm());
+        scheduleSync();
       }
     }catch(e){ pending[k] = true; status("Не сохранено. Проверьте интернет и нажмите «Сохранить».", true); }
     busy[k] = false;
@@ -846,7 +870,7 @@ summary{cursor:pointer;font-weight:600}
     if(setBusy){ setTimer=setTimeout(flushSettings,300); return; }
     if(!setPending) return; setPending=false; setBusy=true;
     const body = JSON.parse(JSON.stringify(settings));
-    try{ if(db) await db.doc("settings/main").set(body); else { const json = JSON.stringify(body); try{ localStorage.setItem("salary:settings", json); }catch(e){} if(cloud) await cset("settings", json); } status("Сохранено в "+hhmm()); }
+    try{ if(db) await db.doc("settings/main").set(body); else { const json = JSON.stringify(body); try{ localStorage.setItem("salary:settings", json); }catch(e){} if(cloud) await cset("settings", json); scheduleSync(); } status("Сохранено в "+hhmm()); }
     catch(e){ setPending=true; status("Настройки не сохранены. Нажмите «Сохранить».", true); }
     setBusy=false;
   }
@@ -974,6 +998,40 @@ summary{cursor:pointer;font-weight:600}
 
   const sb=$("soundBtn"); sb.setAttribute("aria-pressed", sfx.on);
   sb.onclick = ()=>{ sfx.set(!sfx.on); sb.setAttribute("aria-pressed", sfx.on); sb.setAttribute("aria-label", sfx.on?"Звук включён":"Звук выключен"); if(sfx.on) sfx.good(); };
+  // ---- Уведомления: календарь отправляет график и баллы на сервер бота ----
+  let syncTimer=null;
+  function scheduleSync(){ if(!notifOn || !API_URL || !miniApp) return; clearTimeout(syncTimer); syncTimer=setTimeout(()=>syncServer(true), 2500); }
+  async function syncServer(enabled){
+    if(!API_URL || !miniApp) return false;
+    try{
+      const r = await fetch(API_URL.replace(/\/$/,"")+"/sync", {method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({initData: tg.initData, enabled, appUrl: location.origin+location.pathname, data:{settings, months, points:pts, totals}})});
+      const j = await r.json().catch(()=>({}));
+      return !!(r.ok && j.ok);
+    }catch(e){ return false; }
+  }
+  function renderNotif(){
+    const box=$("notifBox"); if(!box) return;
+    box.hidden = !(API_URL && miniApp);
+    $("notifToggle").textContent = notifOn ? "Выключить уведомления" : "Включить уведомления";
+    $("notifToggle").className = notifOn ? "ghost-btn" : "save-btn";
+  }
+  async function setNotif(on){
+    const msg=$("notifMsg"); msg.textContent = on ? "Включаю…" : "Выключаю…";
+    if(on && tgAtLeast("6.9") && tg.requestWriteAccess){
+      const ok = await new Promise(res=>{ try{ tg.requestWriteAccess(g=>res(!!g)); }catch(e){ res(true); } });
+      if(!ok){ msg.textContent="Без разрешения бот не сможет писать вам. Нажмите «Включить» ещё раз и разрешите."; return; }
+    }
+    const ok = await syncServer(on);
+    if(!ok){ msg.textContent="Не получилось связаться с сервером. Проверьте интернет и попробуйте ещё раз."; sfx.error(); return; }
+    notifOn = on;
+    try{ localStorage.setItem("salary:notif", on?"1":"0"); }catch(e){}
+    if(cloud){ try{ await cset("notif", on?"1":"0"); }catch(e){} }
+    msg.textContent = on ? "Уведомления включены. Бот прислал подтверждение в чат." : "Уведомления выключены.";
+    sfx.save(); renderNotif();
+  }
+  $("notifToggle").onclick = ()=>setNotif(!notifOn);
+
   // Подсказка: где открыт календарь и как не потерять данные
   function openTransfer(){ const d=$("copyCode").closest("details"); d.open=true; d.scrollIntoView({block:"start"}); }
   function setupNotice(){
@@ -1030,7 +1088,16 @@ summary{cursor:pointer;font-weight:600}
         } else status("Данные хранятся в вашем аккаунте Telegram");
       }catch(e){ status("Не удалось загрузить данные из Telegram. Проверьте интернет и откройте календарь заново.", true); }
     } else status("Данные хранятся на этом телефоне");
+    if(cloud && API_URL){ try{ const nv = await cget(["notif"]); if(nv.notif!=null){ notifOn = nv.notif==="1"; try{ localStorage.setItem("salary:notif", nv.notif); }catch(e){} } }catch(e){} }
+    renderNotif();
+    if(notifOn) scheduleSync();
     setupNotice(); hideSplash();
+    // Кнопка «Внести баллы» из сообщения бота открывает ввод баллов за сегодня
+    if(location.hash==="#points"){
+      try{ history.replaceState(null, "", location.pathname); }catch(e){}
+      const t0=new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      if(isShift(typeOn(t0))){ view={y:t0.getFullYear(), m:t0.getMonth()}; render(); brush="p"; renderBrushes(); openEditor(t0.getDate()); setTimeout(()=>$("editor").scrollIntoView({block:"center"}), 900); }
+    }
     try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}
     if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
     return;
