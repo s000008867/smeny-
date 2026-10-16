@@ -422,7 +422,7 @@ summary{cursor:pointer;font-weight:600}
   const ckeys = () => new Promise((res,rej)=>{ try{ cloud.getKeys((e,v)=> e ? rej(e) : res(v||[])); }catch(e){ rej(e); } });
   const cget = keys => new Promise((res,rej)=>{ try{ cloud.getItems(keys, (e,v)=> e ? rej(e) : res(v||{})); }catch(e){ rej(e); } });
   // Сервер уведомлений (Cloudflare Worker). Пусто — уведомления скрыты.
-  const API_URL = "";
+  const API_URL = "https://smeny-bot.dsw66b9fh2.workers.dev";
   let notifOn = false;
   try{ notifOn = localStorage.getItem("salary:notif")==="1"; }catch(e){}
   if(miniApp){
