@@ -64,6 +64,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .dow,.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
 .dow span{text-align:center;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .dow span:nth-child(n+6){color:var(--weekend)}
+.dow.sun span:nth-child(n+6){color:var(--muted)}.dow.sun span:nth-child(1),.dow.sun span:nth-child(7){color:var(--weekend)}
 .day{aspect-ratio:1;min-width:0;max-width:100%;padding:0;overflow:hidden;border-radius:10px;border:1px solid var(--line);background:transparent;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:16px;font-weight:500;
   transition:background .12s,border-color .12s}
@@ -510,6 +511,97 @@ body{overflow-x:hidden}.wrap{overflow-x:clip}
 @keyframes conf{to{transform:translate(var(--dx),110vh) rotate(var(--rot));opacity:.9}}
 @media (prefers-reduced-motion: reduce){.story .anim>*,.story-slide .mbars i{animation:none!important}.confetti{display:none}}
 
+/* ===== Деньги ===== */
+.mn-hero{gap:6px}
+.mn-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.mn-top small{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.mn-when{font-size:13px;font-weight:600;color:var(--accent);background:color-mix(in srgb,var(--accent) 13%,transparent);padding:3px 10px;border-radius:999px;white-space:nowrap}
+.mn-big{font-family:var(--font-display);font-weight:700;font-size:clamp(32px,10vw,44px);line-height:1.1}
+.mn-sub{margin:0;font-size:14px;color:var(--muted)}
+.mn-up{display:flex;flex-direction:column;margin-top:6px;border-top:1px solid var(--line)}
+.mn-up div{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.mn-up div:last-child{border-bottom:none;padding-bottom:0}
+.mn-up span{color:var(--muted)}
+.mn-note{margin:0;font-size:13px;color:var(--muted)}
+.mn-check{display:flex;flex-direction:column;gap:8px}
+.ck{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;padding:10px 12px;border-radius:14px;background:var(--bg);border:1px solid var(--line);align-items:center}
+.ck b{font-size:15px}
+.ck small{font-size:12px;color:var(--muted)}
+.ck .ck-r{grid-row:1/3;grid-column:2;display:flex;flex-direction:column;align-items:flex-end;gap:2px;text-align:right}
+.ck .ok{color:var(--accent);font-weight:700}
+.ck .bad{color:var(--absent);font-weight:700}
+.ck .more{color:var(--mid);font-weight:700}
+.ck .ck-btn{padding:6px 12px;border-radius:9px;border:1px solid var(--accent);background:none;color:var(--accent);font-weight:600;font-size:13px}
+.ck-form{grid-column:1/-1;display:flex;gap:8px;margin-top:8px}
+.ck-form input{flex:1;min-width:0;font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.ck-hint{grid-column:1/-1;font-size:12px;color:var(--muted);margin-top:4px}
+.mn-bar{height:10px;border-radius:999px;background:color-mix(in srgb,var(--fg) 9%,transparent);overflow:hidden}
+.mn-bar i{display:block;height:100%;width:0;border-radius:inherit;background:var(--accent);transition:width .5s cubic-bezier(.2,.8,.3,1)}
+.mn-in{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+.mn-in input,.mn-in select,.settings input,.settings select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;min-height:40px}
+.wi-row{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:14px}
+.wi-st{display:flex;align-items:center;gap:6px}
+.wi-st button{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--bg);font-size:20px;line-height:1}
+.wi-st b{min-width:38px;text-align:center;font-family:var(--font-display);font-size:18px}
+.wi-out{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:14px;background:color-mix(in srgb,var(--accent) 10%,var(--surface));font-size:14px}
+.wi-out b{font-size:21px;font-family:var(--font-display)}
+.wi-out .up{color:var(--accent);font-weight:700}
+.wi-out .dn{color:var(--absent);font-weight:700}
+#mnChart svg{width:100%;height:auto;display:block}
+#mnChart .mb{fill:color-mix(in srgb,var(--accent) 38%,var(--surface))}
+#mnChart .mb.cur{fill:var(--accent)}
+#mnChart .mb.fut{fill:color-mix(in srgb,var(--fg) 10%,transparent)}
+#mnChart .ax{font-size:10px;fill:var(--muted)}
+#mnChart .vl{font-size:9.5px;fill:var(--fg);font-weight:600}
+#mnChart .avl{stroke:var(--muted);stroke-dasharray:3 3;stroke-width:1}
+#mnChart p{margin:6px 0 0;font-size:13px;color:var(--muted)}
+/* ===== Настройки ===== */
+#pane-set details>summary,#pane-money details>summary{font-size:16px;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:8px}
+#pane-set details>summary::-webkit-details-marker,#pane-money details>summary::-webkit-details-marker{display:none}
+#pane-set details>summary::after,#pane-money details>summary::after{content:"›";font-size:24px;line-height:1;color:var(--muted);transition:transform .2s;flex:none}
+#pane-set details[open]>summary::after,#pane-money details[open]>summary::after{transform:rotate(90deg)}
+.tg-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.backup>.tg-row:first-child,#notifOpts>.tg-row:first-child{border-top:none;padding-top:2px}
+.tg-row>span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.tg-row b{font-weight:600;font-size:15px;color:var(--fg)}
+.tg-row small{font-size:12.5px;color:var(--muted);line-height:1.35}
+.tgl{flex:none;width:51px;height:31px;border-radius:999px;border:none;background:color-mix(in srgb,var(--fg) 20%,transparent);position:relative;transition:background .2s;padding:0}
+.tgl::after{content:"";position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.25);transition:transform .22s cubic-bezier(.2,.8,.3,1)}
+.tgl[aria-checked="true"]{background:var(--accent)}
+.tgl[aria-checked="true"]::after{transform:translateX(20px)}
+.tgl:disabled{opacity:.45;cursor:default}
+#notifOpts{display:flex;flex-direction:column}
+#notifOpts p{margin:4px 0 0}
+.sync-st{display:flex;gap:10px;align-items:center}
+.sync-st i{width:10px;height:10px;border-radius:50%;background:var(--accent);flex:none}
+.sync-st i[data-st="busy"]{background:var(--mid)}.sync-st i[data-st="err"]{background:var(--absent)}.sync-st i[data-st="off"]{background:var(--muted)}
+.sync-st span{display:flex;flex-direction:column}
+.sync-st b{color:var(--fg);font-size:15px}
+.sync-st small{font-size:12.5px;color:var(--muted)}
+.ghost-btn.danger,.link-btn.danger{color:var(--absent)}
+.save-btn.danger{background:var(--absent);color:#fff}
+.dconf{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:12px;border:1px solid var(--absent);background:color-mix(in srgb,var(--absent) 8%,transparent);font-size:14px}
+.dconf .row{display:flex;gap:12px;align-items:center}
+.backup p.ver{font-size:12px}
+/* приватность: суммы размыты, пока не нажать */
+html.priv .pvt{filter:blur(9px);transition:filter .25s;cursor:pointer}
+html.priv.priv-show .pvt{filter:none}
+/* вход по Face ID */
+.lock{position:fixed;inset:0;z-index:300;background:var(--bg);color:var(--fg);display:flex;align-items:center;justify-content:center;padding:24px}
+.lock-in{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;max-width:300px}
+.lock-ic{font-size:54px;line-height:1}
+.lock-in b{font-family:var(--font-display);font-size:22px}
+.lock-in p{margin:0 0 6px;color:var(--muted)}
+/* окно «Что нового» */
+.sheet-bg{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;animation:shFade .2s}
+.sheet{width:100%;max-width:560px;max-height:84vh;overflow:auto;background:var(--surface);color:var(--fg);border-radius:24px 24px 0 0;padding:20px 18px calc(22px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px;animation:shUp .32s cubic-bezier(.2,.8,.3,1)}
+.sheet h2{margin:0;font-family:var(--font-display);font-size:22px}
+.sheet ul{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:7px;font-size:15px}
+.sheet .kick{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+@keyframes shUp{from{transform:translateY(100%)}to{transform:none}}
+@keyframes shFade{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion: reduce){.sheet,.sheet-bg{animation:none}}
+
 </style>
 <script>
 // Оформление: темы и шрифты. Применяется до отрисовки страницы, чтобы не было вспышки.
@@ -700,6 +792,8 @@ window.LOOK = (function(){
 </script>
 </head>
 <body>
+<div class="lock" id="lock" hidden><div class="lock-in"><div class="lock-ic" aria-hidden="true">🔒</div><b>Смены закрыты</b><p id="lockTx">Подтвердите, что это вы</p><button class="save-btn" id="lockBtn">Открыть</button></div></div>
+<script>try{ if(localStorage.getItem("salary:lock")==="1" && /tgWebApp/.test(location.hash+location.search)) document.getElementById("lock").hidden=false; }catch(e){}</script>
 <div class="splash" id="splash" aria-hidden="true"><div class="splash-in"><div class="splash-logo"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" aria-hidden="true" viewBox="0 0 640 640"><defs><radialGradient id="splbg" cx="50%" cy="45%" r="70%"><stop offset="0" stop-color="#2a241b"/><stop offset="1" stop-color="#0f0d0a"/></radialGradient></defs><rect width="640" height="640" fill="url(#splbg)"/><path d="M560.0,320.0 L559.8,330.1 L587.5,336.6 L585.6,355.9 L557.2,356.8 L555.4,366.8 L553.2,376.7 L579.1,388.4 L573.5,407.1 L545.4,402.4 L541.7,411.8 L537.7,421.1 L560.8,437.7 L551.6,454.8 L525.0,444.8 L519.6,453.3 L513.7,461.6 L533.2,482.4 L520.9,497.4 L496.7,482.4 L489.7,489.7 L482.4,496.7 L497.4,520.9 L482.4,533.2 L461.6,513.7 L453.3,519.6 L444.8,525.0 L454.8,551.6 L437.7,560.8 L421.1,537.7 L411.8,541.7 L402.4,545.4 L407.1,573.5 L388.4,579.1 L376.7,553.2 L366.8,555.4 L356.8,557.2 L355.9,585.6 L336.6,587.5 L330.1,559.8 L320.0,560.0 L309.9,559.8 L303.4,587.5 L284.1,585.6 L283.2,557.2 L273.2,555.4 L263.3,553.2 L251.6,579.1 L232.9,573.5 L237.6,545.4 L228.2,541.7 L218.9,537.7 L202.3,560.8 L185.2,551.6 L195.2,525.0 L186.7,519.6 L178.4,513.7 L157.6,533.2 L142.6,520.9 L157.6,496.7 L150.3,489.7 L143.3,482.4 L119.1,497.4 L106.8,482.4 L126.3,461.6 L120.4,453.3 L115.0,444.8 L88.4,454.8 L79.2,437.7 L102.3,421.1 L98.3,411.8 L94.6,402.4 L66.5,407.1 L60.9,388.4 L86.8,376.7 L84.6,366.8 L82.8,356.8 L54.4,355.9 L52.5,336.6 L80.2,330.1 L80.0,320.0 L80.2,309.9 L52.5,303.4 L54.4,284.1 L82.8,283.2 L84.6,273.2 L86.8,263.3 L60.9,251.6 L66.5,232.9 L94.6,237.6 L98.3,228.2 L102.3,218.9 L79.2,202.3 L88.4,185.2 L115.0,195.2 L120.4,186.7 L126.3,178.4 L106.8,157.6 L119.1,142.6 L143.3,157.6 L150.3,150.3 L157.6,143.3 L142.6,119.1 L157.6,106.8 L178.4,126.3 L186.7,120.4 L195.2,115.0 L185.2,88.4 L202.3,79.2 L218.9,102.3 L228.2,98.3 L237.6,94.6 L232.9,66.5 L251.6,60.9 L263.3,86.8 L273.2,84.6 L283.2,82.8 L284.1,54.4 L303.4,52.5 L309.9,80.2 L320.0,80.0 L330.1,80.2 L336.6,52.5 L355.9,54.4 L356.8,82.8 L366.8,84.6 L376.7,86.8 L388.4,60.9 L407.1,66.5 L402.4,94.6 L411.8,98.3 L421.1,102.3 L437.7,79.2 L454.8,88.4 L444.8,115.0 L453.3,120.4 L461.6,126.3 L482.4,106.8 L497.4,119.1 L482.4,143.3 L489.7,150.3 L496.7,157.6 L520.9,142.6 L533.2,157.6 L513.7,178.4 L519.6,186.7 L525.0,195.2 L551.6,185.2 L560.8,202.3 L537.7,218.9 L541.7,228.2 L545.4,237.6 L573.5,232.9 L579.1,251.6 L553.2,263.3 L555.4,273.2 L557.2,283.2 L585.6,284.1 L587.5,303.4 L559.8,309.9 Z" fill="#f2a33a"/><circle cx="320" cy="320" r="200" fill="#1b1712"/><circle cx="320.0" cy="534.0" r="9" fill="#16130f"/><circle cx="116.5" cy="386.1" r="9" fill="#16130f"/><circle cx="194.2" cy="146.9" r="9" fill="#16130f"/><circle cx="445.8" cy="146.9" r="9" fill="#16130f"/><circle cx="523.5" cy="386.1" r="9" fill="#16130f"/><rect x="195" y="208" width="250" height="238" rx="30" fill="#f1ece4"/><path d="M195 238 a30 30 0 0 1 30 -30 h190 a30 30 0 0 1 30 30 v28 h-250 z" fill="#2c261d"/><rect x="250" y="186" width="22" height="50" rx="11" fill="#f2a33a"/><rect x="368" y="186" width="22" height="50" rx="11" fill="#f2a33a"/><rect x="213" y="282" width="52" height="44" rx="10" fill="#16130f"/><rect x="273" y="282" width="52" height="44" rx="10" fill="#16130f"/><rect x="336" y="285" width="46" height="38" rx="8" fill="none" stroke="#c9bfae" stroke-width="5"/><rect x="393" y="282" width="52" height="44" rx="10" fill="#f2a33a"/><path d="M407 305 l9 9 l16 -18" stroke="#16130f" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/><rect x="213" y="334" width="52" height="44" rx="10" fill="#16130f"/><rect x="273" y="334" width="52" height="44" rx="10" fill="#16130f"/><rect x="333" y="334" width="52" height="44" rx="10" fill="#16130f"/><rect x="396" y="337" width="46" height="38" rx="8" fill="none" stroke="#c9bfae" stroke-width="5"/><rect x="216" y="389" width="46" height="38" rx="8" fill="none" stroke="#c9bfae" stroke-width="5"/><rect x="276" y="389" width="46" height="38" rx="8" fill="none" stroke="#c9bfae" stroke-width="5"/><rect x="333" y="386" width="52" height="44" rx="10" fill="#16130f"/><rect x="393" y="386" width="52" height="44" rx="10" fill="#16130f"/></svg></div><div class="splash-name">Смены</div><div class="splash-sub">календарь механика</div></div></div>
 <div class="wrap">
   <section class="notice" id="notice" hidden aria-live="polite">
@@ -714,7 +808,7 @@ window.LOOK = (function(){
     <h1 id="monthTitle">Октябрь 2026</h1>
     <div class="nav">
       <button class="net-dot" id="netDot" aria-label="Связь: всё сохранено" data-st="ok"><i></i></button>
-      <button class="icon-btn" id="soundBtn" aria-label="Звук" aria-pressed="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path class="wave" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/><path class="mute" d="M16 9l6 6M22 9l-6 6"/></svg></button>
+      <button class="icon-btn" id="soundBtn" aria-label="Звук" aria-pressed="true" hidden><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path class="wave" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/><path class="mute" d="M16 9l6 6M22 9l-6 6"/></svg></button>
       <button class="tq-btn today-btn" id="goToday" hidden>Сегодня</button>
       <button class="icon-btn" id="prev" aria-label="Предыдущий месяц">‹</button>
       <button class="icon-btn" id="next" aria-label="Следующий месяц">›</button>
@@ -736,7 +830,7 @@ window.LOOK = (function(){
 
   <section class="total" aria-live="polite">
     <span class="label">Заработано за месяц</span>
-    <span class="value num" id="total">0 ₽</span>
+    <span class="value num pvt" id="total">0 ₽</span>
     <span class="sub num" id="totalSub">0 смен</span>
   </section>
 
@@ -801,7 +895,6 @@ window.LOOK = (function(){
     <div class="tools">
       <button class="link-btn" id="fillOff">Пустые дни сделать выходными</button>
       <button class="link-btn" id="clearMonth">Очистить месяц</button>
-      <button class="link-btn" id="heatToggle">Тепловая карта</button>
     </div>
     <div id="confirmClear" class="tools" hidden>
       <span>Снять все отметки за месяц?</span>
@@ -833,41 +926,82 @@ window.LOOK = (function(){
     <p class="hint" id="phHint">Сделайте скриншот графика, где видны даты и ваша строка, — смены расставятся сами. Перед записью вы всё проверите.</p>
   </section>
 
-  <dl class="breakdown num" id="breakdown"></dl>
+  <dl class="breakdown num pvt" id="breakdown"></dl>
   </div>
 
-  <div class="pane" id="pane-rep" role="tabpanel">
-  <section class="rep" aria-live="polite">
-    <div class="rep-head">
-      <button class="icon-btn" id="repPrev" aria-label="Предыдущий день">‹</button>
-      <div class="rep-day"><b id="repDay">—</b><span id="repType"></span></div>
-      <button class="icon-btn" id="repNext" aria-label="Следующий день">›</button>
-    </div>
-    <div class="rep-total num"><span>Баллы за день (ВР)</span><strong id="repSum">0</strong><em id="repSumNote"></em></div>
-    <div class="row" id="repWarn" hidden></div>
-    <div id="repList" class="rep-list"></div>
-    <button class="save-btn" id="repAdd">+ Новый ремонт</button>
-    <p class="hint" id="repHint">Нажмите «Новый ремонт» и выберите детали и работы. Приложение сложит их тяжесть, определит категорию ремонта (лёгкий, средний, тяжёлый, сверхтяжёлый) и засчитает баллы категории — как в рабочей системе. Баллы дня попадут в календарь.</p>
+  <div class="pane" id="pane-money" role="tabpanel">
+  <section class="chartbox mn-hero" id="mnNextBox" aria-live="polite">
+    <div class="mn-top"><small id="mnNextLbl">Ближайшая выплата</small><span class="mn-when" id="mnNextWhen"></span></div>
+    <strong class="mn-big num pvt" id="mnNextAmt">—</strong>
+    <p class="mn-sub" id="mnNextSub"></p>
+    <div class="mn-up num pvt" id="mnUpcoming"></div>
   </section>
 
-  <details id="catBox">
-    <summary>Справочник деталей, работ и категорий</summary>
+  <section class="chartbox" id="mnCheckBox">
+    <h3>Сверка с расчёткой</h3>
+    <p class="mn-note">Впишите, сколько реально пришло, — увидите разницу с расчётом.</p>
+    <div class="mn-check num pvt" id="mnCheck"></div>
+  </section>
+
+  <section class="chartbox" id="goalBox">
+    <h3>Цель на <span id="goalMonth">месяц</span></h3>
+    <div class="mn-bar" aria-hidden="true"><i id="goalBar"></i></div>
+    <label class="mn-in" for="goalAmt">Хочу заработать, ₽<input id="goalAmt" type="number" inputmode="numeric" min="0" step="1000" placeholder="Например, 150000"></label>
+    <div id="goalOut" class="goal-out num pvt"></div>
+  </section>
+
+  <section class="chartbox" id="wiBox">
+    <h3>Что если</h3>
+    <div class="wi-row"><span>Ещё доп. смен</span><div class="wi-st"><button id="wiXm" aria-label="Меньше доп. смен">−</button><b class="num" id="wiX">0</b><button id="wiXp" aria-label="Больше доп. смен">+</button></div></div>
+    <div class="wi-row"><span>Средний балл за период</span><div class="wi-st"><button id="wiAm" aria-label="Средний балл меньше">−</button><b class="num" id="wiA">24</b><button id="wiAp" aria-label="Средний балл больше">+</button></div></div>
+    <div class="wi-out num pvt" id="wiOut" aria-live="polite"></div>
+  </section>
+
+  <section class="chartbox" id="mnYearBox">
+    <h3 id="yearTitle">Заработок за 2026 год</h3>
+    <div id="mnChart" class="chart pvt"></div>
+    <table class="year num pvt"><tbody id="yearBody"></tbody><tfoot><tr><td>Всего</td><td id="yearDays"></td><td id="yearSum"></td></tr></tfoot></table>
+  </section>
+
+  <details id="payBox">
+    <summary>🧾 Журнал выплат</summary>
     <div class="backup">
-      <p>У каждой детали и работы есть тяжесть из рейтинга. В ремонте нажимаете на них — тяжесть складывается, и по нему ремонт попадает в категорию.</p>
-      <div class="row" id="catKnownRow"><button class="ghost-btn" id="catKnown">Добавить известные детали</button></div>
-      <div class="row" id="workKnownRow"><button class="ghost-btn" id="workKnown">Добавить работы из рейтинга</button></div>
-      <div class="cat-add">
-        <label for="catName" class="sr">Работа или деталь</label><input id="catName" placeholder="Например: замена цепи" maxlength="60">
-        <label for="catPts" class="sr">Тяжесть</label><input id="catPts" type="number" inputmode="decimal" step="0.1" min="0" placeholder="Тяжесть">
-        <button class="save-btn" id="catAddBtn">Добавить</button>
+      <p>Записывайте аванс и зарплату, чтобы сверять их с расчётом.</p>
+      <div class="pay-add">
+        <label for="payDate">Дата<input id="payDate" type="date"></label>
+        <label for="payAmt">Сумма, ₽<input id="payAmt" type="number" inputmode="numeric" min="0" step="100"></label>
+        <label for="payType">Что<select id="payType"><option>Аванс</option><option>Зарплата</option><option>Премия</option><option>Другое</option></select></label>
       </div>
-      <div id="catList" class="cat-list"></div>
-      <p id="catMsg"></p>
-      <h3 class="look-h" style="margin-top:6px">Категории ремонтов</h3>
-      <p>Ремонт попадает в категорию по тяжести: от указанной тяжести и выше. Засчитываются баллы категории: лёгкий 1, средний 2, тяжёлый 4, сверхтяжёлый 6. Пороги тяжести пока примерные — сверьте с рабочей системой и поправьте.</p>
-      <div class="rcat-head"><span>Категория</span><span>Тяжесть от</span><span>Баллов</span></div>
-      <div id="rcatList" class="cat-list"></div>
+      <div class="row"><button class="save-btn" id="payAdd">Добавить выплату</button></div>
+      <div id="payList" class="pay-list num pvt"></div>
+      <div id="paySum" class="goal-out num pvt"></div>
     </div>
+  </details>
+
+  <details id="workBox">
+    <summary>⚙️ Работа: оплата, премия, выплаты</summary>
+    <div class="settings">
+      <label for="rate">Оплата за смену, ₽<input id="rate" type="number" inputmode="numeric" min="0" step="100" value="5800"></label>
+      <label for="pct">Максимальная премия, %<input id="pct" type="number" inputmode="decimal" min="0" step="1" value="27"></label>
+      <label for="minPts">Минимум баллов в день<input id="minPts" type="number" inputmode="numeric" min="0" step="1" value="18"></label>
+      <label for="maxPts">Баллы для полной премии<input id="maxPts" type="number" inputmode="numeric" min="0" step="1" value="24"></label>
+    </div>
+    <p class="hint" style="margin-top:10px">Процент премии зависит от среднего балла за смену за отчётный период (с 21 по 20): меньше минимума — 0%, от минимума до полной — растёт равномерно, от полной и выше — максимум. Пока баллов нет, премия считается по максимуму.</p>
+    <div class="types" id="typeSettings"></div>
+    <h3 class="look-h">Смена</h3>
+    <div class="settings">
+      <label for="shFrom">Начало<input id="shFrom" type="time" value="09:30"></label>
+      <label for="shTo">Конец<input id="shTo" type="time" value="21:30"></label>
+    </div>
+    <h3 class="look-h">Выплаты</h3>
+    <div class="settings">
+      <label for="payAdv">День аванса<input id="payAdv" type="number" inputmode="numeric" min="1" max="31" value="25"></label>
+      <label for="paySal">День зарплаты<input id="paySal" type="number" inputmode="numeric" min="1" max="31" value="5"></label>
+      <label for="advMode">Аванс<select id="advMode"><option value="half">за 1–15 число</option><option value="fixed">фикс. сумма</option></select></label>
+      <label for="advFix" id="advFixL">Сумма аванса, ₽<input id="advFix" type="number" inputmode="numeric" min="0" step="500" placeholder="Например, 20000"></label>
+    </div>
+    <label class="chk" for="ndfl" style="display:flex;gap:8px;align-items:center;margin-top:12px"><input id="ndfl" type="checkbox">Вычитать НДФЛ 13% — во вкладке «Деньги» суммы на руки</label>
+    <p class="hint" style="margin-top:8px">Аванс приходит в день аванса этого месяца, зарплата — в день зарплаты следующего месяца: всё за месяц (смены и премия) минус аванс. Если суммы в «Сверке» не сходятся — поправьте здесь.</p>
   </details>
   </div>
 
@@ -888,7 +1022,7 @@ window.LOOK = (function(){
     <div class="tile"><small>Лучший средний</small><strong id="recAvg">—</strong><em id="recAvgSub"></em></div>
   </section>
 
-  <section class="pricecard num" id="priceBox">
+  <section class="pricecard num pvt" id="priceBox">
     <small id="priceLbl">Цена балла</small>
     <strong id="priceVal">—</strong>
     <p id="priceText"></p>
@@ -945,10 +1079,6 @@ window.LOOK = (function(){
   </section>
 
 
-  <details id="yearBox">
-    <summary id="yearTitle">Итоги 2026 года</summary>
-    <table class="year num"><tbody id="yearBody"></tbody><tfoot><tr><td>Всего</td><td id="yearDays"></td><td id="yearSum"></td></tr></tfoot></table>
-  </details>
 
   </div>
 
@@ -964,9 +1094,9 @@ window.LOOK = (function(){
   <p class="hint">Награды считаются по сменам, баллам и ремонтам в календаре. Награды за деньги — по завершённым месяцам. У большинства наград 3–4 уровня: бронза, серебро, золото, платина.</p>
   </div>
 
-  <div class="pane" id="pane-more" role="tabpanel">
-  <details id="lookBox" open>
-    <summary>Оформление</summary>
+  <div class="pane" id="pane-set" role="tabpanel">
+  <details id="lookBox">
+    <summary>🎨 Оформление</summary>
     <h3 class="look-h">Тема</h3>
     <div class="look-grid" id="lookThemes" role="group" aria-label="Тема"></div>
     <div class="row" style="display:flex;margin-top:10px"><button class="ghost-btn" id="lookRandom">🎲 Случайная тема</button></div>
@@ -978,78 +1108,28 @@ window.LOOK = (function(){
     </div>
     <h3 class="look-h">Шрифт</h3>
     <div class="font-list" id="lookFonts" role="group" aria-label="Шрифт"></div>
-    <h3 class="look-h">Отклик</h3>
-    <label class="chk" for="hapToggle" style="display:flex;gap:8px;align-items:center;margin-top:10px"><input id="hapToggle" type="checkbox" checked>Вибрация при нажатиях</label>
-  </details>
-
-  <details id="goalBox" open>
-    <summary>Цель по зарплате</summary>
     <div class="backup">
-      <div class="settings" style="margin-top:0;grid-template-columns:1fr"><label for="goalAmt"><span>Хочу заработать за <span id="goalMonth">месяц</span>, ₽</span><input id="goalAmt" type="number" inputmode="numeric" min="0" step="1000" placeholder="Например, 150000"></label></div>
-      <div id="goalOut" class="goal-out num"></div>
+      <div class="tg-row"><span><b>Тепловая карта</b><small>Смены в календаре подсвечены по баллам</small></span><button class="tgl" role="switch" id="heatToggle" aria-checked="false" aria-label="Тепловая карта"></button></div>
     </div>
   </details>
 
-  <details id="payBox">
-    <summary>Выплаты</summary>
+  <details id="sndBox">
+    <summary>🔊 Звук и вибрация</summary>
     <div class="backup">
-      <p>Записывайте аванс и зарплату, чтобы сверять их с расчётом.</p>
-      <div class="pay-add">
-        <label for="payDate">Дата<input id="payDate" type="date"></label>
-        <label for="payAmt">Сумма, ₽<input id="payAmt" type="number" inputmode="numeric" min="0" step="100"></label>
-        <label for="payType">Что<select id="payType"><option>Аванс</option><option>Зарплата</option><option>Премия</option><option>Другое</option></select></label>
-      </div>
-      <div class="row"><button class="save-btn" id="payAdd">Добавить выплату</button></div>
-      <div id="payList" class="pay-list num"></div>
-      <div id="paySum" class="goal-out num"></div>
+      <div class="tg-row"><span><b>Звуки</b><small>Щелчки, отметки дней, сохранение</small></span><button class="tgl" role="switch" id="sndToggle" aria-checked="false" aria-label="Звуки"></button></div>
     </div>
+    <h3 class="look-h">Звук нажатия</h3>
+    <div class="font-list" id="clkList" role="group" aria-label="Звук нажатия"></div>
+    <h3 class="look-h">Вибрация</h3>
+    <div class="font-list" id="hapList" role="group" aria-label="Вибрация"></div>
   </details>
 
-  <details id="repeatBox">
-    <summary>Повтор графика</summary>
+  <details id="syncBox">
+    <summary>☁️ Синхронизация и копии</summary>
     <div class="backup">
-      <p>Задайте схему, например 2 через 2, и календарь сам расставит смены и выходные.</p>
-      <div class="pay-add">
-        <label for="rpWork">Рабочих дней<input id="rpWork" type="number" inputmode="numeric" min="1" max="14" value="2"></label>
-        <label for="rpOff">Выходных<input id="rpOff" type="number" inputmode="numeric" min="1" max="14" value="2"></label>
-        <label for="rpStart">Первая смена<input id="rpStart" type="date"></label>
-        <label for="rpMonths">На сколько<select id="rpMonths"><option value="1">1 месяц</option><option value="2" selected>2 месяца</option><option value="3">3 месяца</option></select></label>
-      </div>
-      <label class="chk" for="rpKeep" style="display:flex;gap:8px;align-items:center"><input id="rpKeep" type="checkbox" checked>Не трогать дни, которые уже отмечены</label>
-      <div class="row"><button class="save-btn" id="rpApply">Расставить смены</button></div>
-      <div class="row" id="rpConfirm" hidden><span id="rpInfo"></span><button class="link-btn" id="rpYes">Да, расставить</button><button class="link-btn" id="rpNo">Отмена</button></div>
-      <p id="rpMsg"></p>
-    </div>
-  </details>
-
-  <details>
-    <summary>Оплата и премия</summary>
-    <div class="settings">
-      <label for="rate">Оплата за смену, ₽<input id="rate" type="number" inputmode="numeric" min="0" step="100" value="5800"></label>
-      <label for="pct">Максимальная премия, %<input id="pct" type="number" inputmode="decimal" min="0" step="1" value="27"></label>
-      <label for="minPts">Минимум баллов в день<input id="minPts" type="number" inputmode="numeric" min="0" step="1" value="18"></label>
-      <label for="maxPts">Баллы для полной премии<input id="maxPts" type="number" inputmode="numeric" min="0" step="1" value="24"></label>
-    </div>
-    <p class="hint" style="margin-top:10px">Процент премии зависит от среднего балла за смену за отчётный период (с 21 по 20): меньше минимума — 0%, от минимума до полной — растёт равномерно, от полной и выше — максимум. Пока баллов нет, премия считается по максимуму.</p>
-    <div class="types" id="typeSettings"></div>
-  </details>
-
-  <details id="notifBox" hidden>
-    <summary>Уведомления в Telegram</summary>
-    <div class="backup">
-      <p>Бот будет присылать сообщения в чат:</p>
-      <p style="margin-top:-4px">· в 21:00 — что завтра: смена, доп. смена или выходной, и цель на смену;<br>· в 21:45 — статистику за смену или напоминание внести баллы;<br>· в 22:00 — повторное напоминание, если баллы не внесены.</p>
-      <div class="row">
-        <button class="save-btn" id="notifToggle">Включить уведомления</button>
-      </div>
-      <p id="notifMsg"></p>
-    </div>
-  </details>
-
-  <button class="link-btn" id="tourOpen" style="align-self:flex-start">❔ Как пользоваться приложением</button>
-  <details>
-    <summary>Перенос и резервная копия</summary>
-    <div class="backup">
+      <div class="sync-st"><i id="syncDot"></i><span><b id="syncWhere">Данные хранятся на этом телефоне</b><small id="syncWhen"></small></span></div>
+      <div class="row"><button class="save-btn" id="syncNow">Синхронизировать сейчас</button></div>
+      <div class="tg-row" id="bakRow"><span><b>Копия от бота по воскресеньям</b><small id="bakHint">Бот пришлёт файл с данными в чат — из него всё восстанавливается</small></span><button class="tgl" role="switch" id="bakToggle" aria-checked="false" aria-label="Копия от бота по воскресеньям"></button></div>
       <p><b style="color:var(--fg)">Перенос данных.</b> Данные в Telegram, в Safari и в иконке на экране «Домой» хранятся отдельно. Чтобы перенести отметки, нажмите «Скопировать код» там, где они есть, и «Вставить код» там, куда переносите.</p>
       <div class="row">
         <button class="ghost-btn" id="copyCode">Скопировать код</button>
@@ -1074,6 +1154,81 @@ window.LOOK = (function(){
       <p id="backupMsg"></p>
     </div>
   </details>
+
+  <details id="notifBox" hidden>
+    <summary>🔔 Уведомления</summary>
+    <div class="backup">
+      <p>Бот пишет в чат по вечерам. Выберите, что присылать.</p>
+      <div class="row">
+        <button class="save-btn" id="notifToggle">Включить уведомления</button>
+      </div>
+      <div id="notifOpts" hidden>
+      <div class="tg-row"><span><b>21:00 — что завтра</b><small>Смена или выходной и цель на смену</small></span><button class="tgl" role="switch" id="nEve" aria-checked="false" aria-label="21:00 — что завтра"></button></div>
+      <div class="tg-row"><span><b>21:45 — итоги смены</b><small>Статистика или напоминание внести баллы</small></span><button class="tgl" role="switch" id="nEnd" aria-checked="false" aria-label="21:45 — итоги смены"></button></div>
+      <div class="tg-row"><span><b>22:00 — повтор</b><small>Если баллы так и не внесены</small></span><button class="tgl" role="switch" id="nRem2" aria-checked="false" aria-label="22:00 — повтор"></button></div>
+      <div class="tg-row"><span><b>Воскресенье — итоги недели</b><small>Смены, баллы и средний за 7 дней</small></span><button class="tgl" role="switch" id="nWeek" aria-checked="false" aria-label="Воскресенье — итоги недели"></button></div>
+        <label class="mn-in" for="nPause" style="margin-top:6px">Пауза — не присылать ничего<select id="nPause"><option value="0">не ставить</option><option value="3">на 3 дня</option><option value="7">на неделю</option><option value="14">на 2 недели</option><option value="30">на месяц</option></select></label>
+        <p id="nPauseTx"></p>
+      </div>
+      <p id="notifMsg"></p>
+    </div>
+  </details>
+
+  <details id="privBox">
+    <summary>🔒 Приватность</summary>
+    <div class="backup">
+      <div class="tg-row"><span><b>Скрывать суммы</b><small>Деньги размыты, пока не нажмёте на них, — удобно показывать экран коллегам</small></span><button class="tgl" role="switch" id="privToggle" aria-checked="false" aria-label="Скрывать суммы"></button></div>
+      <div class="tg-row" id="lockRow"><span><b>Вход по Face ID</b><small id="lockHint">Календарь откроется только после проверки лица или отпечатка</small></span><button class="tgl" role="switch" id="lockToggle" aria-checked="false" aria-label="Вход по Face ID"></button></div>
+      <p id="lockMsg"></p>
+    </div>
+  </details>
+
+  <details id="calSetBox">
+    <summary>📅 Календарь</summary>
+    <h3 class="look-h">Неделя начинается с</h3>
+    <div class="font-list" id="wkList" role="group" aria-label="Первый день недели"></div>
+    <h3 class="look-h">Формат сумм</h3>
+    <div class="font-list" id="mfList" role="group" aria-label="Формат сумм"></div>
+    <h3 class="look-h">Повтор графика</h3>
+    <div class="backup" id="repeatBox">
+      <p>Задайте схему, например 2 через 2, и календарь сам расставит смены и выходные.</p>
+      <div class="pay-add">
+        <label for="rpWork">Рабочих дней<input id="rpWork" type="number" inputmode="numeric" min="1" max="14" value="2"></label>
+        <label for="rpOff">Выходных<input id="rpOff" type="number" inputmode="numeric" min="1" max="14" value="2"></label>
+        <label for="rpStart">Первая смена<input id="rpStart" type="date"></label>
+        <label for="rpMonths">На сколько<select id="rpMonths"><option value="1">1 месяц</option><option value="2" selected>2 месяца</option><option value="3">3 месяца</option></select></label>
+      </div>
+      <label class="chk" for="rpKeep" style="display:flex;gap:8px;align-items:center"><input id="rpKeep" type="checkbox" checked>Не трогать дни, которые уже отмечены</label>
+      <div class="row"><button class="save-btn" id="rpApply">Расставить смены</button></div>
+      <div class="row" id="rpConfirm" hidden><span id="rpInfo"></span><button class="link-btn" id="rpYes">Да, расставить</button><button class="link-btn" id="rpNo">Отмена</button></div>
+      <p id="rpMsg"></p>
+    </div>
+  </details>
+
+  <details id="dataBox">
+    <summary>🗂 Данные</summary>
+    <div class="backup">
+      <p>Таблица со всеми сменами, баллами и суммами по месяцам — откроется в Excel или Numbers.</p>
+      <div class="row"><button class="ghost-btn" id="csvBtn">📊 Скачать таблицу для Excel</button></div>
+      <p id="csvMsg"></p>
+      <div class="row" style="border-top:1px solid var(--line);padding-top:12px"><button class="ghost-btn" id="dClearM">Очистить месяц…</button><button class="ghost-btn danger" id="dWipe">Удалить все данные…</button></div>
+      <div class="dconf" id="dConfirm" hidden><span id="dConfTx"></span><div class="row"><button class="save-btn danger" id="dYes">Удалить</button><button class="link-btn" id="dNo">Отмена</button></div></div>
+      <p id="dMsg"></p>
+    </div>
+  </details>
+
+  <details id="helpBox">
+    <summary>❔ Помощь</summary>
+    <div class="backup">
+      <div class="row"><button class="ghost-btn" id="tourOpen">Как пользоваться</button><button class="ghost-btn" id="newsOpen">Что нового</button></div>
+      <div id="fbBox" hidden>
+        <label class="note-lbl" for="fbText">Написать разработчику<textarea id="fbText" rows="3" maxlength="1000" placeholder="Идея, ошибка или вопрос"></textarea></label>
+        <div class="row" style="margin-top:8px"><button class="save-btn" id="fbSend">Отправить</button></div>
+        <p id="fbMsg"></p>
+      </div>
+      <p class="ver">Версия <b id="verTx"></b></p>
+    </div>
+  </details>
   </div>
 
   </div>
@@ -1081,10 +1236,10 @@ window.LOOK = (function(){
 
 <nav class="tabbar" role="tablist" aria-label="Разделы">
   <button role="tab" data-tab="main" aria-selected="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span>Календарь</span></button>
-  <button role="tab" data-tab="rep" aria-selected="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg><span>Ремонты</span></button>
+  <button role="tab" data-tab="money" aria-selected="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H18v4"/><path d="M3 7.5v10A2.5 2.5 0 0 0 5.5 20H20V9H5.5A2.5 2.5 0 0 1 3 7.5z"/><circle cx="16" cy="14.5" r="1.3" fill="currentColor"/></svg><span>Деньги</span></button>
   <button role="tab" data-tab="stat" aria-selected="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Статистика</span></button>
   <button role="tab" data-tab="ach" aria-selected="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 21h8M9 17h6"/></svg><span>Награды</span><b class="dot num" id="achDot" hidden></b></button>
-  <button role="tab" data-tab="more" aria-selected="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg><span>Ещё</span></button>
+  <button role="tab" data-tab="set" aria-selected="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Настройки</span></button>
 </nav>
 <div class="undo-bar" id="undoBar" role="status" aria-live="polite"><span id="undoTx"></span><button id="undoBtn">Отменить</button></div>
 <button class="toast" id="toast" aria-live="polite"><span class="em" id="toastEm"></span><span id="toastTx"></span></button>
@@ -1101,7 +1256,12 @@ window.LOOK = (function(){
     {k:"o", name:"Выходной", plural:"Выходные", mark:"В"}
   ];
   const T = Object.fromEntries(TYPES.map(t=>[t.k,t]));
-  const fmt = n => Math.round(n).toLocaleString("ru-RU").replace(/ /g," ") + " ₽";
+  const fmtFull = n => Math.round(n).toLocaleString("ru-RU").replace(/ /g," ") + " ₽";
+  // Короткий формат сумм (48,3к ₽) — по выбору в «Настройки → Календарь»
+  const fmt = n => { try{ if(settings.mfmt==="short" && Math.abs(n)>=10000) return (Math.round(n/100)/10).toString().replace(".",",")+"к ₽"; }catch(e){} return fmtFull(n); };
+  // Первый день недели: понедельник (1) или воскресенье (0)
+  function firstCol(y,m){ let w=1; try{ w = settings.wk0===0 ? 0 : 1; }catch(e){} return (new Date(y,m,1).getDay()-w+7)%7; }
+  const isWe = (y,m,d) => { const g=new Date(y,m,d).getDay(); return g===0 || g===6; };
   const plural = (n,a,b,c) => { const m10=n%10,m100=n%100;
     return n+" "+((m10===1&&m100!==11)?a:(m10>=2&&m10<=4&&(m100<12||m100>14))?b:c); };
   const shifts = n => plural(n,"смена","смены","смен");
@@ -1150,7 +1310,7 @@ window.LOOK = (function(){
   const $ = id => document.getElementById(id);
   const hhmm = () => new Date().toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"});
   const status = (t, warn) => { const el=$("saveState"); el.textContent = t || ""; el.classList.toggle("warn", !!warn); if(warn) sfx.error();
-    try{ const s=String(t||""); setNet(warn ? "err" : /Сохраняю|Загружаю|Восстанавливаю/.test(s) ? "busy" : (/Сохранено|сохранено|загружены|хранятся|Отменено/.test(s) ? "ok" : null)); }catch(e){} };
+    try{ const s=String(t||""); if(!warn && /Сохранено|сохранено|загружены/.test(s)){ try{ localStorage.setItem("salary:lastSave", String(Date.now())); }catch(e){} } setNet(warn ? "err" : /Сохраняю|Загружаю|Восстанавливаю/.test(s) ? "busy" : (/Сохранено|сохранено|загружены|хранятся|Отменено/.test(s) ? "ok" : null)); }catch(e){} };
   var netState="ok";
   function setNet(st){
     if(st===null) return; if(!navigator.onLine) st="off"; netState=st;
@@ -1160,7 +1320,8 @@ window.LOOK = (function(){
 
   // Звуки: синтезируются в браузере, без файлов. Включаются только после нажатия.
   const sfx = (()=>{
-    let ctx=null, on=true;
+    let ctx=null, on=true, clk="click";
+    try{ clk = localStorage.getItem("salary:clk") || "click"; }catch(e){}
     try{ on = localStorage.getItem("salary:sound")!=="off"; }catch(e){}
     const ac = ()=>{ if(!ctx){ const C=window.AudioContext||window.webkitAudioContext; if(!C) return null; try{ ctx=new C({latencyHint:"interactive"}); }catch(e){ ctx=new C(); } } if(ctx.state!=="running") ctx.resume(); return ctx; };
     // Звук готовится заранее, с первого касания экрана, чтобы потом не было задержки
@@ -1182,7 +1343,9 @@ window.LOOK = (function(){
     return {
       get on(){ return on; },
       set(v){ on=v; try{ localStorage.setItem("salary:sound", v?"on":"off"); }catch(e){} },
-      click(){ tone(900,0.035,"triangle",0.07); },
+      click(k){ const c=k||clk; if(c==="soft") tone(560,0.05,"sine",0.09); else if(c==="drop") tone(620,0.07,"sine",0.09,0,1.9); else if(c==="mech"){ tone(1700,0.012,"square",0.03); tone(260,0.03,"triangle",0.07,0.006); } else tone(900,0.035,"triangle",0.07); },
+      get clk(){ return clk; },
+      setClk(v){ clk=v; try{ localStorage.setItem("salary:clk", v); }catch(e){} },
       mark(t){ tone(PITCH[t]||600,0.07,"triangle",0.11); tone((PITCH[t]||600)*1.5,0.06,"sine",0.05,0.03); },
       unmark(){ tone(420,0.08,"triangle",0.08,0,0.6); },
       nav(dir){ tone(dir>0?520:620,0.09,"sine",0.07,0,dir>0?1.4:0.7); },
@@ -1193,9 +1356,10 @@ window.LOOK = (function(){
     };
   })();
   // Вибрация: в Telegram — встроенный отклик телефона, в браузере на Android — navigator.vibrate
-  let hapOn = true; try{ hapOn = localStorage.getItem("salary:hap")!=="off"; }catch(e){}
+  let hapOn = true, hapLv = "on"; try{ hapLv = localStorage.getItem("salary:hap") || "on"; hapOn = hapLv!=="off"; }catch(e){}
   function haptic(kind, arg){
     if(!hapOn) return;
+    if(hapLv==="strong"){ if(kind==="i") arg = ({light:"medium", soft:"medium", medium:"heavy", rigid:"heavy"})[arg||"light"] || arg; else if(kind==="s"){ kind="i"; arg="light"; } }
     try{
       const H = tg && tg.HapticFeedback;
       if(H && miniApp && tgAtLeast("6.1")){
@@ -1209,7 +1373,7 @@ window.LOOK = (function(){
     for(const k in HAP){ const f=sfx[k].bind(sfx); sfx[k]=(...a)=>{ haptic(...HAP[k]); return f(...a); }; }
     const fp=sfx.points.bind(sfx); sfx.points=(v,nrm)=>{ if(v!=null) haptic("i", v>=nrm ? "heavy" : "light"); return fp(v,nrm); }; }
   // Щелчок кнопки звучит в момент касания, а не после отпускания пальца
-  const clickSnd = b => !(b.classList.contains("day") || ["prev","next","saveNow","soundBtn","edNext","totSave","edMinus","edPlus"].includes(b.id) || b.closest("#edQuick") || b.disabled);
+  const clickSnd = b => !(b.classList.contains("day") || ["prev","next","saveNow","soundBtn","edNext","totSave","edMinus","edPlus"].includes(b.id) || b.closest("#edQuick") || b.closest("#clkList") || b.disabled);
   document.addEventListener("pointerdown", e=>{
     if(e.button>0) return;
     const b=e.target.closest("button,label.ghost-btn"); if(b && clickSnd(b)) sfx.click();
@@ -1289,12 +1453,14 @@ window.LOOK = (function(){
     const {y,m} = view, days = months[key(y,m)] || {}, P = pts[key(y,m)] || {};
     $("monthTitle").textContent = MONTHS[m] + " " + y;
     const grid = $("grid"); grid.textContent = "";
-    const first = (new Date(y,m,1).getDay()+6)%7, dim = new Date(y,m+1,0).getDate();
+    const first = firstCol(y,m), dim = new Date(y,m+1,0).getDate();
+    { const sun = firstCol(2023,0)===0, L = sun ? ["Вс","Пн","Вт","Ср","Чт","Пт","Сб"] : ["Пн","Вт","Ср","Чт","Пт","Сб","Вс"];
+      document.querySelectorAll(".dow").forEach(r=>{ r.classList.toggle("sun", sun); [...r.children].forEach((sp,i)=>{ if(sp.textContent!==L[i]) sp.textContent=L[i]; }); }); }
     for(let i=0;i<first;i++){ const p=document.createElement("div"); p.className="day pad"; grid.appendChild(p); }
     for(let d=1; d<=dim; d++){
       const b = document.createElement("button"), t = days[d], wd = (first+d-1)%7;
       const p = isShift(t) && P[d]!=null ? +P[d] : null;
-      b.className = "day" + (wd>=5?" we":"") + (d>=21?" np":"") + (t?" t-"+t:"") + (sel===d?" sel":"") + ((dayx[ds(y,m,d)]||{}).note?" has-note":"") +
+      b.className = "day" + (isWe(y,m,d)?" we":"") + (d>=21?" np":"") + (t?" t-"+t:"") + (sel===d?" sel":"") + ((dayx[ds(y,m,d)]||{}).note?" has-note":"") +
         (y===now.getFullYear()&&m===now.getMonth()&&d===now.getDate()?" today":"");
       if(t) b.dataset.t = t;
       b.dataset.d = d;
@@ -1486,21 +1652,22 @@ window.LOOK = (function(){
 
   function renderYear(){
     const y = view.y, body = $("yearBody"); body.textContent = "";
-    $("yearTitle").textContent = "Итоги "+y+" года";
+    $("yearTitle").textContent = "Заработок за "+y+" год"+(payCfg().ndfl ? " · на руки" : "");
     let tw=0, ts=0;
     for(let m=0;m<12;m++){
       const c = calc(y, m), worked = c.cnt.w + c.cnt.x;
       if(!worked && !c.total && m!==view.m) continue;
-      tw+=worked; ts+=c.total;
+      tw+=worked; ts+=netv(c.total);
       const tr=document.createElement("tr"); if(m===view.m) tr.className="cur";
       tr.innerHTML="<td></td><td></td><td></td>";
       tr.children[0].textContent = MONTHS[m][0].toUpperCase()+MONTHS[m].slice(1);
       tr.children[1].textContent = shifts(worked);
-      tr.children[2].textContent = fmt(c.total);
+      tr.children[2].textContent = fmt(netv(c.total));
       body.appendChild(tr);
     }
     $("yearDays").textContent = shifts(tw);
     $("yearSum").textContent = fmt(ts);
+    try{ renderMoneyChart(); }catch(e){ console.error(e); }
   }
 
   function renderTypeSettings(){
@@ -1794,6 +1961,13 @@ window.LOOK = (function(){
     if(s.ach && typeof s.ach==="object") settings.ach = Object.assign({}, settings.ach||{}, s.ach);
     if(s.customTheme && window.LOOK && LOOK.getCustom){ settings.customTheme=s.customTheme; if(JSON.stringify(LOOK.getCustom())!==JSON.stringify(s.customTheme)){ try{ localStorage.setItem("salary:customTheme", JSON.stringify(s.customTheme)); }catch(e){} if(LOOK.get().t==="custom" || (s.look && s.look.t==="custom")) LOOK.setCustom(s.customTheme); } }
     if(s.look && window.LOOK){ const L=LOOK.get(), t=s.look.t||"auto", f=s.look.f||"auto"; settings.look={t, f}; if(L.t!==t || L.f!==f){ LOOK.set(t, f); try{ renderLook(); }catch(e){} } }
+    if(s.payout && typeof s.payout==="object") settings.payout = Object.assign({}, s.payout);
+    if(s.shift && typeof s.shift==="object") settings.shift = {from:String(s.shift.from||"09:30"), to:String(s.shift.to||"21:30")};
+    if(s.wk0===0 || s.wk0===1) settings.wk0 = s.wk0;
+    if(typeof s.mfmt==="string") settings.mfmt = s.mfmt;
+    if(s.notifs && typeof s.notifs==="object") settings.notifs = Object.assign({}, s.notifs);
+    if(typeof s.pauseUntil==="string") settings.pauseUntil = s.pauseUntil;
+    try{ renderWorkExtra(); }catch(e){}
     $("rate").value=settings.rate; $("pct").value=settings.pct; $("minPts").value=settings.minPts; $("maxPts").value=settings.maxPts; renderTypeSettings(); renderQuick();
   }
 
@@ -1864,7 +2038,7 @@ window.LOOK = (function(){
   }
 
   // ---- вкладки ----
-  const TABS=["main","rep","stat","ach","more"];
+  const TABS=["main","money","stat","ach","set"];
   function markTab(t){ for(const b of document.querySelectorAll(".tabbar button")) b.setAttribute("aria-selected", String(b.dataset.tab===t)); }
   function setTab(t, fromScroll){
     const changed = tab!==t; tab=t; markTab(t);
@@ -1891,19 +2065,19 @@ window.LOOK = (function(){
   function renderPane(){
     clearTimeout(otherTimer); otherTimer=setTimeout(renderOthers, 350);
     try{
-      if(tab==="rep"){ renderRep(); renderCat(); }
+      if(tab==="money"){ renderMoney(); renderGoal(); renderPays(); }
       else if(tab==="stat"){ renderRecapCard(); renderStat(); }
       else if(tab==="ach") renderAch();
-      else if(tab==="more"){ renderLook(); renderCustom(); renderGoal(); renderPays(); renderRepeat(); }
+      else if(tab==="set"){ renderLook(); renderCustom(); renderRepeat(); renderSet(); }
     }catch(e){ console.error(e); }
   }
   function renderOthers(){
     const cur=tab;
     for(const t of TABS){ if(t===cur || t==="main") continue; try{
-      if(t==="rep"){ renderRep(); renderCat(); }
+      if(t==="money"){ renderMoney(); renderGoal(); renderPays(); }
       else if(t==="stat"){ renderRecapCard(); renderStat(); }
       else if(t==="ach") renderAch();
-      else if(t==="more"){ renderLook(); renderCustom(); renderGoal(); renderPays(); renderRepeat(); }
+      else if(t==="set"){ renderLook(); renderCustom(); renderRepeat(); renderSet(); }
     }catch(e){} }
   }
 
@@ -1924,162 +2098,6 @@ window.LOOK = (function(){
     applyDayPoints(c.y, c.m, c.d, hadReps);
     render();
   }
-  function renderRep(){
-    const c=repCtx(), t=(months[c.k]||{})[c.d], reps=dayData(c.id).reps||[];
-    const isToday = c.y===now.getFullYear() && c.m===now.getMonth() && c.d===now.getDate();
-    $("repDay").textContent = c.d+" "+GEN[c.m]+(isToday?" · сегодня":"");
-    $("repType").textContent = t ? T[t].name : "день не отмечен";
-    $("repSum").textContent = f1(daySum(c.id));
-    const cc=[0,0,0,0]; reps.forEach(r=>{ const k=repInfo(r).ci; if(k>=0) cc[k]++; });
-    const C0=repCats(), byCat=C0.map((x,i)=>cc[i] ? x.nm.toLowerCase()+": "+cc[i] : "").filter(Boolean).join(", ");
-    $("repSumNote").textContent = !reps.length ? "Ремонтов за этот день пока нет." : plural(reps.length,"ремонт","ремонта","ремонтов")+(byCat?" ("+byCat+")":"")+" · общая тяжесть "+f1(dayWeight(c.id))+(isShift(t) ? " · баллы записаны в календарь" : "");
-    const warn=$("repWarn"); warn.textContent="";
-    warn.hidden = !(reps.length && !isShift(t));
-    if(!warn.hidden){
-      warn.appendChild(el("span","", "День не отмечен как смена, поэтому баллы не попадут в расчёт."));
-      const b=el("button","link-btn","Отметить как смену"); b.onclick=()=>{ const days=Object.assign({}, months[c.k]||{}); days[c.d]="w"; months[c.k]=days; scheduleSave(c.k); applyDayPoints(c.y,c.m,c.d,false); sfx.mark("w"); render(); }; warn.appendChild(b);
-    }
-    const list=$("repList"); list.textContent="";
-    if(activeRep>=reps.length) activeRep=reps.length-1;
-    reps.forEach((r,i)=>{
-      const card=el("div","rep-card"+(i===activeRep?" active":""));
-      const head=el("div","rc-head");
-      head.appendChild(el("b","", "Ремонт "+(i+1)));
-      const inp=el("input"); inp.placeholder="Номер или модель байка"; inp.maxLength=40; inp.value=r.t||""; inp.setAttribute("aria-label","Подпись ремонта "+(i+1));
-      inp.addEventListener("change", ()=>changeReps(R=>{ R[i].t=inp.value.trim(); }));
-      inp.addEventListener("focus", ()=>{ if(activeRep!==i){ activeRep=i; renderRep(); } });
-      head.appendChild(inp);
-      const RI=repInfo(r);
-      head.appendChild(el("span","rc-sum num", RI.ci>=0 ? "+"+f1(RI.p)+" б." : "0 б."));
-      const del=el("button","icon-btn", delArm===i ? "Точно?" : "×"); del.setAttribute("aria-label","Удалить ремонт "+(i+1)); del.style.width = delArm===i ? "auto" : ""; del.style.padding = delArm===i ? "0 10px" : "";
-      del.onclick=()=>{ if(delArm!==i){ delArm=i; renderRep(); return; } delArm=-1; if(activeRep>=i) activeRep--; changeReps(R=>R.splice(i,1)); sfx.unmark(); };
-      head.appendChild(del);
-      card.appendChild(head);
-      const items=el("div","rc-items");
-      (r.it||[]).forEach((x,j)=>{
-        const row=el("div","rc-item num");
-        row.appendChild(el("span","nm", x.nm+" · тяжесть "+(x.p==null ? "?" : f1(x.p))));
-        const mi=el("button","", "−"); mi.setAttribute("aria-label","Меньше: "+x.nm);
-        mi.onclick=()=>{ changeReps(R=>{ const it=R[i].it[j]; it.n--; if(it.n<=0) R[i].it.splice(j,1); }); sfx.unmark(); };
-        const n=el("span","n", String(x.n));
-        const pl=el("button","", "+"); pl.setAttribute("aria-label","Больше: "+x.nm);
-        pl.onclick=()=>{ changeReps(R=>{ R[i].it[j].n++; }); };
-        row.append(mi, n, pl, el("span","sub", f1(x.p*x.n)));
-        items.appendChild(row);
-      });
-      if(!(r.it||[]).length) items.appendChild(el("p","rc-empty", i===activeRep ? "Нажмите на работы ниже, чтобы добавить их в ремонт." : "Пусто. Нажмите на ремонт, чтобы добавить работы."));
-      card.appendChild(items);
-      if((r.it||[]).length || r.cat!=null){
-        const row=el("div","rc-cat num");
-        const unk=(r.it||[]).some(x=>x.p==null);
-        row.appendChild(el("span","w", "Тяжесть "+(unk?"≥ ":"")+f1(RI.w)+" →"));
-        const sel=el("select"); sel.setAttribute("aria-label","Категория ремонта "+(i+1));
-        const C=repCats();
-        const o0=el("option","", "Авто: "+(RI.auto>=0 ? C[RI.auto].nm+" +"+f1(C[RI.auto].p) : "нет")); o0.value=""; sel.appendChild(o0);
-        C.forEach((x,k)=>{ const o=el("option","", x.nm+" +"+f1(x.p)); o.value=String(k); sel.appendChild(o); });
-        sel.value = RI.manual ? String(RI.ci) : "";
-        sel.classList.toggle("manual", RI.manual);
-        sel.addEventListener("change", ()=>{ changeReps(R=>{ if(sel.value==="") delete R[i].cat; else R[i].cat=+sel.value; }); sfx.click(); });
-        row.appendChild(sel);
-        if(RI.manual) row.appendChild(el("span","w","вручную"));
-        if(unk) row.appendChild(el("span","w","есть работы без тяжести — выберите категорию как в системе"));
-        card.appendChild(row);
-      }
-      if(i===activeRep){
-        if(!catalog.length){
-          const e=el("p","rc-empty","Справочник работ пуст. Добавьте работы и их баллы в «Справочнике работ» ниже."); card.appendChild(e);
-          const b=el("button","link-btn","Открыть справочник"); b.onclick=()=>{ $("catBox").open=true; $("catBox").scrollIntoView({block:"start"}); $("catName").focus(); }; card.appendChild(b);
-        } else {
-          const chips=el("div","rc-chips");
-          catalog.forEach(cItem=>{
-            const b=el("button"); b.appendChild(document.createTextNode(cItem.nm)); b.appendChild(el("b","", cItem.p==null ? "?" : f1(cItem.p)));
-            b.onclick=()=>{ changeReps(R=>{ const it=R[i].it||(R[i].it=[]); const ex=it.find(x=>x.i===cItem.id); if(ex) ex.n++; else it.push({i:cItem.id, nm:cItem.nm, p: cItem.p==null ? null : +cItem.p, n:1}); }); sfx.points(daySum(c.id), settings.maxPts); };
-            chips.appendChild(b);
-          });
-          card.appendChild(chips);
-        }
-      } else {
-        card.addEventListener("click", e=>{ if(e.target.closest("button,input")) return; activeRep=i; delArm=-1; renderRep(); });
-      }
-      list.appendChild(card);
-    });
-  }
-  $("repAdd").onclick = ()=>{ changeReps(R=>R.push({t:"", it:[]})); activeRep=(dayData(repCtx().id).reps||[]).length-1; delArm=-1; renderRep(); };
-  $("repPrev").onclick = ()=>{ const c=repCtx(); repDate=new Date(c.y,c.m,c.d-1); activeRep=-1; delArm=-1; renderRep(); };
-  $("repNext").onclick = ()=>{ const c=repCtx(); repDate=new Date(c.y,c.m,c.d+1); activeRep=-1; delArm=-1; renderRep(); };
-
-  // Известные веса деталей (из ваших ремонтов)
-  const KNOWN_PARTS = [["Блокиратор",2.3],["Задние колодки",3.8],["Цепь",0.5],["Звезда",2.8],["Вставка колеса",2],["Покрышка",2.3],["Наклейка номера",0],
-    ["Пластина номера",1.5],["Площадка переднего номера",1],["Крыло",1.1],["Зеркало левое",0.5],["Зеркало правое",0.5],["Держатель телефона",0.6]];
-  const missingKnown = () => KNOWN_PARTS.filter(([nm])=>!catalog.some(c=>c.nm.trim().toLowerCase()===nm.toLowerCase()));
-  $("catKnown").onclick = ()=>{
-    const add=missingKnown(); if(!add.length) return;
-    add.forEach(([nm,p],j)=>catalog.push({id:"k"+Date.now().toString(36)+j, nm, p}));
-    saveX("cat","list",catalog); $("catMsg").textContent="Добавлено деталей: "+add.length+". Работы (мойка, регулировки и т. д.) добавьте со своими весами."; sfx.save();
-    renderCat(); renderRep();
-  };
-  function renderRcats(){
-    const box=$("rcatList"); box.textContent="";
-    repCats().forEach((x,k)=>{
-      const row=el("div","rcat-row");
-      row.appendChild(el("b","", x.nm));
-      const f=el("input"); f.type="number"; f.inputMode="decimal"; f.step="0.1"; f.min="0"; f.value=x.from; f.disabled=k===0; f.setAttribute("aria-label",x.nm+": тяжесть от");
-      const pp=el("input"); pp.type="number"; pp.inputMode="decimal"; pp.step="0.5"; pp.min="0"; pp.value=x.p; pp.setAttribute("aria-label",x.nm+": баллов");
-      const save=()=>{
-        const C=JSON.parse(JSON.stringify(repCats())), fv=parseFloat(String(f.value).replace(",",".")), pv=parseFloat(String(pp.value).replace(",","."));
-        if(k>0 && isFinite(fv) && fv>=0) C[k].from=fv; if(isFinite(pv) && pv>=0) C[k].p=pv;
-        settings.repCats=C; saveSettings(); recalcAllReps(); renderRep();
-      };
-      f.addEventListener("change", save); pp.addEventListener("change", save);
-      row.append(f, pp); box.appendChild(row);
-    });
-  }
-  // Пересчёт баллов всех дней с ремонтами после смены категорий
-  function recalcAllReps(){
-    for(const id in dayx){ const R=(dayx[id]||{}).reps; if(!R || !R.length) continue; const [yy,mm,dd]=id.split("-").map(Number); applyDayPoints(yy,mm-1,dd,true); }
-    render();
-  }
-  const KNOWN_WORKS = ["Бортировка","Заклейка камеры переднего колеса (со снятием колеса)","Замена дуги багажника","Мойка","Нарезание резьбы для болта","Оклейка карпетом",
-    "Оклейка номера","Очистка багажника от скотча","Подкачка колёс","Подтяжка зеркал","Подтяжка и настройка цепи","Разбор байка под списание","Регулировка тормозов",
-    "Ремонт подножки/центрального винта","Ремонт шатунов со звездой","Устранение люфта руля","Устранение прокола (ЕВ-16)","Экстракция закисшего или слизанного болта"];
-  const missingWorks = () => KNOWN_WORKS.filter(nm=>!catalog.some(c=>c.nm.trim().toLowerCase()===nm.toLowerCase()));
-  $("workKnown").onclick = ()=>{
-    const add=missingWorks(); if(!add.length) return;
-    add.forEach((nm,j)=>catalog.push({id:"w"+Date.now().toString(36)+j, nm, p:null}));
-    saveX("cat","list",catalog); $("catMsg").textContent="Добавлено работ: "+add.length+". Их тяжесть пока неизвестна (стоит «?») — впишите её в списке ниже, когда узнаете."; sfx.save();
-    renderCat(); renderRep();
-  };
-  function renderCat(){
-    $("workKnownRow").hidden = !missingWorks().length;
-    $("workKnown").textContent = "Добавить работы из рейтинга ("+missingWorks().length+")";
-    $("catKnownRow").hidden = !missingKnown().length;
-    $("catKnown").textContent = "Добавить известные детали ("+missingKnown().length+")";
-    renderRcats();
-    const box=$("catList"); box.textContent="";
-    if(!catalog.length){ box.appendChild(el("p","rc-empty","Пока пусто. Добавьте первую работу и сколько баллов она даёт.")); return; }
-    catalog.forEach((cItem,i)=>{
-      const row=el("div","cat-row");
-      const n=el("input"); n.value=cItem.nm; n.maxLength=60; n.setAttribute("aria-label","Название работы");
-      const p=el("input"); p.type="number"; p.inputMode="decimal"; p.step="0.5"; p.min="0"; p.value=cItem.p==null ? "" : cItem.p; p.placeholder="тяжесть ?"; p.setAttribute("aria-label","Тяжесть работы");
-      const save=()=>{ const nm=n.value.trim(), pv=parseFloat(String(p.value).replace(",",".")), wasNull=cItem.p==null; if(nm) cItem.nm=nm; if(isFinite(pv)&&pv>=0) cItem.p=pv; saveX("cat","list",catalog);
-        // Вес работы стал известен — подставляем его в уже записанные ремонты, где он был «?»
-        if(wasNull && cItem.p!=null){ let n2=0; for(const id in dayx){ const R=(dayx[id]||{}).reps; if(!R) continue; let ch=false; R.forEach(r=>(r.it||[]).forEach(x=>{ if(x.i===cItem.id && x.p==null){ x.p=cItem.p; ch=true; } })); if(ch){ saveX("d",id,dayx[id]); n2++; } } if(n2){ recalcAllReps(); $("catMsg").textContent="Тяжесть обновлена и в ремонтах за "+dayz(n2)+"."; } }
-        renderCat(); renderRep(); };
-      n.addEventListener("change", save); p.addEventListener("change", save);
-      const del=el("button","", "×"); del.setAttribute("aria-label","Удалить «"+cItem.nm+"»");
-      del.onclick=()=>{ catalog.splice(i,1); saveX("cat","list",catalog); renderCat(); renderRep(); };
-      row.append(n,p,del); box.appendChild(row);
-    });
-  }
-  $("catAddBtn").onclick = ()=>{
-    const nm=$("catName").value.trim(), pv=parseFloat(String($("catPts").value).replace(",","."));
-    if(!nm){ $("catMsg").textContent="Напишите название работы."; return; }
-    if(!isFinite(pv) || pv<0){ $("catMsg").textContent="Укажите тяжесть числом, например 2 или 1,5."; return; }
-    catalog.push({id:"c"+Date.now().toString(36)+Math.random().toString(36).slice(2,5), nm, p:pv});
-    saveX("cat","list",catalog); $("catName").value=""; $("catPts").value=""; $("catMsg").textContent="Добавлено: "+nm+" — тяжесть "+f1(pv)+"."; sfx.save();
-    renderCat(); renderRep(); $("catName").focus();
-  };
-
   // ---- рекорды, серии, цена балла ----
   function recordsAll(){
     const t0=new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime(), list=[];
@@ -2170,17 +2188,18 @@ window.LOOK = (function(){
     let n=0; for(let d=1; d<=dim; d++){ if(new Date(y,m,d)<=t0) continue; const t=days[d]; if(!t || t==="o") n++; } return n;
   }
   function renderGoal(){
-    const k=key(view.y,view.m), g=settings.goals[k], c=calc(view.y,view.m), out=$("goalOut");
-    $("goalMonth").textContent = MONTHS[view.m];
+    const k=key(view.y,view.m), g=settings.goals[k], c=calc(view.y,view.m), out=$("goalOut"), tot=netv(c.total);
+    $("goalMonth").textContent = MONTHS[view.m]+(view.y!==now.getFullYear() ? " "+view.y : "");
     if(document.activeElement!==$("goalAmt")) $("goalAmt").value = g || "";
+    $("goalBar").style.width = g ? Math.min(100, tot/g*100).toFixed(1)+"%" : "0%";
     out.textContent="";
     const line=(t,b)=>{ const p=el(b?"b":"span","",t); out.appendChild(p); };
-    if(!g){ line("По отмеченным сменам за "+MONTHS[view.m]+" выходит "+fmt(c.total)+". Введите желаемую сумму, и я посчитаю, сколько доп. смен нужно."); return; }
-    const gap=g-c.total, per=settings.rate*(1+settings.pct/100), free=freeDays(view.y,view.m);
-    if(gap<=0){ line("Цель достигается", true); line("По отмеченным сменам выйдет "+fmt(c.total)+" — на "+fmt(-gap)+" больше цели."); return; }
+    if(!g){ line("По отмеченным сменам за "+MONTHS[view.m]+" выходит "+fmt(tot)+". Впишите желаемую сумму — посчитаю, сколько доп. смен нужно."); return; }
+    const gap=g-tot, per=netv(pay("x")*(1+(inBonus("x") ? settings.pct/100 : 0))), free=freeDays(view.y,view.m);
+    if(gap<=0){ line("Цель достигается 🎉", true); line("По отмеченным сменам выйдет "+fmt(tot)+" — на "+fmt(-gap)+" больше цели."); return; }
     const n=Math.ceil(gap/per);
-    line("Не хватает "+fmt(gap), true);
-    line("По отмеченным сменам выйдет "+fmt(c.total)+". Нужно ещё примерно "+n+" "+plural(n,"доп. смена","доп. смены","доп. смен").split(" ").slice(1).join(" ")+" — каждая ≈ "+fmt(per)+" с премией.");
+    line(Math.round(tot/g*100)+"% · не хватает "+fmt(gap), true);
+    line("Ещё "+n+" "+plural(n,"доп. смена","доп. смены","доп. смен").split(" ").slice(1).join(" ")+" — и цель закрыта. Каждая ≈ "+fmt(per)+" с премией.");
     line(free ? "Свободных дней в "+MONTHS_PREP[view.m]+" после сегодняшнего: "+free+"."+(n>free?" Их не хватит, чтобы выйти на цель.":"") : "Свободных дней в этом месяце больше нет.");
   }
   $("goalAmt").addEventListener("input", ()=>{
@@ -2567,7 +2586,7 @@ window.LOOK = (function(){
     $("phResult").hidden=false; $("phStart").hidden=true;
     $("phTitle").textContent = MONTHS[m][0].toUpperCase()+MONTHS[m].slice(1)+" "+y+" · "+phData.fio;
     const grid=$("phGrid"); grid.textContent="";
-    const first=(new Date(y,m,1).getDay()+6)%7;
+    const first=firstCol(y,m);
     for(let i=0;i<first;i++){ const p=el("div","day pad"); grid.appendChild(p); }
     let chg=0, cnt={w:0,x:0,o:0,s:0,a:0}, vac=0, unread=0;
     phPlan = {};
@@ -2608,8 +2627,6 @@ window.LOOK = (function(){
   };
 
   // ======== Итоги месяца: истории и карточка-картинка ========
-  $("hapToggle").checked = hapOn;
-  $("hapToggle").addEventListener("change", ()=>{ hapOn=$("hapToggle").checked; try{ localStorage.setItem("salary:hap", hapOn?"on":"off"); }catch(e){} if(hapOn) haptic("n","success"); });
   const esc = t => String(t==null?"":t).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
   const Cap = t => t ? t[0].toUpperCase()+t.slice(1) : t;
   const WDF = ["воскресенье","понедельник","вторник","среда","четверг","пятница","суббота"];
@@ -2686,7 +2703,7 @@ window.LOOK = (function(){
     S.push({c1:"var(--accent)", c2:"var(--hot)", html:
       '<div class="em">🎞️</div><div class="kick">Итоги месяца</div><h2>'+Cap(mName)+' '+R.y+'</h2>'+
       '<p>'+(settings.fio ? esc(settings.fio)+', смотрим' : 'Смотрим')+', как прошёл месяц.'+(R.curMonth ? ' Месяц ещё идёт — это итоги на сегодня.' : '')+'</p>'});
-    const first=(new Date(R.y,R.m,1).getDay()+6)%7; let dots='';
+    const first=firstCol(R.y,R.m); let dots='';
     for(let i=0;i<first;i++) dots+='<i style="visibility:hidden"></i>';
     for(let d=1; d<=R.dim; d++){ const t=R.days[d]; dots+='<i'+(t && t!=="o" ? ' class="t-'+t+'"' : '')+'></i>'; }
     const extra=[]; if(R.extraN) extra.push('из них <b>'+R.extraN+' доп.</b>'); if(R.sick) extra.push('больничных: '+R.sick); if(R.absent) extra.push('прогулов: '+R.absent);
@@ -2925,8 +2942,8 @@ window.LOOK = (function(){
     {e:"👋", h:"Это «Смены»", p:"Календарь механика: считает зарплату, премию и сколько баллов нужно набрать в день."},
     {e:"📅", h:"Отмечайте смены", p:"Выберите кисть и нажимайте на дни. Зажмите день — откроется быстрое меню. График можно заполнить по фото."},
     {e:"🎯", h:"Баллы и цель", p:"После смены внесите баллы. «Ввести общее» — число за период из рабочей системы. Плитки покажут, сколько нужно в день."},
-    {e:"🔧", h:"Ремонты", p:"Кнопки +1, +2, +4, +6 в карточке «Сегодня» — по одной на каждый ремонт. Подробный журнал — во вкладке «Ремонты»."},
-    {e:"🔔", h:"Бот и жесты", p:"Во вкладке «Ещё» включите уведомления — бот напомнит о смене и спросит баллы. Свайп влево-вправо переключает вкладки."}
+    {e:"💰", h:"Деньги", p:"Ближайшая выплата, сверка с расчёткой, цель и «что если». Кнопки +1…+6 в карточке «Сегодня» — по одной на каждый ремонт."},
+    {e:"⚙️", h:"Настройки и бот", p:"В «Настройках» — звук, вибрация, оформление и уведомления: бот напомнит о смене и спросит баллы. Свайп влево-вправо переключает вкладки."}
   ];
   function openTour(){
     let i=0; const box=el("div","story"); box.setAttribute("role","dialog"); box.setAttribute("aria-label","Как пользоваться");
@@ -2962,10 +2979,9 @@ window.LOOK = (function(){
   }
   // Тепловая карта: смены подсвечены по баллам
   var heatOn=false; try{ heatOn = localStorage.getItem("salary:heat")==="1"; }catch(e){}
-  $("heatToggle").onclick = ()=>{ heatOn=!heatOn; try{ localStorage.setItem("salary:heat", heatOn?"1":"0"); }catch(e){} render(); sfx.click(); };
   function applyHeat(){
     const g=$("grid"); g.classList.toggle("heat", heatOn);
-    $("heatToggle").textContent = heatOn ? "Обычный вид" : "Тепловая карта";
+    $("heatToggle").setAttribute("aria-checked", String(heatOn));
     const P=pts[key(view.y,view.m)]||{}, N=settings.maxPts, M=settings.minPts;
     g.querySelectorAll(".day[data-d]").forEach(b=>{
       b.removeAttribute("data-hp"); b.style.background=""; b.style.color="";
@@ -3095,7 +3111,6 @@ window.LOOK = (function(){
     }
     const row=el("div","pm-row");
     if(isShift(t)){ const e2=el("button","link-btn","Другое число и заметка"); e2.onclick=()=>{ closeDayMenu(); brush="p"; renderBrushes(); openEditor(d); setTimeout(()=>$("editor").scrollIntoView({block:"center", behavior:"smooth"}), 50); }; row.appendChild(e2); }
-    const rp=el("button","link-btn","Ремонты дня"); rp.onclick=()=>{ closeDayMenu(); repDate=new Date(view.y,view.m,d); activeRep=-1; setTab("rep"); }; row.appendChild(rp);
     const cl=el("button","link-btn","Закрыть"); cl.onclick=closeDayMenu; row.appendChild(cl);
     m.appendChild(row);
     shade.onclick=closeDayMenu;
@@ -3127,7 +3142,7 @@ window.LOOK = (function(){
   const pNum = t => parseFloat(String(t).replace(/[^\d,.-]/g,"").replace(",","."));
   function liveAfterRender(){
     popChanged();
-    rollNum("total", pNum, v=>fmt(v));
+    rollNum("total", t=>{ const v=pNum(t); return /\dк/.test(t) ? v*1000 : v; }, v=>fmt(v));
     rollNum("ptsTotal", pNum, v=>f1(Math.round(v*10)/10));
   }
   // Празднование: дневная норма в баллах — конфетти и вибрация
@@ -3139,6 +3154,288 @@ window.LOOK = (function(){
   }
   function burst(){ if(reduceMotion()) return; const w=el("div","burst"); document.body.appendChild(w); confetti(w); setTimeout(()=>w.remove(), 3500); }
 
+  // ======== Деньги: выплаты, сверка, цель, «что если», заработок за год ========
+  const APP_VER = "3.0";
+  const PAYDEF = {adv:25, sal:5, mode:"half", fix:0, ndfl:false};
+  function payCfg(){ let p={}; try{ p=settings.payout||{}; }catch(e){} return Object.assign({}, PAYDEF, p); }
+  function netv(v){ return payCfg().ndfl ? v*0.87 : v; }
+  const dimOf = (y,m) => new Date(y,m+1,0).getDate();
+  const Cap1 = t => t ? t[0].toUpperCase()+t.slice(1) : t;
+  const hasMarks = (y,m) => Object.keys(months[key(y,m)]||{}).length>0;
+  // Аванс за месяц: оплата смен с 1 по 15 число (без премии) или фиксированная сумма
+  function advFor(y,m){ const P=payCfg(); if(P.mode==="fixed") return hasMarks(y,m) ? Math.max(0, +P.fix||0) : 0; const days=months[key(y,m)]||{}; let s=0; for(const d in days) if(+d<=15) s+=pay(days[d]); return netv(s); }
+  // Зарплата за месяц: всё за месяц (смены и премия) минус аванс; приходит в следующем месяце
+  function salFor(y,m){ return Math.max(0, netv(calc(y,m).total) - advFor(y,m)); }
+  function payEvents(fromIdx, n){
+    const P=payCfg(), out=[];
+    for(let i=0;i<n;i++){ const ix=fromIdx+i, y=Math.floor(ix/12), m=ix%12, ny=Math.floor((ix+1)/12), nm=(ix+1)%12;
+      out.push({kind:"adv", y, m, date:new Date(y,m,Math.min(Math.max(1,+P.adv||25), dimOf(y,m))), amt:advFor(y,m)});
+      out.push({kind:"sal", y, m, date:new Date(ny,nm,Math.min(Math.max(1,+P.sal||5), dimOf(ny,nm))), amt:salFor(y,m)});
+    }
+    return out.sort((a,b)=>a.date-b.date);
+  }
+  const evName = e => (e.kind==="adv" ? "Аванс" : "Зарплата")+" за "+MONTHS[e.m];
+  const evDate = e => e.date.getDate()+" "+GEN[e.date.getMonth()];
+  const evKey = e => key(e.date.getFullYear(), e.date.getMonth());
+  const evGot = e => { const L=(pays[evKey(e)]||[]).filter(p=> e.kind==="adv" ? p.t==="Аванс" : (p.t==="Зарплата" || p.t==="Премия")); return L.length ? L.reduce((s,p)=>s+(+p.a||0),0) : null; };
+  let ckOpen=null;
+  function renderMoney(){
+    const t0=new Date(now.getFullYear(), now.getMonth(), now.getDate()), idx=now.getFullYear()*12+now.getMonth();
+    const ev=payEvents(idx-5, 7), fut=ev.filter(e=>e.date>=t0 && (hasMarks(e.y,e.m) || e.y*12+e.m>=idx)), past=ev.filter(e=>e.date<t0);
+    const h=fut[0], P=payCfg();
+    if(h){
+      const dd=Math.round((h.date-t0)/864e5);
+      $("mnNextWhen").textContent = dd===0 ? "сегодня" : dd===1 ? "завтра" : "через "+dayz(dd);
+      $("mnNextAmt").textContent = h.amt>0 ? "≈ "+fmt(h.amt) : "—";
+      const what = h.kind==="adv" ? (P.mode==="fixed" ? "фиксированный аванс" : "смены с 1 по 15 "+GEN[h.m]) : "смены и премия за "+MONTHS[h.m]+" минус аванс";
+      const grow = (h.y*12+h.m)>=idx ? " · сумма растёт с каждой отмеченной сменой" : "";
+      $("mnNextSub").textContent = evName(h)+", "+evDate(h)+" — "+what+(P.ndfl ? ", на руки" : "")+(h.amt>0 ? grow : " · отметьте смены в календаре");
+    } else { $("mnNextWhen").textContent=""; $("mnNextAmt").textContent="—"; $("mnNextSub").textContent="Отметьте смены в календаре — здесь появится прогноз выплаты."; }
+    const up=$("mnUpcoming"); up.textContent="";
+    fut.slice(1,3).forEach(e=>{ const r=el("div"); r.append(el("span","", evName(e)+", "+evDate(e)), el("b","", e.amt>0 ? "≈ "+fmt(e.amt) : "—")); up.appendChild(r); });
+    { const c=calc(now.getFullYear(), now.getMonth()), r=el("div"); r.append(el("span","", "Всего за "+MONTHS[now.getMonth()]+" по отметкам"), el("b","", fmt(netv(c.total)))); up.appendChild(r); }
+    // Сверка: прошедшие выплаты, свежие сверху
+    const box=$("mnCheck"); box.textContent="";
+    const list=past.filter(e=>e.amt>0 || evGot(e)!=null).reverse().slice(0,4);
+    if(!list.length) box.appendChild(el("p","mn-note","Здесь появятся прошедшие выплаты — когда наступит день аванса или зарплаты за месяц с отмеченными сменами."));
+    list.forEach(e=>{
+      const id=e.kind+key(e.y,e.m), got=evGot(e), row=el("div","ck");
+      const lft=el("div"); lft.append(el("b","", evName(e)), el("small","", " "+evDate(e)+" · расчёт "+fmt(e.amt)));
+      lft.style.display="flex"; lft.style.flexDirection="column";
+      const rt=el("div","ck-r");
+      if(got!=null){
+        const df=got-e.amt, ok=Math.abs(df)<=Math.max(50, e.amt*0.005);
+        rt.append(el("b","", fmt(got)), el("span", ok ? "ok" : df<0 ? "bad" : "more", ok ? "✓ сходится" : (df<0 ? "−" : "+")+fmt(Math.abs(df))));
+      } else { const b=el("button","ck-btn","Внести"); b.onclick=()=>{ ckOpen = ckOpen===id ? null : id; renderMoney(); }; rt.appendChild(b); }
+      row.append(lft, rt);
+      if(got!=null && !P.ndfl && e.amt>0 && Math.abs(got-e.amt*0.87)<=e.amt*0.02) row.appendChild(el("div","ck-hint","Похоже на вычет НДФЛ 13%. Включите его в «Работа» внизу этой вкладки — расчёт станет на руки."));
+      else if(got!=null && e.kind==="adv" && Math.abs(got-e.amt)>Math.max(50, e.amt*0.005) && P.mode!=="fixed") row.appendChild(el("div","ck-hint","Если аванс у вас фиксированный — укажите его сумму в «Работа»."));
+      if(ckOpen===id && got==null){
+        const f=el("div","ck-form"), inp=el("input"); inp.type="number"; inp.inputMode="numeric"; inp.min="0"; inp.step="100"; inp.placeholder="Сколько пришло, ₽"; inp.setAttribute("aria-label","Сколько пришло: "+evName(e));
+        const sv=el("button","save-btn","Сохранить");
+        sv.onclick=()=>{ const a=parseFloat(String(inp.value).replace(",",".")); if(!isFinite(a)||a<=0){ inp.focus(); sfx.error(); return; }
+          const k=evKey(e); pays[k]=(pays[k]||[]).concat({d:e.date.getDate(), a:Math.round(a), t: e.kind==="adv" ? "Аванс" : "Зарплата"}); saveX("p",k,pays[k]);
+          ckOpen=null; sfx.save(); renderMoney(); renderPays(); };
+        inp.addEventListener("keydown", ev2=>{ if(ev2.key==="Enter"){ ev2.preventDefault(); sv.click(); } });
+        f.append(inp, sv); row.appendChild(f); setTimeout(()=>{ try{ inp.focus({preventScroll:true}); }catch(x){} }, 30);
+      }
+      box.appendChild(row);
+    });
+    renderWI();
+  }
+  // «Что если»: доп. смены и средний балл → сумма за текущий месяц
+  let wiX=0, wiA=null;
+  function renderWI(){
+    const y=now.getFullYear(), m=now.getMonth(), c=calc(y,m);
+    if(wiA==null) wiA = c.avgP!=null ? Math.round(c.avgP) : settings.maxPts;
+    $("wiX").textContent=wiX; $("wiA").textContent=wiA;
+    const px=pay("x"), base2=c.base+wiX*px, bb2=c.bonusBase+(inBonus("x") ? wiX*px : 0), pc=pctFor(wiA), tot2=base2+bb2*pc/100;
+    const a=netv(c.total), b=netv(tot2), d=b-a, out=$("wiOut"); out.textContent="";
+    const same = !wiX && Math.abs(d)<1;
+    out.append(el("span","", same ? Cap1(MONTHS[m])+" по отметкам" : Cap1(MONTHS[m])+" сейчас: "+fmt(a)+" → будет"), el("b","", fmt(b)));
+    if(same) out.appendChild(el("span","", "Нажимайте + и −: сколько добавят доп. смены и другой средний балл."));
+    if(Math.abs(d)>=1) out.appendChild(el("span", d>0 ? "up" : "dn", (d>0 ? "+" : "−")+fmt(Math.abs(d))+(d>0 ? " к месяцу" : " от месяца")));
+    out.appendChild(el("span","", "Премия "+pctTxt(pc)+(wiA>=settings.maxPts ? " — полная" : wiA<settings.minPts ? " — меньше минимума, премии нет" : "")+(wiX ? " · доп. смена ≈ "+fmt(netv(px*(1+(inBonus("x")?pc/100:0)))) : "")));
+    const free=freeDays(y,m); if(wiX>free) out.appendChild(el("span","dn", "Свободных дней в "+MONTHS_PREP[m]+" осталось "+free));
+  }
+  const wiSet = (dx, da) => { wiX=Math.max(0, Math.min(20, wiX+dx)); wiA=Math.max(0, Math.min(60, (wiA==null?settings.maxPts:wiA)+da)); renderWI(); };
+  $("wiXm").onclick=()=>wiSet(-1,0); $("wiXp").onclick=()=>wiSet(1,0); $("wiAm").onclick=()=>wiSet(0,-1); $("wiAp").onclick=()=>wiSet(0,1);
+  // График заработка по месяцам
+  function renderMoneyChart(){
+    const y=view.y, idx=now.getFullYear()*12+now.getMonth(), V=[];
+    for(let m=0;m<12;m++){ const c=calc(y,m); V.push({m, v:netv(c.total), cur: y*12+m===idx, fut: y*12+m>idx}); }
+    const W=340, H=156, L=2, R=2, Tp=20, B=18, iw=W-L-R, ih=H-Tp-B, mx=Math.max(1, ...V.map(x=>x.v)), bw=iw/12, gap=5;
+    const LET=["Я","Ф","М","А","М","И","И","А","С","О","Н","Д"], kv=v=> v>=1000 ? Math.round(v/1000)+"к" : v>0 ? String(Math.round(v)) : "";
+    let svg='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Заработок по месяцам '+y+' года">';
+    const done=V.filter(x=>x.v>0 && !x.fut), avg=done.length ? done.reduce((s,x)=>s+x.v,0)/done.length : 0;
+    V.forEach(x=>{ const h=x.v>0 ? Math.max(3, x.v/mx*ih) : 2, X=L+x.m*bw+gap/2, w=bw-gap, cx=(X+w/2).toFixed(1);
+      svg+='<rect class="mb'+(x.cur?' cur':'')+(x.fut && !x.v?' fut':'')+'" x="'+X.toFixed(1)+'" y="'+(Tp+ih-h).toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+h.toFixed(1)+'" rx="4"/>';
+      if(x.v>0) svg+='<text class="vl" x="'+cx+'" y="'+(Tp+ih-h-4).toFixed(1)+'" text-anchor="middle">'+kv(x.v)+'</text>';
+      svg+='<text class="ax" x="'+cx+'" y="'+(H-5)+'" text-anchor="middle">'+LET[x.m]+'</text>'; });
+    if(avg>0){ const ay=(Tp+ih-avg/mx*ih).toFixed(1); svg+='<line class="avl" x1="'+L+'" x2="'+(W-R)+'" y1="'+ay+'" y2="'+ay+'"/>'; }
+    svg+='</svg>';
+    const sum=V.reduce((s,x)=>s+x.v,0);
+    $("mnChart").innerHTML = svg + (done.length ? '<p>В среднем ≈ '+fmt(avg)+' в месяц (пунктир) · всего за год '+fmt(sum)+'</p>' : '<p>Отметьте смены — появится заработок по месяцам.</p>');
+  }
+  // Настройки «Работа»: смена и выплаты
+  function renderWorkExtra(){
+    const P=payCfg(), S=settings.shift||{from:"09:30", to:"21:30"}, act=document.activeElement;
+    const put=(id,v)=>{ const e=$(id); if(e && e!==act) e.value=v; };
+    put("shFrom", S.from); put("shTo", S.to); put("payAdv", P.adv); put("paySal", P.sal); put("advMode", P.mode); put("advFix", P.fix||"");
+    if($("ndfl")) $("ndfl").checked=!!P.ndfl; if($("advFixL")) $("advFixL").hidden = P.mode!=="fixed";
+  }
+  function onWork(){
+    const P=payCfg(), ad=parseInt($("payAdv").value,10), sl=parseInt($("paySal").value,10), fx=parseFloat($("advFix").value);
+    if(ad>=1 && ad<=31) P.adv=ad; if(sl>=1 && sl<=31) P.sal=sl; P.mode=$("advMode").value==="fixed" ? "fixed" : "half"; P.fix = isFinite(fx)&&fx>=0 ? Math.round(fx) : 0; P.ndfl=$("ndfl").checked;
+    settings.payout=P; settings.shift={from:$("shFrom").value||"09:30", to:$("shTo").value||"21:30"};
+    $("advFixL").hidden = P.mode!=="fixed"; saveSettings(); renderYear(); renderMoney(); renderGoal();
+  }
+  ["payAdv","paySal","advFix","shFrom","shTo"].forEach(id=>$(id).addEventListener("input", onWork));
+  ["advMode","ndfl"].forEach(id=>$(id).addEventListener("change", onWork));
+  renderWorkExtra();
+
+  // ======== Настройки ========
+  function tgl(id, on, fn, dis){ const b=$(id); if(!b) return; b.setAttribute("aria-checked", String(!!on)); b.disabled=!!dis; b._fn=fn;
+    if(!b._t){ b._t=1; b.addEventListener("click", ()=>{ if(b.disabled) return; const v=b.getAttribute("aria-checked")!=="true"; b.setAttribute("aria-checked", String(v)); haptic("i","light"); try{ b._fn(v); }catch(e){ console.error(e); } }); } }
+  function seg(boxId, opts, cur, fn){ const box=$(boxId); if(!box) return; box.textContent=""; opts.forEach(([v,lbl])=>{ const b=el("button","",lbl); b.setAttribute("aria-pressed", String(v===cur)); b.onclick=()=>fn(v); box.appendChild(b); }); }
+  const NOTIF_DEF = {eve:true, end:true, rem2:true, week:true, backup:false};
+  const notifs = () => Object.assign({}, NOTIF_DEF, settings.notifs||{});
+  function setNotifOpt(k, v){ const n=notifs(); n[k]=v; settings.notifs=n; saveSettings(); renderNotifOpts(); renderSet(); }
+  function renderNotifOpts(){
+    const o=$("notifOpts"); if(!o) return; o.hidden=!notifOn; const n=notifs();
+    tgl("nEve", n.eve, v=>setNotifOpt("eve", v)); tgl("nEnd", n.end, v=>setNotifOpt("end", v)); tgl("nRem2", n.rem2, v=>setNotifOpt("rem2", v)); tgl("nWeek", n.week, v=>setNotifOpt("week", v));
+    const pu=settings.pauseUntil||"", t0=iso(new Date(now.getFullYear(), now.getMonth(), now.getDate())), tx=$("nPauseTx"); tx.textContent="";
+    if(pu && pu>t0){ tx.appendChild(el("span","", "⏸ На паузе: сообщения снова придут с "+shortDate(pu)+". ")); const b=el("button","link-btn","Снять паузу"); b.onclick=()=>{ settings.pauseUntil=""; saveSettings(); renderNotifOpts(); sfx.click(); }; tx.appendChild(b); }
+    $("nPause").value="0";
+  }
+  $("nPause").addEventListener("change", ()=>{ const n=parseInt($("nPause").value,10); if(!(n>0)) return; settings.pauseUntil=iso(new Date(now.getFullYear(), now.getMonth(), now.getDate()+n)); saveSettings(); renderNotifOpts(); sfx.save(); });
+  // Приватность: суммы размыты, нажатие показывает их на 8 секунд
+  let privOn=false; try{ privOn = localStorage.getItem("salary:priv")==="1"; }catch(e){}
+  const applyPriv = () => document.documentElement.classList.toggle("priv", privOn);
+  applyPriv();
+  { let pt=null; document.addEventListener("click", e=>{ if(!privOn) return; const t=e.target.closest && e.target.closest(".pvt"); if(!t) return; const H=document.documentElement; if(H.classList.contains("priv-show")) return;
+      e.preventDefault(); e.stopPropagation(); H.classList.add("priv-show"); clearTimeout(pt); pt=setTimeout(()=>H.classList.remove("priv-show"), 8000); }, true); }
+  // Вход по Face ID / отпечатку (Telegram BiometricManager)
+  const BM = () => (miniApp && tgAtLeast("7.2") && tg.BiometricManager) || null;
+  let lockOn=false; try{ lockOn = localStorage.getItem("salary:lock")==="1"; }catch(e){}
+  function bmInit(){ return new Promise(res=>{ const b=BM(); if(!b) return res(null); if(b.isInited) return res(b); let done=false; const fin=v=>{ if(!done){ done=true; res(v); } }; try{ b.init(()=>fin(b)); }catch(e){ fin(null); } setTimeout(()=>fin(b.isInited ? b : null), 3000); }); }
+  function bmAuth(reason){ return new Promise(res=>{ const b=BM(); if(!b) return res(false); try{ b.authenticate({reason}, ok=>res(!!ok)); }catch(e){ res(false); } }); }
+  const unlock = () => { $("lock").hidden=true; };
+  async function lockFlow(){
+    if($("lock").hidden) return;
+    if(!lockOn || !BM()){ unlock(); return; }
+    const b=await bmInit(); if(!b || !b.isBiometricAvailable || !b.isAccessGranted){ unlock(); return; }
+    $("lockBtn").textContent = b.biometricType==="finger" ? "Открыть по отпечатку" : "Открыть по Face ID";
+    $("lockTx").textContent = "Подтвердите, что это вы";
+    const ok=await bmAuth("Откройте календарь «Смены»");
+    if(ok){ unlock(); haptic("n","success"); } else $("lockTx").textContent="Не получилось. Нажмите, чтобы попробовать ещё раз.";
+  }
+  $("lockBtn").onclick = lockFlow;
+  lockFlow();
+  async function setLock(v){
+    const msg=$("lockMsg"); msg.textContent="";
+    if(!v){ lockOn=false; try{ localStorage.setItem("salary:lock","0"); }catch(e){} msg.textContent="Календарь открывается без проверки."; renderSet(); return; }
+    const b=await bmInit();
+    if(!b || !b.isBiometricAvailable){ msg.textContent="На этом телефоне Telegram не может использовать Face ID или отпечаток."; renderSet(); return; }
+    if(!b.isAccessGranted){
+      if(b.isAccessRequested){ msg.textContent="Раньше доступ был запрещён. Разрешите его в открывшихся настройках и включите снова."; try{ b.openSettings(); }catch(e){} renderSet(); return; }
+      const g=await new Promise(res=>{ try{ b.requestAccess({reason:"Чтобы никто, кроме вас, не открыл ваши смены и зарплату"}, ok=>res(!!ok)); }catch(e){ res(false); } });
+      if(!g){ msg.textContent="Доступ не разрешён — вход по Face ID не включён."; renderSet(); return; }
+    }
+    const ok=await bmAuth("Проверка для входа в «Смены»");
+    if(!ok){ msg.textContent="Проверка не пройдена — вход не включён."; renderSet(); return; }
+    lockOn=true; try{ localStorage.setItem("salary:lock","1"); }catch(e){} msg.textContent="Готово: при открытии календарь спросит Face ID."; sfx.good(); renderSet();
+  }
+  function setHap(v){ hapLv=v; hapOn=v!=="off"; try{ localStorage.setItem("salary:hap", v); }catch(e){} if(hapOn) haptic("i","medium"); renderSet(); }
+  function agoTxt(ms){ if(!ms) return ""; const d=new Date(ms), t=d.toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"}), dd=Math.round((new Date(now.getFullYear(),now.getMonth(),now.getDate()) - new Date(d.getFullYear(),d.getMonth(),d.getDate()))/864e5);
+    return dd===0 ? "сегодня в "+t : dd===1 ? "вчера в "+t : d.getDate()+" "+GEN[d.getMonth()]+" в "+t; }
+  function renderSet(){
+    tgl("heatToggle", heatOn, v=>{ heatOn=v; try{ localStorage.setItem("salary:heat", v?"1":"0"); }catch(e){} render(); });
+    tgl("sndToggle", sfx.on, v=>{ sfx.set(v); const sb2=$("soundBtn"); if(sb2) sb2.setAttribute("aria-pressed", String(v)); if(v) sfx.good(); renderSet(); });
+    seg("clkList", [["click","Щелчок"],["soft","Мягкий"],["drop","Капля"],["mech","Механика"]], sfx.clk, v=>{ sfx.setClk(v); if(!sfx.on){ sfx.set(true); } sfx.click(v); renderSet(); });
+    seg("hapList", [["off","Выключена"],["on","Лёгкая"],["strong","Сильная"]], hapLv==="off" ? "off" : hapLv==="strong" ? "strong" : "on", setHap);
+    // синхронизация
+    let last=0; try{ last=+localStorage.getItem("salary:lastSave")||0; }catch(e){}
+    $("syncWhere").textContent = cloud ? "Данные в вашем аккаунте Telegram" : "Данные хранятся на этом телефоне";
+    $("syncWhen").textContent = (netState==="err" ? "Есть несохранённые изменения. " : netState==="off" ? "Нет интернета — сохраню, когда появится. " : "")+(last ? "Последнее сохранение: "+agoTxt(last) : "Пока ничего не сохранялось");
+    $("syncDot").dataset.st = netState;
+    const bot = !!(API_URL && miniApp), n=notifs();
+    $("bakRow").hidden = !bot;
+    tgl("bakToggle", notifOn && n.backup, v=>{ setNotifOpt("backup", v); $("bakHint").textContent = v ? "Включено. Первая копия придёт в воскресенье около 21:00." : "Бот пришлёт файл с данными в чат — из него всё восстанавливается"; }, !notifOn);
+    if(!notifOn) $("bakHint").textContent = "Сначала включите уведомления в разделе «Уведомления» — тогда бот сможет хранить копию.";
+    let bn=$("bakNow"); if(!bn){ bn=el("button","link-btn","Прислать копию в чат сейчас"); bn.id="bakNow"; bn.style.alignSelf="flex-start"; $("bakRow").after(bn); bn.onclick=sendBackupNow; }
+    bn.hidden = !(bot && notifOn);
+    // приватность
+    tgl("privToggle", privOn, v=>{ privOn=v; try{ localStorage.setItem("salary:priv", v?"1":"0"); }catch(e){} applyPriv(); });
+    $("lockRow").hidden = !BM();
+    tgl("lockToggle", lockOn, setLock);
+    // календарь
+    seg("wkList", [[1,"Понедельника"],[0,"Воскресенья"]], settings.wk0===0 ? 0 : 1, v=>{ settings.wk0=v; saveSettings(); render(); renderSet(); sfx.click(); });
+    seg("mfList", [["full","48 300 ₽"],["short","48,3к ₽"]], settings.mfmt==="short" ? "short" : "full", v=>{ settings.mfmt=v; saveSettings(); render(); renderSet(); sfx.click(); });
+    $("fbBox").hidden = !bot;
+    $("verTx").textContent = APP_VER;
+  }
+  $("syncNow").onclick = async ()=>{
+    const b=$("syncNow"); b.disabled=true; b.textContent="Синхронизирую…";
+    try{ await $("saveNow").onclick(); await pullServer(); if(notifOn) await syncServer(true); }catch(e){}
+    b.disabled=false; b.textContent="Синхронизировать сейчас"; renderSet();
+  };
+  async function sendBackupNow(){
+    const b=$("bakNow"); b.disabled=true; b.textContent="Отправляю…";
+    let ok=false;
+    try{ await syncServer(true); const r=await fetch(API_URL.replace(/\/$/,"")+"/backup", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({initData: tg.initData})}); const j=await r.json().catch(()=>({})); ok=!!j.ok; }catch(e){}
+    b.disabled=false; b.textContent = ok ? "Копия отправлена в чат ✓" : "Не отправилось — попробуйте ещё раз";
+    if(ok) sfx.save(); else sfx.error();
+    setTimeout(()=>{ b.textContent="Прислать копию в чат сейчас"; }, 5000);
+  }
+  // Данные: таблица для Excel, очистка, удаление
+  async function saveFile(name, data, type, msgEl){
+    const file = new File([data], name, {type});
+    try{ if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file], title:name}); msgEl.textContent="Готово: сохраните файл в «Файлы» или откройте в Excel."; return; } }
+    catch(e){ if(e && e.name==="AbortError"){ msgEl.textContent="Сохранение отменено."; return; } }
+    const url=URL.createObjectURL(file), a=document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url), 4000);
+    msgEl.textContent="Файл сохранён: "+name;
+  }
+  function csvText(){
+    const WD2=["вс","пн","вт","ср","чт","пт","сб"], rows=[["Дата","День недели","Отметка","Баллы","Оплата, ₽","Заметка"]], keys=Object.keys(months).filter(k=>/^\d{4}-\d{2}$/.test(k)).sort();
+    for(const k of keys){ const [yy,mm]=k.split("-").map(Number), D=months[k]||{}, P=pts[k]||{};
+      for(let d=1; d<=dimOf(yy,mm-1); d++){ const t=D[d], note=(dayx[ds(yy,mm-1,d)]||{}).note||""; if(!t && !note) continue;
+        rows.push([String(d).padStart(2,"0")+"."+String(mm).padStart(2,"0")+"."+yy, WD2[new Date(yy,mm-1,d).getDay()], t ? T[t].name : "", P[d]!=null && isShift(t) ? String(P[d]).replace(".",",") : "", t ? Math.round(pay(t)) : "", note]); } }
+    rows.push([]); rows.push(["Месяц","Смен","Доп. смен","Средний балл за период","Премия, %","Премия, ₽","Итого, ₽"]);
+    for(const k of keys){ const [yy,mm]=k.split("-").map(Number); if(!Object.keys(months[k]||{}).length) continue; const c=calc(yy,mm-1);
+      rows.push([Cap1(MONTHS[mm-1])+" "+yy, c.cnt.w, c.cnt.x, c.avgP!=null ? f1(c.avgP) : "", f1(c.bonusPct), Math.round(c.bonus), Math.round(c.total)]); }
+    const q=v=>{ const t=String(v==null ? "" : v); return /[;"\n\r]/.test(t) ? '"'+t.replace(/"/g,'""')+'"' : t; };
+    return "﻿"+rows.map(r=>r.map(q).join(";")).join("\r\n");
+  }
+  $("csvBtn").onclick = ()=>{ const d=new Date(); saveFile("смены-"+iso(d)+".csv", csvText(), "text/csv", $("csvMsg")); };
+  let dMode=null;
+  $("dClearM").onclick = ()=>{ dMode="month"; $("dConfTx").textContent="Очистить "+MONTHS[view.m]+" "+view.y+": все отметки и баллы этого месяца? Можно будет отменить сразу после."; $("dYes").textContent="Очистить месяц"; $("dConfirm").hidden=false; $("dMsg").textContent=""; };
+  $("dWipe").onclick = ()=>{ dMode="all"; $("dConfTx").textContent="Удалить все отметки, баллы, заметки и выплаты за всё время? Это нельзя отменить. Настройки и оформление останутся. Сначала можно скачать копию в «Синхронизация и копии»."; $("dYes").textContent="Удалить всё навсегда"; $("dConfirm").hidden=false; $("dMsg").textContent=""; };
+  $("dNo").onclick = ()=>{ dMode=null; $("dConfirm").hidden=true; };
+  $("dYes").onclick = async ()=>{
+    $("dConfirm").hidden=true;
+    if(dMode==="month"){ $("clearYes").onclick(); $("dMsg").textContent=Cap1(MONTHS[view.m])+" очищен."; dMode=null; return; }
+    if(dMode!=="all") return; dMode=null;
+    months={}; pts={}; totals={}; dayx={}; pays={}; catalog=[];
+    try{ const rm=[]; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(/^salary:(\d{4}-\d{2}$|d:|p:|cat:list)/.test(k)) rm.push(k); } rm.forEach(k=>localStorage.removeItem(k)); }catch(e){}
+    if(cloud){ try{ const ks=(await ckeys()).filter(k=>/^(m_|d_|p_)|^cat_list$/.test(k)); for(const k of ks) await cremove(k); }catch(e){} }
+    if(notifOn) syncServer(true);
+    closeEditor(); render(); sfx.unmark(); $("dMsg").textContent="Все данные удалены. Настройки остались."; status("Данные удалены");
+  };
+  // Помощь: что нового, написать разработчику
+  const NEWS = [{v:"3.0", d:"17 октября 2026", items:[
+    "Новая вкладка «Деньги»: ближайшая выплата, сверка с расчёткой, цель на месяц, «что если» и заработок за год",
+    "«Ещё» стала «Настройками»: звук и вибрация, синхронизация, уведомления, приватность, календарь, данные, помощь",
+    "Бот может присылать копию данных по воскресеньям и итоги недели; можно поставить уведомления на паузу",
+    "Скрытие сумм и вход по Face ID",
+    "Неделя с воскресенья, короткий формат сумм, таблица для Excel",
+    "Раздел «Ремонты» убран — кнопки +1…+6 в карточке «Сегодня» остались",
+    "Свайп между вкладками стал плавным"]}];
+  function openNews(){
+    const bg=el("div","sheet-bg"), sh=el("div","sheet"); sh.setAttribute("role","dialog"); sh.setAttribute("aria-label","Что нового");
+    NEWS.forEach((n,i)=>{ sh.appendChild(el("span","kick","Версия "+n.v+" · "+n.d)); if(i===0) sh.appendChild(el("h2","","Что нового")); const ul=el("ul"); n.items.forEach(t=>ul.appendChild(el("li","",t))); sh.appendChild(ul); });
+    const ok=el("button","save-btn","Понятно"); sh.appendChild(ok);
+    const close=()=>{ bg.remove(); try{ localStorage.setItem("salary:ver", APP_VER); }catch(e){} };
+    ok.onclick=close; bg.onclick=e=>{ if(e.target===bg) close(); };
+    bg.appendChild(sh); document.body.appendChild(bg);
+  }
+  $("newsOpen").onclick = openNews;
+  setTimeout(()=>{ try{ const v=localStorage.getItem("salary:ver"), seen=localStorage.getItem("salary:tour")==="1";
+    if(v!==APP_VER){ if(seen && !document.querySelector(".story")) openNews(); else localStorage.setItem("salary:ver", APP_VER); } }catch(e){} }, 1600);
+  $("fbSend").onclick = async ()=>{
+    const t=$("fbText").value.trim(), msg=$("fbMsg"), b=$("fbSend");
+    if(t.length<3){ msg.textContent="Напишите сообщение."; $("fbText").focus(); return; }
+    b.disabled=true; msg.textContent="Отправляю…";
+    try{
+      const r=await fetch(API_URL.replace(/\/$/,"")+"/feedback", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({initData: tg.initData, text:t, ver:APP_VER, app: location.pathname.includes("team") ? "команда" : "личная"})});
+      const j=await r.json().catch(()=>({}));
+      if(j.ok){ msg.textContent="Отправлено. Спасибо! Ответ придёт в чат с ботом."; $("fbText").value=""; sfx.save(); }
+      else msg.textContent = ({limit:"Сегодня уже отправлено много сообщений — попробуйте завтра.", no_owner:"Получатель сообщений пока не настроен."})[j.error] || "Не отправилось. Проверьте интернет и попробуйте ещё раз.";
+    }catch(e){ msg.textContent="Не отправилось. Проверьте интернет и попробуйте ещё раз."; }
+    b.disabled=false;
+  };
+  window.addEventListener("online", ()=>{ try{ renderSet(); }catch(e){} }); window.addEventListener("offline", ()=>{ try{ renderSet(); }catch(e){} });
+
   const sb=$("soundBtn"); sb.setAttribute("aria-pressed", sfx.on);
   sb.onclick = ()=>{ sfx.set(!sfx.on); sb.setAttribute("aria-pressed", sfx.on); sb.setAttribute("aria-label", sfx.on?"Звук включён":"Звук выключен"); if(sfx.on) sfx.good(); };
   // ---- Уведомления: календарь отправляет график и баллы на сервер бота ----
@@ -3148,7 +3445,7 @@ window.LOOK = (function(){
     if(!API_URL || !miniApp) return false;
     try{
       const r = await fetch(API_URL.replace(/\/$/,"")+"/sync", {method:"POST", headers:{"Content-Type":"application/json"},
-        body: JSON.stringify({initData: tg.initData, enabled, appUrl: location.origin+location.pathname, data:{settings, months, points:pts, totals}, inboxAck: pendingAck||undefined})});
+        body: JSON.stringify({initData: tg.initData, enabled, appUrl: location.origin+location.pathname, data:{settings, months, points:pts, totals, days:dayx, pays}, inboxAck: pendingAck||undefined})});
       const j = await r.json().catch(()=>({}));
       if(r.ok && j.ok) pendingAck=0;
       return !!(r.ok && j.ok);
@@ -3159,6 +3456,7 @@ window.LOOK = (function(){
     box.hidden = !(API_URL && miniApp);
     $("notifToggle").textContent = notifOn ? "Выключить уведомления" : "Включить уведомления";
     $("notifToggle").className = notifOn ? "ghost-btn" : "save-btn";
+    try{ renderNotifOpts(); }catch(e){}
   }
   async function setNotif(on){
     const msg=$("notifMsg"); msg.textContent = on ? "Включаю…" : "Выключаю…";
@@ -3177,7 +3475,7 @@ window.LOOK = (function(){
   $("notifToggle").onclick = ()=>setNotif(!notifOn);
 
   // Подсказка: где открыт календарь и как не потерять данные
-  function openTransfer(){ setTab("more"); const d=$("copyCode").closest("details"); d.open=true; d.scrollIntoView({block:"start"}); }
+  function openTransfer(){ setTab("set"); const d=$("copyCode").closest("details"); d.open=true; d.scrollIntoView({block:"start"}); }
   function setupNotice(){
     let hidden=false; try{ hidden = localStorage.getItem("salary:noticeHidden")==="1"; }catch(e){}
     const standalone = navigator.standalone===true || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
