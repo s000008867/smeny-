@@ -1455,9 +1455,12 @@ window.LOOK = (function(){
     if(T0 && T0.pts!=null){
       const lim=new Date(T0.upTo+"T23:59:59"); let aSum=0, aCnt=0;
       for(const it of list){ if(new Date(it.yy, it.mo, it.d) > lim){ aSum+=it.p; aCnt++; } }
-      pSum = +T0.pts + aSum; pDone = dates.filter(d=>d<=lim).length + aCnt;
+      // Баллы дня «по число», изменённые после сохранения общего (ремонт добавили или убрали), меняют итог
+      let dl=0; const [ly,lm,ld]=T0.upTo.split("-").map(Number), limIt=list.find(it=>it.yy===ly && it.mo===lm-1 && it.d===ld);
+      if(T0.dp!=null) dl=(limIt ? limIt.p : 0) - (+T0.dp||0);
+      pSum = +T0.pts + aSum + dl; pDone = dates.filter(d=>d<=lim).length + aCnt;
       counted = tDay<=lim || !!todayIt;
-      if(live && todayIt && tDay>lim) part = todayIt.p;
+      if(live && todayIt && (tDay>lim || (T0.dp!=null && tDay.getTime()===new Date(ly,lm-1,ld).getTime()))) part = todayIt.p;
     } else if(live && todayIt) part = todayIt.p;
     if(live && counted) pDone--;
     const avgP = pDone ? (pSum-part)/pDone : null, avgSrc = T0 && T0.pts!=null ? "manual" : (scored ? "daily" : "none");
@@ -1842,7 +1845,7 @@ window.LOOK = (function(){
     const v=parseFloat($("totPts").value), dt=$("totDate").value;
     if(!isFinite(v) || v<0){ status("Введите количество баллов числом.", true); return; }
     if(!dt){ status("Укажите, по какое число посчитаны баллы.", true); return; }
-    const k=key(view.y,view.m); totals[k]={pts:Math.round(v*10)/10, upTo:dt, fx:1};
+    const k=key(view.y,view.m), [dy,dm,dd2]=dt.split("-").map(Number), dP=(pts[key(dy,dm-1)]||{})[dd2]; totals[k]={pts:Math.round(v*10)/10, upTo:dt, fx:1, dp: dP!=null ? +dP : 0};
     $("totForm").hidden=true; render(); scheduleSave(k); sfx.save();
   };
   $("totClear").onclick = ()=>{ const k=key(view.y,view.m); delete totals[k]; render(); scheduleSave(k); };
@@ -2938,7 +2941,8 @@ window.LOOK = (function(){
     const lim=new Date(dt+"T23:59:59"); let aSum=0, aCnt=0;
     for(const it of c.list){ if(new Date(it.yy,it.mo,it.d)>lim){ aSum+=it.p; aCnt++; } }
     // Пробный расчёт с новым общим числом — тем же способом, что и после сохранения
-    const was=totals[k]; totals[k]={pts:v, upTo:dt}; const c2=calc(yy,mm-1); if(was) totals[k]=was; else delete totals[k];
+    const [dy,dm,dd2]=dt.split("-").map(Number), dP=(pts[key(dy,dm-1)]||{})[dd2];
+    const was=totals[k]; totals[k]={pts:v, upTo:dt, dp: dP!=null ? +dP : 0}; const c2=calc(yy,mm-1); if(was) totals[k]=was; else delete totals[k];
     out.textContent = now1+" Станет: "+f1(v)+" по "+shortDate(dt)+" включительно"+(aCnt ? " + "+f1(aSum)+" за "+plural(aCnt,"смену","смены","смен")+" после" : "")+" = "+f1(c2.pSum)+(c2.avgP!=null ? ", средний "+f1(c2.avgP) : "")+". Баллы смен по "+shortDate(dt)+" берутся только из общего числа."+(c2.live && dt===iso(new Date()) ? " Смена ещё идёт: ремонты, которые вы внесёте сегодня, не прибавятся — для этого поставьте вчерашнюю дату." : "");
   }
   ["tqPts","tqDate"].forEach(id=>$(id).addEventListener("input", tqPreview));
@@ -2951,7 +2955,8 @@ window.LOOK = (function(){
     const v=parseFloat(String($("tqPts").value).replace(",",".")), dt=$("tqDate").value, k=$("tqForm").dataset.k;
     if(!isFinite(v) || v<0){ status("Введите количество баллов числом.", true); return; }
     if(!dt){ status("Укажите, по какое число посчитаны баллы.", true); return; }
-    totals[k]={pts:Math.round(v*10)/10, upTo:dt, fx:1};
+    const [dy,dm,dd2]=dt.split("-").map(Number), dP=(pts[key(dy,dm-1)]||{})[dd2];
+    totals[k]={pts:Math.round(v*10)/10, upTo:dt, fx:1, dp: dP!=null ? +dP : 0};
     tqClose(); render(); scheduleSave(k); sfx.save();
     const [yy,mm]=k.split("-").map(Number), c=calc(yy,mm-1);
     status("Общее сохранено: "+f1(v)+" · средний "+(c.avgP!=null?f1(c.avgP):"—"));
@@ -3381,10 +3386,11 @@ window.LOOK = (function(){
   // Общее, сохранённое старой версией «по сегодня» во время смены, считаем «по вчера» — тогда сегодняшние ремонты прибавляются
   function fixTodayTotal(){
     const t0=new Date(now.getFullYear(), now.getMonth(), now.getDate()), per=periodOf(t0), k=key(per.y, per.m), T0=totals[k];
-    if(!T0 || T0.fx || T0.upTo!==iso(t0)) return;
-    if(!calc(per.y, per.m).live) return;
-    totals[k]=Object.assign({}, T0, {upTo: iso(new Date(t0.getFullYear(), t0.getMonth(), t0.getDate()-1)), fx:1}); scheduleSave(k);
+    if(!T0 || T0.dp!=null) return;
+    if(T0.upTo===iso(t0)){ const P=ptsOn(t0); totals[k]=Object.assign({}, T0, {fx:1, dp: P!=null ? P : 0}); scheduleSave(k); return; }
+    if(!T0.fx){ const [ly,lm,ld]=T0.upTo.split("-").map(Number), P=(pts[key(ly,lm-1)]||{})[ld]; totals[k]=Object.assign({}, T0, {fx:1, dp: P!=null ? +P : 0}); scheduleSave(k); }
   }
+
 
   // Кружок баллов при открытии календаря заполняется с нуля
   function ringIntro(){
