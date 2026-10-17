@@ -1,1 +1,102 @@
+# Автовыкладка «Смен».
+# Загрузили файлы в репозиторий smeny- → проверки расчёта → сайт smeny-, сайт smeny-team и бот обновляются сами.
+# Если проверки не прошли — не выкладывается НИЧЕГО, а GitHub пришлёт письмо.
+name: Выкладка
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  check:
+    name: Проверки и сборка
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Тесты расчёта (calc_test.js)
+        run: |
+          # имя файла с проверками может прийти с пробелом вместо «_» (так сохраняет iPhone)
+          shopt -s nullglob
+          files=(calc*test*.js)
+          if [ ${#files[@]} -eq 0 ]; then echo "::error::Нет файла с проверками calc_test.js"; exit 1; fi
+          node --test "${files[@]}"
+      - name: Сборка сайта
+        run: node build.js
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  site:
+    name: Сайт smeny-
+    needs: check
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
+
+  team:
+    name: Сайт smeny-team
+    needs: check
+    runs-on: ubuntu-latest
+    env:
+      TOKEN: ${{ secrets.TEAM_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node build.js
+      - name: Отправить в smeny-team
+        run: |
+          if [ -z "$TOKEN" ]; then echo "::warning::Нет секрета TEAM_TOKEN — smeny-team не обновлён"; exit 0; fi
+          git clone --depth 1 "https://x-access-token:${TOKEN}@github.com/${{ github.repository_owner }}/smeny-team.git" team
+          cp -r _site/. team/
+          cd team
+          git config user.name "smeny-deploy"
+          git config user.email "smeny-deploy@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then echo "smeny-team уже актуален"; else git commit -m "Выкладка ${GITHUB_SHA::7}" && git push; fi
+
+  bot:
+    name: Бот в Cloudflare
+    needs: check
+    runs-on: ubuntu-latest
+    env:
+      HAS_CF: ${{ secrets.CF_API_TOKEN != '' && secrets.CF_ACCOUNT_ID != '' && secrets.CF_KV_ID != '' }}
+      KV_ID: ${{ secrets.CF_KV_ID }}
+      SETUP_KEY: ${{ secrets.SETUP_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Нет секретов Cloudflare — бот пропускаю
+        if: env.HAS_CF != 'true'
+        run: echo "::warning::Добавьте секреты CF_API_TOKEN, CF_ACCOUNT_ID и CF_KV_ID — тогда бот будет обновляться сам"
+      - name: Номер хранилища
+        if: env.HAS_CF == 'true'
+        run: sed -i "s/\"KV_ID\"/\"${KV_ID}\"/" wrangler.toml
+      - name: Выкладка бота
+        if: env.HAS_CF == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_API_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          command: deploy
+      - name: Обновить команды бота (/setup)
+        if: env.HAS_CF == 'true' && env.SETUP_KEY != ''
+        run: curl -fsS "https://smeny-bot.dsw66b9fh2.workers.dev/setup?key=${SETUP_KEY}" | head -1
 
