@@ -555,6 +555,14 @@ body{overflow-x:hidden}.wrap{overflow-x:clip}
 #mnChart .vl{font-size:9.5px;fill:var(--fg);font-weight:600}
 #mnChart .avl{stroke:var(--muted);stroke-dasharray:3 3;stroke-width:1}
 #mnChart p{margin:6px 0 0;font-size:13px;color:var(--muted)}
+/* поля не вылезают за рамку (iPhone даёт полям даты и времени свою ширину) */
+.settings label,.pay-add label,.trow label,.mn-in{min-width:0}
+.settings input:not([type=checkbox]),.settings select,.pay-add input,.pay-add select,.trow input:not([type=checkbox]),.mn-in input,.mn-in select{min-width:0;max-width:100%;width:100%;display:block}
+input[type=time],input[type=date]{-webkit-appearance:none;appearance:none;text-align:left;min-height:40px}
+input[type=time]::-webkit-date-and-time-value,input[type=date]::-webkit-date-and-time-value{text-align:left}
+.trow{grid-template-columns:minmax(0,1fr) auto}
+.trow input:not([type=checkbox]){font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-height:40px}
+.trow label.chk{white-space:nowrap}
 /* ===== Настройки ===== */
 #pane-set details>summary,#pane-money details>summary{font-size:16px;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:8px}
 #pane-set details>summary::-webkit-details-marker,#pane-money details>summary::-webkit-details-marker{display:none}
@@ -848,7 +856,7 @@ window.LOOK = (function(){
   <section class="totq">
     <div class="editor" id="tqForm" hidden>
       <div class="head"><b>Общее количество баллов</b><span id="tqHint">за период премии</span></div>
-      <p class="hint" style="margin:0">Впишите число «За отчётный период» из рабочей системы. Средний балл, премия и цель на день пересчитаются от него.</p>
+      <p class="hint" style="margin:0">Впишите число «За отчётный период» из рабочей системы и дату, по которую оно посчитано, — обычно сегодня. Баллы смен после этой даты прибавятся к нему.</p>
       <div class="settings" style="margin-top:0">
         <label for="tqPts">Баллов за период<input id="tqPts" type="number" inputmode="decimal" min="0" step="0.1" placeholder="Например, 351"></label>
         <label for="tqDate">Посчитано по число<input id="tqDate" type="date"></label>
@@ -995,7 +1003,7 @@ window.LOOK = (function(){
     </div>
     <h3 class="look-h">Выплаты</h3>
     <div class="settings">
-      <label for="payAdv">День аванса<input id="payAdv" type="number" inputmode="numeric" min="1" max="31" value="25"></label>
+      <label for="payAdv">День аванса<input id="payAdv" type="number" inputmode="numeric" min="1" max="31" value="20"></label>
       <label for="paySal">День зарплаты<input id="paySal" type="number" inputmode="numeric" min="1" max="31" value="5"></label>
       <label for="advMode">Аванс<select id="advMode"><option value="half">за 1–15 число</option><option value="fixed">фикс. сумма</option></select></label>
       <label for="advFix" id="advFixL">Сумма аванса, ₽<input id="advFix" type="number" inputmode="numeric" min="0" step="500" placeholder="Например, 20000"></label>
@@ -1423,6 +1431,9 @@ window.LOOK = (function(){
       const lim=new Date(T0.upTo+"T23:59:59"); let aSum=0, aCnt=0;
       for(const it of list){ if(new Date(it.yy, it.mo, it.d) > lim){ aSum+=it.p; aCnt++; } }
       pSum = +T0.pts + aSum; pDone = dates.filter(d=>d<=lim).length + aCnt;
+      // Общее посчитано на сегодня, а смена ещё идёт: сегодняшняя смена не считается отработанной (иначе средний занижается)
+      { const t=new Date(), tid=iso(t), [eh,em]=String((settings.shift||{}).to||"21:30").split(":").map(Number);
+        if(T0.upTo===tid && dates.some(d=>iso(d)===tid) && !list.some(it=>iso(new Date(it.yy,it.mo,it.d))===tid) && t.getHours()*60+t.getMinutes() < (eh||21)*60+(em||0)) pDone--; }
     }
     const avgP = pDone ? pSum/pDone : null, avgSrc = T0 && T0.pts!=null ? "manual" : (scored ? "daily" : "none");
     const bonusPct = pctFor(avgP), bonus = bonusBase*bonusPct/100, bonusMax = bonusBase*settings.pct/100;
@@ -1787,7 +1798,7 @@ window.LOOK = (function(){
   $("totOpen").onclick = ()=>{
     const k=key(view.y,view.m), T0=totals[k], pm = view.m===0?11:view.m-1, py = view.m===0?view.y-1:view.y;
     const start=new Date(py,pm,21), end=new Date(view.y,view.m,20), today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
-    const def = T0 ? T0.upTo : iso(today<start?start:today>end?end:today);
+    const def = iso(today<start?start:today>end?end:today);
     $("totPts").value = T0 ? T0.pts : ""; $("totDate").value = def;
     $("totDate").min = iso(start); $("totDate").max = iso(end);
     $("totHint").textContent = "21 "+GEN[pm]+" – 20 "+GEN[view.m];
@@ -2859,15 +2870,28 @@ window.LOOK = (function(){
     const start=new Date(py,pm,21), end=new Date(P.y,P.m,20), t0=new Date(now.getFullYear(),now.getMonth(),now.getDate());
     $("tqHint").textContent = "21 "+GEN[pm]+" – 20 "+GEN[P.m];
     $("tqPts").value = T0 ? T0.pts : "";
-    $("tqDate").value = T0 ? T0.upTo : iso(t0<start?start:t0>end?end:t0);
+    // Дата — всегда сегодня: число из рабочей системы обычно посчитано на сегодня. Старая дата давала двойной счёт.
+    $("tqDate").value = iso(t0<start?start:t0>end?end:t0);
     $("tqDate").min=iso(start); $("tqDate").max=iso(end);
-    const c=calc(P.y,P.m);
-    $("tqPrev").textContent = c.pDone ? "Сейчас в приложении: "+f1(c.pSum)+" за "+shifts(c.pDone)+", средний "+f1(c.avgP)+"." : "";
     $("tqClear").hidden=!T0;
     $("tqForm").hidden=false; $("tqForm").dataset.k=k;
+    tqPreview();
     try{ $("tqPts").focus({preventScroll:true}); }catch(e){}
     $("tqForm").scrollIntoView({block:"center", behavior:"smooth"});
   }
+  // Подсказка в форме: как сложится итог — общее число + баллы смен после выбранной даты
+  function tqPreview(){
+    const k=$("tqForm").dataset.k; if(!k) return;
+    const [yy,mm]=k.split("-").map(Number), c=calc(yy,mm-1), v=parseFloat(String($("tqPts").value).replace(",",".")), dt=$("tqDate").value, out=$("tqPrev");
+    const now1 = c.pDone ? "Сейчас в приложении: "+f1(c.pSum)+" за "+shifts(c.pDone)+"." : "";
+    if(!isFinite(v) || !dt){ out.textContent=now1; return; }
+    const lim=new Date(dt+"T23:59:59"); let aSum=0, aCnt=0;
+    for(const it of c.list){ if(new Date(it.yy,it.mo,it.d)>lim){ aSum+=it.p; aCnt++; } }
+    // Пробный расчёт с новым общим числом — тем же способом, что и после сохранения
+    const was=totals[k]; totals[k]={pts:v, upTo:dt}; const c2=calc(yy,mm-1); if(was) totals[k]=was; else delete totals[k];
+    out.textContent = now1+" Станет: "+f1(v)+" по "+shortDate(dt)+" включительно"+(aCnt ? " + "+f1(aSum)+" за "+shifts(aCnt)+" после" : "")+" = "+f1(c2.pSum)+(c2.avgP!=null ? ", средний "+f1(c2.avgP) : "")+". Баллы смен по "+shortDate(dt)+" берутся только из общего числа.";
+  }
+  ["tqPts","tqDate"].forEach(id=>$(id).addEventListener("input", tqPreview));
   $("tqOpen").onclick = ()=>{ if($("tqForm").hidden) tqOpen(); else $("tqForm").hidden=true; };
   document.querySelector(".tile.ring").addEventListener("click", ()=>{ sfx.click(); tqOpen(); });
   $("tqCancel").onclick = ()=>{ $("tqForm").hidden=true; };
@@ -3156,7 +3180,7 @@ window.LOOK = (function(){
 
   // ======== Деньги: выплаты, сверка, цель, «что если», заработок за год ========
   const APP_VER = "3.0";
-  const PAYDEF = {adv:25, sal:5, mode:"half", fix:0, ndfl:false};
+  const PAYDEF = {adv:20, sal:5, mode:"half", fix:0, ndfl:false};
   function payCfg(){ let p={}; try{ p=settings.payout||{}; }catch(e){} return Object.assign({}, PAYDEF, p); }
   function netv(v){ return payCfg().ndfl ? v*0.87 : v; }
   const dimOf = (y,m) => new Date(y,m+1,0).getDate();
@@ -3169,7 +3193,7 @@ window.LOOK = (function(){
   function payEvents(fromIdx, n){
     const P=payCfg(), out=[];
     for(let i=0;i<n;i++){ const ix=fromIdx+i, y=Math.floor(ix/12), m=ix%12, ny=Math.floor((ix+1)/12), nm=(ix+1)%12;
-      out.push({kind:"adv", y, m, date:new Date(y,m,Math.min(Math.max(1,+P.adv||25), dimOf(y,m))), amt:advFor(y,m)});
+      out.push({kind:"adv", y, m, date:new Date(y,m,Math.min(Math.max(1,+P.adv||20), dimOf(y,m))), amt:advFor(y,m)});
       out.push({kind:"sal", y, m, date:new Date(ny,nm,Math.min(Math.max(1,+P.sal||5), dimOf(ny,nm))), amt:salFor(y,m)});
     }
     return out.sort((a,b)=>a.date-b.date);
