@@ -78,25 +78,31 @@ jobs:
     needs: check
     runs-on: ubuntu-latest
     env:
-      HAS_CF: ${{ secrets.CF_API_TOKEN != '' && secrets.CF_ACCOUNT_ID != '' && secrets.CF_KV_ID != '' }}
-      KV_ID: ${{ secrets.CF_KV_ID }}
+      CF_TOKEN: ${{ secrets.CF_API_TOKEN }}
+      CF_ACC: ${{ secrets.CF_ACCOUNT_ID }}
+      CF_KV: ${{ secrets.CF_KV_ID }}
       SETUP_KEY: ${{ secrets.SETUP_KEY }}
     steps:
       - uses: actions/checkout@v4
-      - name: Нет секретов Cloudflare — бот пропускаю
-        if: env.HAS_CF != 'true'
-        run: echo "::warning::Добавьте секреты CF_API_TOKEN, CF_ACCOUNT_ID и CF_KV_ID — тогда бот будет обновляться сам"
-      - name: Номер хранилища
-        if: env.HAS_CF == 'true'
-        run: sed -i "s/\"KV_ID\"/\"${KV_ID}\"/" wrangler.toml
-      - name: Выкладка бота
-        if: env.HAS_CF == 'true'
-        uses: cloudflare/wrangler-action@v3
+      - uses: actions/setup-node@v4
         with:
-          apiToken: ${{ secrets.CF_API_TOKEN }}
-          accountId: ${{ secrets.CF_ACCOUNT_ID }}
-          command: deploy
+          node-version: 22
+      - name: Подготовка (секреты без лишних пробелов и переносов)
+        run: |
+          clean() { printf '%s' "$1" | tr -d '[:space:]'; }
+          T=$(clean "$CF_TOKEN"); A=$(clean "$CF_ACC"); K=$(clean "$CF_KV"); S=$(clean "$SETUP_KEY")
+          if [ -z "$T" ] || [ -z "$A" ] || [ -z "$K" ]; then
+            echo "::warning::Добавьте секреты CF_API_TOKEN, CF_ACCOUNT_ID и CF_KV_ID — тогда бот будет обновляться сам"
+            echo "SKIP_BOT=1" >> "$GITHUB_ENV"; exit 0
+          fi
+          echo "::add-mask::$T"; [ -n "$S" ] && echo "::add-mask::$S"
+          echo "CLOUDFLARE_API_TOKEN=$T" >> "$GITHUB_ENV"
+          echo "CLOUDFLARE_ACCOUNT_ID=$A" >> "$GITHUB_ENV"
+          echo "SETUP_CLEAN=$S" >> "$GITHUB_ENV"
+          sed -i "s/\"KV_ID\"/\"$K\"/" wrangler.toml
+      - name: Выкладка бота
+        if: env.SKIP_BOT != '1'
+        run: npx --yes wrangler@4 deploy
       - name: Обновить команды бота (/setup)
-        if: env.HAS_CF == 'true' && env.SETUP_KEY != ''
-        run: curl -fsS "https://smeny-bot.dsw66b9fh2.workers.dev/setup?key=${SETUP_KEY}" | head -1
-
+        if: env.SKIP_BOT != '1' && env.SETUP_CLEAN != ''
+        run: curl -fsS "https://smeny-bot.dsw66b9fh2.workers.dev/setup?key=${SETUP_CLEAN}" | head -1
