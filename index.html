@@ -625,6 +625,46 @@ input[type=time]::-webkit-date-and-time-value,input[type=date]::-webkit-date-and
 .m-q{animation:mQ 1.6s ease-in-out infinite}
 @keyframes mQ{50%{transform:translateY(-3px)}}
 @media (prefers-reduced-motion: reduce){.m-record,.m-steam,.m-wheel,.m-q{animation:none!important}}
+/* быстрый старт */
+.qs-sheet{gap:12px}
+.qs-dots{display:flex;gap:6px;justify-content:center}.qs-dots i{width:22px;height:4px;border-radius:2px;background:var(--line)}.qs-dots i.on{background:var(--accent)}
+.qs-masc{width:84px;height:84px;align-self:center}.qs-masc svg{width:100%;height:100%;overflow:visible}
+.qs-sheet h2{text-align:center}
+.qs-p{margin:0;font-size:15px;color:var(--muted);line-height:1.4}.qs-p b{color:var(--fg)}
+.qs-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:4px}
+.qs-opt{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:16px;border:1px solid var(--line);background:var(--bg)}
+.qs-opt>b{font-size:16px}.qs-opt>span{font-size:13px;color:var(--muted);margin-top:-6px}
+.qs-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.qs-res{display:flex;flex-direction:column;align-items:center;gap:2px;padding:14px;border-radius:16px;background:color-mix(in srgb,var(--accent) 12%,var(--surface))}
+.qs-res small{color:var(--muted);font-size:13px}.qs-res b{font-family:var(--font-display);font-size:34px;line-height:1.1}.qs-res span{font-size:13px;color:var(--muted)}
+/* погода */
+#tChip .wx{margin-left:6px;padding-left:6px;border-left:1px solid color-mix(in srgb,currentColor 35%,transparent);font-weight:700}
+.wx-find{display:flex;gap:8px}.wx-find input{flex:1;min-width:0;font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+#wxMsg{margin:6px 0 0}
+.m-rain path{animation:mRain 1.1s linear infinite}
+@keyframes mRain{0%{transform:translateY(-6px);opacity:0}20%{opacity:1}100%{transform:translateY(14px);opacity:0}}
+.m-snowf text{animation:mSnow 3.4s ease-in-out infinite}
+@keyframes mSnow{0%{transform:translateY(-4px);opacity:0}30%{opacity:1}100%{transform:translate(4px,12px);opacity:0}}
+.m-sun{transform-box:fill-box;transform-origin:center;animation:mSpin 14s linear infinite}
+.m-breath{animation:mBreathOut 2.6s ease-out infinite}
+@keyframes mBreathOut{0%{opacity:0;transform:translate(0,0) scale(.6)}40%{opacity:1}100%{opacity:0;transform:translate(6px,-4px) scale(1.2)}}
+@media (prefers-reduced-motion: reduce){.m-rain path,.m-snowf text,.m-sun,.m-breath{animation:none!important}}
+/* своя клавиатура */
+.kb{position:fixed;left:0;right:0;bottom:0;z-index:120;max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:7px;padding:8px 4px calc(8px + env(safe-area-inset-bottom,0px));background:color-mix(in srgb,var(--surface) 92%,var(--fg));border-top:1px solid var(--line);box-shadow:0 -10px 30px rgba(0,0,0,.22);transform:translateY(105%);transition:transform .22s cubic-bezier(.2,.8,.3,1);touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.kb.on{transform:none}
+.kb-row{display:flex;gap:5px;justify-content:center}
+.kb-k{flex:1;min-width:0;height:44px;padding:0;border:none;border-radius:9px;background:var(--surface);color:var(--fg);font-family:var(--font-body);font-size:19px;box-shadow:0 1px 0 rgba(0,0,0,.25)}
+.kb-k:active{background:var(--line);transform:scale(.96)}
+.kb-k.fn,.kb-k.sh,.kb-k.del{flex:1.35;font-size:15px;background:color-mix(in srgb,var(--fg) 12%,var(--surface))}
+.kb-k.sh.on{background:var(--accent);color:var(--accent-fg)}
+.kb-k.del{color:var(--absent)}
+.kb-k.sp{flex:4.2;font-size:14px;color:var(--muted)}
+.kb-k.done{flex:2;font-size:15px;font-weight:700;background:var(--accent);color:var(--accent-fg)}
+.kb-num{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:0 4px}
+.kb-num .kb-k{height:50px;font-family:var(--font-display);font-size:22px}
+.kb.num .kb-row .done{flex:1;height:48px;margin:0 4px}
+.kb-focus{outline:2px solid var(--accent)!important;outline-offset:1px}
+.kb-open .pager>.pane{padding-bottom:calc(var(--kbh,300px) + 24px)!important}
 /* ===== Настройки ===== */
 #pane-set details>summary,#pane-money details>summary{font-size:16px;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:8px}
 #pane-set details>summary::-webkit-details-marker,#pane-money details>summary::-webkit-details-marker{display:none}
@@ -1186,6 +1226,13 @@ window.LOOK = (function(){
     <div class="font-list" id="lookFonts" role="group" aria-label="Шрифт"></div>
     <button class="masc-row" id="mascRow" aria-expanded="false" aria-controls="mascPick"><span class="mp-i" id="mascRowI"></span><span class="mr-t"><small>Механик</small><b id="mascRowN">Как в теме</b></span><span class="mr-c" aria-hidden="true">›</span></button>
     <div class="masc-pick" id="mascPick" role="group" aria-label="Как одет механик" hidden></div>
+    <div class="backup" style="margin-top:10px">
+      <div class="tg-row"><span><b>Механик одевается по погоде</b><small>В дождь — зонт, в мороз — ушанка и шарф, в жару — очки</small></span><button class="tgl" role="switch" id="wxToggle" aria-checked="false" aria-label="Механик одевается по погоде"></button></div>
+      <div id="wxBox" hidden>
+        <div class="wx-find"><input id="wxCity" placeholder="Ваш город" autocomplete="address-level2" aria-label="Город"><button class="ghost-btn" id="wxFind">Найти</button><button class="ghost-btn" id="wxGeo" aria-label="Определить по геопозиции">📍</button></div>
+        <p id="wxMsg"></p>
+      </div>
+    </div>
     <div class="backup">
       <div class="tg-row"><span><b>Тепловая карта</b><small>Смены в календаре подсвечены по баллам</small></span><button class="tgl" role="switch" id="heatToggle" aria-checked="false" aria-label="Тепловая карта"></button></div>
     </div>
@@ -1298,7 +1345,7 @@ window.LOOK = (function(){
   <details id="helpBox">
     <summary>❔ Помощь</summary>
     <div class="backup">
-      <div class="row"><button class="ghost-btn" id="tourOpen">Как пользоваться</button><button class="ghost-btn" id="newsOpen">Что нового</button></div>
+      <div class="row"><button class="ghost-btn" id="tourOpen">Как пользоваться</button><button class="ghost-btn" id="newsOpen">Что нового</button><button class="ghost-btn" id="qsOpen">Быстрый старт</button></div>
       <div id="fbBox" hidden>
         <label class="note-lbl" for="fbText">Написать разработчику<textarea id="fbText" rows="3" maxlength="1000" placeholder="Идея, ошибка или вопрос"></textarea></label>
         <div class="row" style="margin-top:8px"><button class="save-btn" id="fbSend">Отправить</button></div>
@@ -1377,6 +1424,19 @@ window.LOOK = (function(){
   const cget = keys => new Promise((res,rej)=>{ try{ cloud.getItems(keys, (e,v)=> e ? rej(e) : res(v||{})); }catch(e){ rej(e); } });
   // Сервер уведомлений (Cloudflare Worker). Пусто — уведомления скрыты.
   const API_URL = "https://smeny-bot.dsw66b9fh2.workers.dev";
+  window.SMENY_VER = "3.1";
+  // Ошибки у пользователя коротко уходят владельцу бота: не больше трёх за запуск, без повторов
+  { let sent=0; const seen=new Set();
+    const report=(msg, where)=>{ try{
+      if(!API_URL || sent>=3 || location.protocol==="file:") return; const k=String(msg).slice(0,140); if(seen.has(k)) return; seen.add(k); sent++;
+      const tgw=window.Telegram && Telegram.WebApp;
+      fetch(API_URL.replace(/\/$/,"")+"/err", {method:"POST", headers:{"Content-Type":"application/json"}, keepalive:true,
+        body:JSON.stringify({initData:(tgw && tgw.initData)||"", msg:String(msg).slice(0,400), where:String(where||"").slice(0,160), ver:window.SMENY_VER, app: location.pathname.includes("team") ? "команда" : "личная", ua:navigator.userAgent})}).catch(()=>{});
+    }catch(e){} };
+    window.addEventListener("error", e=>{ if(!e || !e.message || /Script error/i.test(e.message)) return; report(e.message, (e.filename||"").split("/").pop()+":"+e.lineno+":"+e.colno); });
+    window.addEventListener("unhandledrejection", e=>{ const r=e && e.reason; if(!r || (r.name==="AbortError")) return; report((r && r.message) || String(r), r && r.stack ? String(r.stack).split("\n").slice(0,2).join(" ") : ""); });
+    const ce=console.error.bind(console); console.error=(...a)=>{ ce(...a); const er=a.find(x=>x instanceof Error); if(er) report(er.message, String(er.stack||"").split("\n").slice(0,2).join(" ")); };
+  }
   let notifOn = false;
   try{ notifOn = localStorage.getItem("salary:notif")==="1"; }catch(e){}
   if(miniApp){
@@ -3275,10 +3335,18 @@ window.LOOK = (function(){
     let hat = HAT[S]; if(hat===undefined) hat=HAT.base;
     const santa = sh("M29 38q4-22 24-20 12 2 17 16l-5 3q-4-10-12-12-14-2-17 13Z","#e03131")+'<circle cx="69" cy="37" r="4" fill="#fff" stroke="'+O+'" stroke-width="1.4"/>'+sh("M28 37q22-6 44 0v5q-22-5-44 0Z","#fff",1.6);
     if(ny && S==="base") hat=santa;
+    // ---- погода (только у большого механика в карточке): зонт, ушанка, шарф, очки, дождь, снег, солнце
+    let WQ=""; if(full){ try{ WQ=wxKind(); }catch(e){} }
+    const cold = WQ==="snow" || WQ==="frost" || WQ==="cold", wet = WQ==="rain" || WQ==="storm";
+    if((WQ==="snow"||WQ==="frost") && S==="base" && !ny) hat = '<path d="M27 41q-4 13 4 17l3-1q-5-8-1-15ZM73 41q4 13-4 17l-3-1q5-8 1-15Z" fill="#d9c7a7" stroke="'+O+'" stroke-width="1.8" stroke-linejoin="round"/>'+sh("M29 39q0-19 21-19t21 19Z","#6b4a2b")+sh("M27 34.5h46v7H27Z","#d9c7a7",1.8)+ln("M31 37l2 2M37 36l1.5 2.5M44 36l1 2.5M51 36l1 2.5M58 36l1 2.5M65 36l1.5 2.5","#a8946f",1.2)+'<circle cx="50" cy="23" r="2.2" fill="#d9c7a7" stroke="'+O+'" stroke-width="1"/>';
+    if(wet) hat = (hat||"") + '<g class="m-umb">'+ln("M50 20V2",O,2.2)+sh("M12 2Q50 -30 88 2Q78.5 -4 69 2Q59.5 -4 50 2Q40.5 -4 31 2Q21.5 -4 12 2Z","#e03131")+'<path d="M31 2Q40.5 -4 50 2Q50 -22 41 -21Z" fill="#fff" opacity=".85"/><path d="M69 2Q59.5 -4 50 2Q50 -22 59 -21Z" fill="#fff" opacity=".2"/>'+ln("M50 -26v-4",O,2)+'</g>';
     const hairBase = S==="base"||S==="synth"||S==="pop"||S==="notebook"||S==="ocean"||S==="pixel" ? sh("M31.5 44q-1-9 4-13l1 10ZM68.5 44q1-9-4-13l-1 10Z","#4a3528",1.4) : "";
     const head = '<ellipse cx="31" cy="48" rx="3.6" ry="4.8" fill="'+SK+'" stroke="'+O+'" stroke-width="1.8"/><ellipse cx="69" cy="48" rx="3.6" ry="4.8" fill="'+SK+'" stroke="'+O+'" stroke-width="1.8"/>'+
       '<path d="M31 46c0-13 8.5-21 19-21s19 8 19 21c0 12-8 20.5-19 20.5S31 58 31 46Z" fill="'+SK+'" stroke="'+O+'" stroke-width="2.2"/>'+hairBase+cheeks+eyes+brows+nose+mouth+(FACE[S]||"");
-    const neck = '<path d="M44 62h12v15H44Z" fill="'+SKD+'" stroke="'+O+'" stroke-width="1.8"/>';
+    let neck = '<path d="M44 62h12v15H44Z" fill="'+SKD+'" stroke="'+O+'" stroke-width="1.8"/>';
+    if(cold) neck += sh("M36 68q14 7 28 0l2 7q-16 8-32 0Z","#e03131",1.8)+ln("M41 70.6l-1 5.6M47 72l-.6 5.6M53 72l.6 5.6M59 70.6l1 5.6","#fff",1.4)+sh("M57 74l5 17-6 1.4-3.4-16.4Z","#e03131",1.6)+ln("M57.4 85.4l5-.8M58.4 89l4.6-.9","#fff",1.2);
+    const glassesFace = ["synth","term","pixel","steam"].includes(S);
+    const hotGlasses = WQ==="hot" && !glassesFace ? sh("M34 43h32v3q-1 6-7 6h-4q-4 0-5-4-1 4-5 4h-4q-6 0-7-6Z","#1b1b1b",1.6)+ln("M37 45l3-1.5M53 45l3-1.5","#fff",1.2) : "";
     const extra = mood==="tired" ? sh("M73 30q3 4.5 0 6.5-3-2 0-6.5Z","#74c0fc",1.1)+sh("M30 34q2.6 4 0 5.6-2.6-1.6 0-5.6Z","#74c0fc",1)
       : mood==="sick" ? '<g transform="rotate(28 52 58)"><rect x="52" y="56.6" width="15" height="2.8" rx="1.4" fill="#fff" stroke="'+O+'" stroke-width="1"/><circle cx="67" cy="58" r="2" fill="#e03131" stroke="'+O+'" stroke-width="1"/></g>'+sh("M64 30q3 4 0 6-3-2 0-6Z","#74c0fc",1)
       : mood==="sleep" ? '<text class="zz" x="76" y="30" font-size="13" font-weight="800" fill="currentColor" font-family="system-ui,sans-serif">z</text><text class="zz z2" x="84" y="20" font-size="10" font-weight="800" fill="currentColor" font-family="system-ui,sans-serif">z</text>' : "";
@@ -3298,15 +3366,19 @@ window.LOOK = (function(){
       steam: sh("M30 102L30 116H70L70 102Z","#6e4a2c")+ln("M50 102V116",O,1.2),
       base: sh("M33 102h34v14H33Z",ACC)+'<rect x="44" y="104" width="12" height="7" rx="1.5" fill="rgba(0,0,0,.14)" stroke="'+O+'" stroke-width="1"/>'
     }[S]||"";
-    const upper = BACK+LONG+o.body+blanket+arms+neck+'<g class="m-head"'+tilt+'>'+head+(hat||"")+'</g>'+extra;
+    const upper = BACK+LONG+o.body+blanket+arms+neck+'<g class="m-head"'+tilt+'>'+head+hotGlasses+(hat||"")+'</g>'+extra+(WQ==="frost" ? '<g class="m-breath"><circle cx="58" cy="62" r="2.6" fill="#fff" opacity=".8"/><circle cx="63" cy="60" r="3.4" fill="#fff" opacity=".6"/><circle cx="69" cy="58" r="4.2" fill="#fff" opacity=".4"/></g>' : WQ==="hot" ? sh("M70 34q3 4.5 0 6.5-3-2 0-6.5Z","#74c0fc",1.1) : "");
+    let WXL="";
+    if(wet) WXL='<g class="m-rain">'+[[0,10],[14,40],[26,0],[78,20],[92,52],[100,6],[6,70],[96,90],[2,118],[98,128]].map(([x,y],i)=>'<path d="M'+x+' '+y+'l-2 7" stroke="#4dabf7" stroke-width="2" stroke-linecap="round" style="animation-delay:'+(i*.13).toFixed(2)+'s"/>').join("")+'</g>'+(WQ==="storm" ? sh("M92 -4l-8 16h6l-6 14 14-19h-7l6-11Z","#ffd43b",1.4) : "");
+    else if(WQ==="snow"||WQ==="frost") WXL='<g class="m-snowf">'+[[2,6],[18,30],[88,14],[98,44],[6,64],[94,84],[0,110],[100,124],[12,140]].map(([x,y],i)=>'<text x="'+x+'" y="'+y+'" font-size="'+(7+i%3*2)+'" fill="#a5d8ff" style="animation-delay:'+(i*.4).toFixed(1)+'s">❄</text>').join("")+'</g>';
+    else if(WQ==="hot") WXL='<g class="m-sun"><circle cx="92" cy="6" r="9" fill="#ffd43b" stroke="'+O+'" stroke-width="1.4"/>'+[0,45,90,135,180,225,270,315].map(a=>{ const r=a*Math.PI/180; return '<path d="M'+(92+Math.cos(r)*12).toFixed(1)+' '+(6+Math.sin(r)*12).toFixed(1)+'L'+(92+Math.cos(r)*16).toFixed(1)+' '+(6+Math.sin(r)*16).toFixed(1)+'" stroke="#f59f00" stroke-width="2" stroke-linecap="round"/>'; }).join("")+'</g>';
     if(sit){
       // сидит на ящике с инструментами: верх ниже, ноги короче
       const box='<path d="M14 122h72v40H14Z" fill="#c0392b" stroke="'+O+'" stroke-width="2.2" stroke-linejoin="round"/><path d="M14 132h72" stroke="'+O+'" stroke-width="1.6"/><rect x="44" y="127" width="12" height="7" rx="1.5" fill="#d9dde0" stroke="'+O+'" stroke-width="1.2"/>';
       const sLegs = sh("M30 126h18v32H30Z",LEG[0])+sh("M52 126h18v32H52Z",LEG[0])+sh("M27 156h22q2 0 2 5v4H26q-2-5 1-9Z",LEG[1])+sh("M73 156H51q-2 0-2 5v4h25q2-5-2-9Z",LEG[1]);
-      return '<svg viewBox="-8 -6 116 178" aria-hidden="true"><g class="m-all m-'+mood+'">'+box+'<g transform="translate(0 18)">'+upper+'</g>'+sLegs+'</g></svg>';
+      return '<svg viewBox="-8 -6 116 178" aria-hidden="true">'+WXL+'<g class="m-all m-'+mood+'">'+box+'<g transform="translate(0 18)">'+upper+'</g>'+sLegs+'</g></svg>';
     }
-    const vb = mood==="record" ? "-8 -36 116 208" : "-8 -6 116 178";
-    return '<svg viewBox="'+vb+'" aria-hidden="true"><g class="m-all m-'+mood+'">'+(blanket ? legs : BACK+legs)+prop+(BACK ? upper.replace(BACK,"") : upper)+above+'</g></svg>';
+    const vb = mood==="record" ? "-8 -36 116 208" : wet ? "-8 -30 116 202" : "-8 -6 116 178";
+    return '<svg viewBox="'+vb+'" aria-hidden="true">'+WXL+'<g class="m-all m-'+mood+'">'+(blanket ? legs : BACK+legs)+prop+(BACK ? upper.replace(BACK,"") : upper)+above+'</g></svg>';
   }
   const PH_WORK = ["Каждый собранный байк — маленькая победа.","Не торопись с болтом — сорвёшь резьбу, потеряешь полчаса.","Чистая цепь — довольный курьер.","Сначала диагностика, потом ключ.","Хороший механик слышит байк раньше, чем видит.","Три лёгких ремонта — тоже норма.","Перерыв на чай — часть техпроцесса.","Порядок на столе — плюс пять минут в час.","Сложный ремонт сегодня — опыт на завтра.","Тормоза — это про жизнь. Проверь дважды.","Норма сама себя не наберёт, но и не убежит.","Темп важнее рывка: двенадцать часов — длинная дистанция.","Спорный болт? Проникающая смазка и терпение.","Последний ремонт смены делай как первый."];
   const PH_REST = ["Выходной — тоже работа: на восстановление.","Сегодня лучший инструмент — диван.","Отдых без мыслей о баллах засчитывается.","Выспись — завтра байки сами себя не починят.","Прогулка без ключа в кармане — отличный план.","Выходной — лучшее время для своих дел.","Отдыхай с той же отдачей, с какой работаешь."];
@@ -3322,8 +3394,10 @@ window.LOOK = (function(){
       else { let top=-1; try{ top=recordsAll().list.filter(it=>!(it.y===t0.getFullYear() && it.m===t0.getMonth() && it.d===t0.getDate())).reduce((m,it)=>Math.max(m,it.p),-1); }catch(e){}
         mood = p>=settings.maxPts ? (top>=0 && p>top ? "record" : "happy") : ended ? "tired" : "work"; }
     } else mood = t==="o" ? "sleep" : t==="s" ? "sick" : t==="a" ? "tired" : "point";
-    const skin=mascSkin(), ny=document.documentElement.classList.contains("ny"), mk=mood+"|"+skin+"|"+ny;
+    let wk=""; try{ wk=wxKind(); }catch(e){}
+    const skin=mascSkin(), ny=document.documentElement.classList.contains("ny"), mk=mood+"|"+skin+"|"+ny+"|"+wk;
     const m=$("masc"); if(m && m.dataset.mk!==mk){ const say=m.querySelector(".m-say"); m.innerHTML=mascSvg(mood, skin, ny, true); if(say) m.appendChild(say); m.dataset.mk=mk; m.dataset.mood=mood; }
+    try{ renderWxChip(); }catch(e){}
     const ph=$("tPhrase"); if(ph){ const f="«"+phrase(isShift(t))+"»"; if(ph.classList.contains("say")) ph.dataset.keep=f; else ph.textContent=f; }
 
   }
@@ -3466,7 +3540,7 @@ window.LOOK = (function(){
   function burst(){ if(reduceMotion()) return; const w=el("div","burst"); document.body.appendChild(w); confetti(w); setTimeout(()=>w.remove(), 3500); }
 
   // ======== Деньги: выплаты, сверка, цель, «что если», заработок за год ========
-  const APP_VER = "3.0";
+  const APP_VER = window.SMENY_VER || "3.1";
   const PAYDEF = {adv:20, sal:5, mode:"fixed", fix:43300, ndfl:false};
   function payCfg(){ let p={}; try{ p=settings.payout||{}; }catch(e){} if(!p.pv) p={ndfl:!!p.ndfl}; return Object.assign({}, PAYDEF, p); }
   function netv(v){ return payCfg().ndfl ? v*0.87 : v; }
@@ -3691,6 +3765,195 @@ window.LOOK = (function(){
       box.appendChild(b); });
   }
 
+  // ======== Своя клавиатура для всех полей (цифры и буквы) ========
+  // Системная клавиатура не выезжает: у полей inputmode="none", вместо неё — наша панель снизу.
+  // Исключения: поля кода переноса (там нужна вставка), даты/время/списки (родные колёса iPhone).
+  const KB_SKIP = new Set(["edInput","tqPts","codeIn","codeOut"]);
+  const kbEligible = e => e && (e.tagName==="TEXTAREA" || (e.tagName==="INPUT" && ["text","number","search","",null].includes((e.getAttribute("type")||"").toLowerCase()))) && !KB_SKIP.has(e.id) && !e.readOnly && !e.disabled;
+  function kbMark(root){ (root||document).querySelectorAll("input,textarea").forEach(e=>{ if(kbEligible(e) && e.getAttribute("inputmode")!=="none"){ e.dataset.im = e.getAttribute("inputmode")||""; e.setAttribute("inputmode","none"); } }); }
+  kbMark();
+  try{ new MutationObserver(ms=>{ for(const m of ms) m.addedNodes.forEach(n=>{ if(n.nodeType===1) kbMark(n.parentNode||n); }); }).observe(document.body, {childList:true, subtree:true}); }catch(e){}
+  const KB_RU=[["й","ц","у","к","е","н","г","ш","щ","з","х"],["ф","ы","в","а","п","р","о","л","д","ж","э"],["⇧","я","ч","с","м","и","т","ь","б","ю","⌫"]];
+  const KB_EN=[["q","w","e","r","t","y","u","i","o","p"],["a","s","d","f","g","h","j","k","l"],["⇧","z","x","c","v","b","n","m","⌫"]];
+  const KB_SY=[["1","2","3","4","5","6","7","8","9","0"],["-","/",":",";","(",")","₽","@","\"","+"],["#","=","%","&","*","'","!","?",",","⌫"]];
+  let kbEl=null, kbIn=null, kbMode="ru", kbShift=false, kbHideT=null;
+  function kbBuild(){
+    if(kbEl) return kbEl; kbEl=el("div","kb"); kbEl.setAttribute("role","group"); kbEl.setAttribute("aria-label","Клавиатура");
+    kbEl.addEventListener("pointerdown", e=>{ e.preventDefault(); }, {passive:false});   // фокус остаётся в поле
+    document.body.appendChild(kbEl); return kbEl;
+  }
+  function kbKey(t, cls, label){ const b=el("button","kb-k"+(cls?" "+cls:""), label||t); b.type="button"; b.dataset.k=t; if(t==="⌫") b.setAttribute("aria-label","Стереть"); return b; }
+  function kbRender(){
+    const k=kbBuild(); k.textContent=""; const num = kbIn && kbIn.type==="number";
+    k.classList.toggle("num", num);
+    if(num){
+      const g=el("div","kb-num"); ["1","2","3","⌫","4","5","6",",","7","8","9","0"].forEach(t=>g.appendChild(kbKey(t, t==="⌫"?"del":t===","?"com":"")));
+      k.appendChild(g); const r=el("div","kb-row"); r.appendChild(kbKey("done","done","Готово")); k.appendChild(r);
+    } else {
+      const L = kbMode==="en" ? KB_EN : kbMode==="sy" ? KB_SY : KB_RU;
+      L.forEach(row=>{ const r=el("div","kb-row"); row.forEach(t=>{ const up = kbShift && t.length===1 && t!==t.toUpperCase() ? t.toUpperCase() : t;
+        r.appendChild(kbKey(t, t==="⇧" ? "sh"+(kbShift?" on":"") : t==="⌫" ? "del" : "", t==="⇧" ? "⇧" : up)); }); k.appendChild(r); });
+      const r=el("div","kb-row");
+      r.appendChild(kbKey("mode","fn", kbMode==="sy" ? "АБВ" : "123"));
+      r.appendChild(kbKey("lang","fn", kbMode==="en" ? "РУ" : "EN"));
+      r.appendChild(kbKey(" ","sp","пробел"));
+      r.appendChild(kbKey(".","",'.'));
+      r.appendChild(kbKey(kbIn && kbIn.tagName==="TEXTAREA" ? "nl" : "done","done", kbIn && kbIn.tagName==="TEXTAREA" ? "↵" : "Готово"));
+      k.appendChild(r);
+    }
+  }
+  function kbInput(v){ const e=kbIn; if(!e) return; e.value=v; e.dispatchEvent(new Event("input",{bubbles:true})); }
+  function kbPress(t){
+    const e=kbIn; if(!e) return; let v=String(e.value||""); const num=e.type==="number", max=+e.getAttribute("maxlength")||0;
+    if(t==="done"){ e.dispatchEvent(new KeyboardEvent("keydown",{key:"Enter", bubbles:true})); kbHide(true); return; }
+    if(t==="nl"){ if(!max || v.length<max) kbInput(v+"\n"); return; }
+    if(t==="⌫"){ if(e.dataset.dot){ delete e.dataset.dot; return; } kbInput(v.slice(0,-1)); return; }
+    if(t==="⇧"){ kbShift=!kbShift; kbRender(); return; }
+    if(t==="mode"){ kbMode = kbMode==="sy" ? (kbIn.dataset.lang||"ru") : "sy"; kbRender(); return; }
+    if(t==="lang"){ kbMode = kbMode==="en" ? "ru" : "en"; kbIn.dataset.lang=kbMode; kbRender(); return; }
+    let ch=t;
+    if(num){
+      // в числовом поле точку нельзя оставить последней — запоминаем её до следующей цифры
+      if(t===","||t==="."){ if(v.includes(".") || e.dataset.dot) return; e.dataset.dot="1"; if(!v) kbInput("0"); return; }
+      if(!/\d/.test(t)) return; if(e.dataset.dot){ delete e.dataset.dot; ch="."+t; } else if(v==="0") v="";
+    }
+    else if(kbShift && ch.length===1){ ch=ch.toUpperCase(); kbShift=false; kbRender(); }
+    if(max && (v+ch).length>max) return;
+    kbInput(v+ch);
+  }
+  function kbShow(e){
+    clearTimeout(kbHideT);
+    if(kbIn && kbIn!==e) kbIn.classList.remove("kb-focus");
+    kbIn=e; e.classList.add("kb-focus");
+    if(e.type!=="number"){ kbMode = e.dataset.lang || "ru"; kbShift = !e.value && (e.tagName!=="TEXTAREA" ? true : true); }
+    kbRender(); const k=kbBuild();
+    requestAnimationFrame(()=>{ k.classList.add("on"); const h=k.offsetHeight; document.documentElement.style.setProperty("--kbh", h+"px"); document.body.classList.add("kb-open");
+      const sheet=e.closest(".sheet,.tq-sheet"); if(sheet && sheet.dataset.kbb==null){ const fx=/fixed|absolute/.test(getComputedStyle(sheet).position); sheet.dataset.kbb=fx?"b":"m"; if(fx) sheet.style.bottom=h+"px"; else sheet.style.marginBottom=h+"px"; sheet.style.maxHeight="calc(100vh - "+(h+20)+"px)"; }
+      setTimeout(()=>{ try{ e.scrollIntoView({block:"center", behavior:"smooth"}); }catch(x){} }, 60); });
+  }
+  function kbHide(blur){
+    if(!kbEl) return; const e=kbIn;
+    kbEl.classList.remove("on"); document.body.classList.remove("kb-open");
+    document.querySelectorAll(".sheet,.tq-sheet").forEach(sh=>{ if(sh.dataset.kbb!=null){ if(sh.dataset.kbb==="b") sh.style.bottom=""; else sh.style.marginBottom=""; sh.style.maxHeight=""; delete sh.dataset.kbb; } });
+    if(e){ e.classList.remove("kb-focus"); e.dispatchEvent(new Event("change",{bubbles:true})); if(blur) try{ e.blur(); }catch(x){} }
+    kbIn=null;
+  }
+  // нажатие по клавишам
+  document.addEventListener("click", e=>{ const b=e.target.closest && e.target.closest(".kb-k"); if(!b || !kbIn) return; haptic("s"); kbPress(b.dataset.k); });
+  // фокус в поле — показать нашу клавиатуру; inputmode="none" ставим ещё до фокуса
+  document.addEventListener("pointerdown", e=>{ const t=e.target; if(kbEligible(t) && t.getAttribute("inputmode")!=="none"){ t.dataset.im=t.getAttribute("inputmode")||""; t.setAttribute("inputmode","none"); } }, true);
+  document.addEventListener("focusin", e=>{ const t=e.target; if(kbEligible(t)){ if(t.getAttribute("inputmode")!=="none") t.setAttribute("inputmode","none"); kbShow(t); } else if(kbIn && !(kbEl && kbEl.contains(t))) kbHide(false); });
+  document.addEventListener("focusout", e=>{ if(e.target===kbIn){ kbHideT=setTimeout(()=>{ if(document.activeElement!==kbIn) kbHide(false); }, 120); } });
+  // тап мимо поля и клавиатуры — спрятать
+  document.addEventListener("pointerdown", e=>{ if(!kbIn) return; const t=e.target; if(t===kbIn || (kbEl && kbEl.contains(t)) || kbEligible(t)) return; kbHide(true); }, true);
+
+  // ======== Погода для механика (Open-Meteo, без ключей) ========
+  function wxCfg(){ try{ return JSON.parse(localStorage.getItem("salary:wx")||"null")||{}; }catch(e){ return {}; } }
+  function wxSave(c){ try{ localStorage.setItem("salary:wx", JSON.stringify(c)); }catch(e){} }
+  var wxData=null; try{ wxData=JSON.parse(localStorage.getItem("salary:wxc")||"null"); }catch(e){}
+  function wxKind(){
+    const c=wxCfg(); if(!c.on || !wxData || Date.now()-wxData.at>6*3600e3) return "";
+    const k=+wxData.code, t=+wxData.temp;
+    if(k>=95) return "storm"; if((k>=51&&k<=67)||(k>=80&&k<=82)) return "rain"; if((k>=71&&k<=77)||k===85||k===86) return "snow";
+    if(t<=-8) return "frost"; if(t<=2) return "cold"; if(t>=27) return "hot"; return "";
+  }
+  function wxText(){
+    if(!wxData || !wxCfg().on || Date.now()-wxData.at>6*3600e3) return "";
+    const k=+wxData.code, t=+wxData.temp;
+    const em = k>=95 ? "⛈" : (k>=71&&k<=77)||k===85||k===86 ? "❄️" : (k>=80&&k<=82) ? "🌦" : (k>=51&&k<=67) ? "🌧" : k>=45&&k<=48 ? "🌫" : k>=1&&k<=3 ? "⛅" : "☀️";
+    return em+" "+(t>0?"+":"")+t+"°";
+  }
+  async function wxFetch(force){
+    const c=wxCfg(); if(!c.on || c.lat==null) return;
+    if(!force && wxData && Date.now()-wxData.at<40*60e3){ renderWxChip(); return; }
+    try{
+      const r=await fetch("https://api.open-meteo.com/v1/forecast?latitude="+c.lat+"&longitude="+c.lon+"&current=temperature_2m,weather_code&timezone=auto");
+      const j=await r.json(), cur=j.current||{}; if(cur.temperature_2m==null) return;
+      wxData={temp:Math.round(cur.temperature_2m), code:+cur.weather_code||0, at:Date.now()}; try{ localStorage.setItem("salary:wxc", JSON.stringify(wxData)); }catch(e){}
+      renderMasc(); renderWxChip(); renderWxSet();
+    }catch(e){}
+  }
+  function renderWxChip(){ const c=$("tChip"); if(!c) return; let sp=c.querySelector(".wx"); const t=wxText(); if(!t){ if(sp) sp.remove(); return; } if(!sp){ sp=el("span","wx"); c.appendChild(sp); } sp.textContent=t; }
+  function renderWxSet(){
+    const c=wxCfg(); tgl("wxToggle", !!c.on, v=>{ const cc=wxCfg(); cc.on=v; wxSave(cc); if(v){ $("wxBox").hidden=false; if(cc.lat==null){ $("wxMsg").textContent="Напишите город или нажмите 📍"; try{ $("wxCity").focus(); }catch(e){} } else wxFetch(true); } else { $("wxBox").hidden=true; renderMasc(); renderWxChip(); } renderWxSet(); });
+    $("wxBox").hidden=!c.on;
+    if(c.on && c.city && document.activeElement!==$("wxCity")) $("wxCity").value=c.city;
+    if(c.on && c.city) $("wxMsg").textContent = c.city+(wxText() ? " · сейчас "+wxText() : " · загружаю погоду…");
+  }
+  function wxSet(lat, lon, city){ const c=wxCfg(); c.on=true; c.lat=+(+lat).toFixed(3); c.lon=+(+lon).toFixed(3); c.city=city; wxSave(c); wxData=null; try{ localStorage.removeItem("salary:wxc"); }catch(e){} renderWxSet(); wxFetch(true); sfx.save(); }
+  $("wxFind").onclick = async ()=>{
+    const q=$("wxCity").value.trim(); if(q.length<2){ $("wxMsg").textContent="Напишите название города."; return; }
+    $("wxMsg").textContent="Ищу…";
+    try{ const r=await fetch("https://geocoding-api.open-meteo.com/v1/search?count=1&language=ru&name="+encodeURIComponent(q)); const j=await r.json(), g=(j.results||[])[0];
+      if(!g){ $("wxMsg").textContent="Город не найден. Попробуйте написать иначе."; return; }
+      wxSet(g.latitude, g.longitude, g.name+(g.admin1 && g.admin1!==g.name ? ", "+g.admin1 : ""));
+    }catch(e){ $("wxMsg").textContent="Нет связи. Проверьте интернет."; }
+  };
+  $("wxCity").addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); $("wxFind").click(); } });
+  $("wxGeo").onclick = ()=>{
+    $("wxMsg").textContent="Определяю место…";
+    const ok=(lat,lon)=>wxSet(lat, lon, "по геопозиции"), fail=()=>{ $("wxMsg").textContent="Не получилось определить место. Напишите город."; };
+    try{
+      const LM = miniApp && tgAtLeast("8.0") && tg.LocationManager;
+      if(LM){ LM.init(()=>{ if(!LM.isLocationAvailable){ fail(); return; } LM.getLocation(d=>{ if(d && d.latitude!=null) ok(d.latitude, d.longitude); else fail(); }); }); return; }
+      if(navigator.geolocation) navigator.geolocation.getCurrentPosition(p=>ok(p.coords.latitude, p.coords.longitude), fail, {timeout:10000, maximumAge:3600e3}); else fail();
+    }catch(e){ fail(); }
+  };
+  setTimeout(()=>wxFetch(false), 1500); setInterval(()=>{ if(!document.hidden) wxFetch(false); }, 20*60e3);
+  document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) wxFetch(false); });
+
+  // ======== Быстрый старт: зарплата за минуту для нового человека ========
+  let qsWait=false;
+  function qsClose(bg){ if(bg) bg.remove(); document.body.style.overflow=""; try{ localStorage.setItem("salary:qs","1"); localStorage.setItem("salary:tour","1"); localStorage.setItem("salary:ver", APP_VER); }catch(e){} }
+  function openQuick(step){
+    document.querySelectorAll(".sheet-bg.qs").forEach(x=>x.remove());
+    const bg=el("div","sheet-bg qs"), sh=el("div","sheet qs-sheet"); sh.setAttribute("role","dialog"); sh.setAttribute("aria-label","Быстрый старт");
+    bg.appendChild(sh); document.body.appendChild(bg); document.body.style.overflow="hidden";
+    const dots=n=>'<div class="qs-dots">'+[1,2,3].map(i=>'<i'+(i<=n?' class="on"':'')+'></i>').join("")+'</div>';
+    const name = (miniApp && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.first_name) || "";
+    const st=step||1;
+    if(st===1){
+      sh.innerHTML=dots(1)+'<div class="qs-masc">'+mascSvg("idle", mascSkin(), false)+'</div><h2>'+(name ? esc(name)+", привет!" : "Привет!")+'</h2><p class="qs-p">Посчитаем твою зарплату за минуту. Проверь, сколько платят за смену:</p>'+
+        '<label class="mn-in">Оплата за смену, ₽<input id="qsRate" type="number" inputmode="numeric" min="0" step="100" value="'+settings.rate+'"></label>'+
+        '<label class="mn-in">Баллов для полной премии<input id="qsMax" type="number" inputmode="numeric" min="0" step="1" value="'+settings.maxPts+'"></label>'+
+        '<div class="row qs-row"><button class="save-btn" id="qsNext">Дальше</button><button class="link-btn" id="qsSkip">Пропустить</button></div>';
+      sh.querySelector("#qsNext").onclick=()=>{ const r=parseFloat(sh.querySelector("#qsRate").value), mx=parseFloat(sh.querySelector("#qsMax").value);
+        if(isFinite(r)&&r>0){ settings.rate=r; $("rate").value=r; } if(isFinite(mx)&&mx>0){ settings.maxPts=mx; $("maxPts").value=mx; } saveSettings(); render(); sfx.click(); openQuick(2); };
+      sh.querySelector("#qsSkip").onclick=()=>{ qsClose(bg); };
+    } else if(st===2){
+      const t1=iso(new Date(now.getFullYear(), now.getMonth(), now.getDate()));
+      sh.innerHTML=dots(2)+'<h2>Твои смены</h2><p class="qs-p">Как удобнее заполнить календарь?</p>'+
+        '<div class="qs-opt"><b>📷 По фото графика</b><span>Скриншот графика — смены расставятся сами</span>'+
+          '<label class="mn-in">Фамилия, как в графике<input id="qsFio" maxlength="60" autocomplete="family-name" placeholder="Например: Иванов" value="'+esc(settings.fio || $("phName").value || (miniApp && tg.initDataUnsafe && tg.initDataUnsafe.user && /[а-яё]/i.test(tg.initDataUnsafe.user.last_name||"") ? tg.initDataUnsafe.user.last_name : ""))+'"></label>'+
+          '<button class="save-btn" id="qsPhoto">Выбрать фото графика</button></div>'+
+        '<div class="qs-opt"><b>🔁 По схеме</b><span>Например, 2 через 2</span>'+
+          '<div class="qs-grid"><label class="mn-in">Рабочих<input id="qsW" type="number" inputmode="numeric" min="1" max="14" value="2"></label><label class="mn-in">Выходных<input id="qsO" type="number" inputmode="numeric" min="1" max="14" value="2"></label></div>'+
+          '<label class="mn-in">Первая смена<input id="qsStart" type="date" value="'+t1+'"></label>'+
+          '<button class="ghost-btn" id="qsPlan">Расставить на 2 месяца</button></div>'+
+        '<div class="row qs-row"><button class="link-btn" id="qsSelf">Отмечу сам в календаре</button></div>';
+      sh.querySelector("#qsPhoto").onclick=()=>{ const f=sh.querySelector("#qsFio").value.trim(); if(f.length<2){ sh.querySelector("#qsFio").focus(); sfx.error(); return; }
+        $("phName").value=f; settings.fio=f; saveSettings(); qsWait=true; $("phFile").click(); qsClose(bg); setTab("main");
+        setTimeout(()=>{ const b=$("phBox"); if(b) b.scrollIntoView({block:"start", behavior:"smooth"}); }, 400); };
+      sh.querySelector("#qsPlan").onclick=()=>{ const W=parseInt(sh.querySelector("#qsW").value,10), O=parseInt(sh.querySelector("#qsO").value,10), sv=sh.querySelector("#qsStart").value;
+        if(!(W>=1 && O>=1 && sv)){ sfx.error(); return; }
+        const [yy,mm,dd]=sv.split("-").map(Number), start=new Date(yy,mm-1,dd), end=new Date(yy,mm+1,0), touched=new Set();
+        for(let d=new Date(start), i=0; d<=end; d.setDate(d.getDate()+1), i++){ const k=key(d.getFullYear(), d.getMonth()); if((months[k]||{})[d.getDate()]) continue; months[k]=Object.assign({}, months[k]||{}); months[k][d.getDate()] = (i%(W+O))<W ? "w" : "o"; touched.add(k); }
+        touched.forEach(k=>scheduleSave(k)); render(); sfx.good(); openQuick(3); };
+      sh.querySelector("#qsSelf").onclick=()=>{ qsClose(bg); };
+    } else {
+      const c=calc(now.getFullYear(), now.getMonth()), tot=netv(c.total), idx=now.getFullYear()*12+now.getMonth(), t0=new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const nx=payEvents(idx, 2).filter(e=>e.date>=t0 && e.amt>0)[0], st2=periodStats(periodOf(t0).y, periodOf(t0).m);
+      sh.innerHTML=dots(3)+'<div class="qs-masc">'+mascSvg("happy", mascSkin(), false)+'</div><h2>Готово!</h2>'+
+        '<div class="qs-res"><small>В '+MONTHS_PREP[now.getMonth()]+' ты получишь</small><b class="num">≈ '+fmt(tot)+'</b><span>'+shifts(c.cnt.w+c.cnt.x)+' · премия '+pctTxt(c.bonusPct)+'</span></div>'+
+        (nx ? '<p class="qs-p">Ближайшая выплата: '+(nx.kind==="adv"?"аванс":"зарплата")+' '+evDate(nx)+' — <b>'+fmt(nx.amt)+'</b></p>' : '')+
+        '<p class="qs-p">Для полной премии держи в среднем <b>'+settings.maxPts+' баллов</b> за смену'+(st2.perDay>0 ? ' — сейчас нужно '+f1(st2.perDay)+' в день' : '')+'. После смены жми +1…+6 за каждый ремонт или вноси баллы числом.</p>'+
+        '<div class="row qs-row"><button class="save-btn" id="qsDone">Открыть календарь</button><button class="link-btn" id="qsTour">Как пользоваться</button></div>';
+      sh.querySelector("#qsDone").onclick=()=>{ qsClose(bg); sfx.good(); try{ burst(); }catch(e){} };
+      sh.querySelector("#qsTour").onclick=()=>{ qsClose(bg); openTour(); };
+    }
+  }
+  { const f=$("phApply").onclick; $("phApply").onclick=(...a)=>{ const r=f.apply($("phApply"), a); if(qsWait){ qsWait=false; setTimeout(()=>openQuick(3), 700); } return r; }; }
+
   // ======== Настройки ========
   function tgl(id, on, fn, dis){ const b=$(id); if(!b) return; b.setAttribute("aria-checked", String(!!on)); b.disabled=!!dis; b._fn=fn;
     if(!b._t){ b._t=1; b.addEventListener("click", ()=>{ if(b.disabled) return; const v=b.getAttribute("aria-checked")!=="true"; b.setAttribute("aria-checked", String(v)); haptic("i","light"); try{ b._fn(v); }catch(e){ console.error(e); } }); } }
@@ -3747,7 +4010,7 @@ window.LOOK = (function(){
   function agoTxt(ms){ if(!ms) return ""; const d=new Date(ms), t=d.toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"}), dd=Math.round((new Date(now.getFullYear(),now.getMonth(),now.getDate()) - new Date(d.getFullYear(),d.getMonth(),d.getDate()))/864e5);
     return dd===0 ? "сегодня в "+t : dd===1 ? "вчера в "+t : d.getDate()+" "+GEN[d.getMonth()]+" в "+t; }
   function renderSet(){
-    try{ renderMascPick(); }catch(e){}
+    try{ renderMascPick(); renderWxSet(); }catch(e){}
     tgl("heatToggle", heatOn, v=>{ heatOn=v; try{ localStorage.setItem("salary:heat", v?"1":"0"); }catch(e){} render(); });
     tgl("sndToggle", sfx.on, v=>{ sfx.set(v); const sb2=$("soundBtn"); if(sb2) sb2.setAttribute("aria-pressed", String(v)); if(v) sfx.good(); renderSet(); });
     seg("clkList", [["click","Щелчок"],["soft","Мягкий"],["drop","Капля"],["mech","Механика"]], sfx.clk, v=>{ sfx.setClk(v); if(!sfx.on){ sfx.set(true); } sfx.click(v); renderSet(); });
@@ -3821,7 +4084,13 @@ window.LOOK = (function(){
     closeEditor(); render(); sfx.unmark(); $("dMsg").textContent="Все данные удалены. Настройки остались."; status("Данные удалены");
   };
   // Помощь: что нового, написать разработчику
-  const NEWS = [{v:"3.0", d:"17 октября 2026", items:[
+  const NEWS = [{v:"3.1", d:"17 октября 2026", items:[
+    "Механик во весь рост: 8 поз по ситуации — кофе утром, колесо в работе, кубок за рекорд, плед на больничном",
+    "Механик одевается по погоде: зонт в дождь, ушанка и шарф в мороз, очки в жару — включите в «Оформлении»",
+    "Костюм механика можно выбрать отдельно от темы",
+    "Быстрый старт для новичков: зарплата за минуту",
+    "Своя клавиатура во всех полях: цифры, русские и английские буквы, символы — системная больше не выскакивает",
+    "Мягкое перелистывание месяцев"]},{v:"3.0", d:"17 октября 2026", items:[
     "Новая вкладка «Деньги»: ближайшая выплата, сверка с расчёткой, цель на месяц, «что если» и заработок за год",
     "«Ещё» стала «Настройками»: звук и вибрация, синхронизация, уведомления, приватность, календарь, данные, помощь",
     "Бот может присылать копию данных по воскресеньям и итоги недели; можно поставить уведомления на паузу",
@@ -3838,6 +4107,7 @@ window.LOOK = (function(){
     bg.appendChild(sh); document.body.appendChild(bg);
   }
   $("newsOpen").onclick = openNews;
+  $("qsOpen").onclick = ()=>openQuick(1);
   setTimeout(()=>{ try{ const v=localStorage.getItem("salary:ver"), seen=localStorage.getItem("salary:tour")==="1";
     if(v!==APP_VER){ if(seen && !document.querySelector(".story")) openNews(); else localStorage.setItem("salary:ver", APP_VER); } }catch(e){} }, 1600);
   $("fbSend").onclick = async ()=>{
@@ -3858,16 +4128,26 @@ window.LOOK = (function(){
   sb.onclick = ()=>{ sfx.set(!sfx.on); sb.setAttribute("aria-pressed", sfx.on); sb.setAttribute("aria-label", sfx.on?"Звук включён":"Звук выключен"); if(sfx.on) sfx.good(); };
   // ---- Уведомления: календарь отправляет график и баллы на сервер бота ----
   let syncTimer=null;
-  function scheduleSync(){ if(!notifOn || !API_URL || !miniApp) return; clearTimeout(syncTimer); syncTimer=setTimeout(()=>syncServer(true), 2500); }
-  async function syncServer(enabled){
+  // Сервер получает данные не чаще раза в 90 секунд (бережём лимит записей), а при сворачивании — сразу.
+  // После конца смены — быстро, чтобы бот сразу прислал статистику.
+  let lastSync=0, syncDirty=false;
+  function scheduleSync(){
+    if(!notifOn || !API_URL || !miniApp) return; syncDirty=true; clearTimeout(syncTimer);
+    const t=new Date(), [eh,em]=String((settings.shift||{}).to||"21:30").split(":").map(Number), late=t.getHours()*60+t.getMinutes() >= (eh||21)*60+(em||0);
+    const wait = late ? 2500 : Math.max(2500, 90000-(Date.now()-lastSync));
+    syncTimer=setTimeout(()=>syncServer(true), wait);
+  }
+  document.addEventListener("visibilitychange", ()=>{ if(document.hidden && syncDirty && notifOn){ clearTimeout(syncTimer); syncServer(true, true); } });
+  async function syncServer(enabled, bg){
     if(!API_URL || !miniApp) return false;
+    lastSync=Date.now(); syncDirty=false;
     try{
-      const r = await fetch(API_URL.replace(/\/$/,"")+"/sync", {method:"POST", headers:{"Content-Type":"application/json"},
+      const r = await fetch(API_URL.replace(/\/$/,"")+"/sync", {method:"POST", headers:{"Content-Type":"application/json"}, keepalive: !!bg,
         body: JSON.stringify({initData: tg.initData, enabled, appUrl: location.origin+location.pathname, data:{settings, months, points:pts, totals, days:dayx, pays}, inboxAck: pendingAck||undefined})});
       const j = await r.json().catch(()=>({}));
-      if(r.ok && j.ok) pendingAck=0;
+      if(r.ok && j.ok) pendingAck=0; else syncDirty=true;
       return !!(r.ok && j.ok);
-    }catch(e){ return false; }
+    }catch(e){ syncDirty=true; return false; }
   }
   function renderNotif(){
     const box=$("notifBox"); if(!box) return;
@@ -3967,7 +4247,9 @@ window.LOOK = (function(){
     if(API_URL && miniApp){ try{ fetch(API_URL.replace(/\/$/,"")+"/hello", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({initData: tg.initData, appUrl: location.origin+location.pathname})}).catch(()=>{}); }catch(e){} }
     setupNotice(); hideSplash();
     try{ seasonal(); }catch(e){}
-    { let seen=false; try{ seen = localStorage.getItem("salary:tour")==="1"; }catch(e){} if(!seen) setTimeout(openTour, 1100); }
+    { let seen=false, qs=false; try{ seen = localStorage.getItem("salary:tour")==="1"; qs = localStorage.getItem("salary:qs")==="1"; }catch(e){}
+      const empty = !Object.values(months).some(m=>Object.keys(m||{}).length);
+      if(empty && !qs) setTimeout(()=>openQuick(1), 1000); else if(!seen) setTimeout(openTour, 1100); }
     achReady=true; checkAch(); setAchDot(achDotN);
     // Кнопка «Внести баллы» из сообщения бота открывает ввод баллов за сегодня
     if(location.hash==="#points"){
