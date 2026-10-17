@@ -1012,11 +1012,11 @@ window.LOOK = (function(){
     <div class="settings">
       <label for="payAdv">День аванса<input id="payAdv" type="number" inputmode="numeric" min="1" max="31" value="20"></label>
       <label for="paySal">День зарплаты<input id="paySal" type="number" inputmode="numeric" min="1" max="31" value="5"></label>
-      <label for="advMode">Аванс<select id="advMode"><option value="half">за 1–15 число</option><option value="fixed">фикс. сумма</option></select></label>
-      <label for="advFix" id="advFixL">Сумма аванса, ₽<input id="advFix" type="number" inputmode="numeric" min="0" step="500" placeholder="Например, 20000"></label>
+      <label for="advMode">Аванс<select id="advMode"><option value="fixed">фикс. сумма</option><option value="half">за 1–15 число</option></select></label>
+      <label for="advFix" id="advFixL">Сумма аванса, ₽<input id="advFix" type="number" inputmode="numeric" min="0" step="500" placeholder="43300"></label>
     </div>
     <label class="chk" for="ndfl" style="display:flex;gap:8px;align-items:center;margin-top:12px"><input id="ndfl" type="checkbox">Вычитать НДФЛ 13% — во вкладке «Деньги» суммы на руки</label>
-    <p class="hint" style="margin-top:8px">Аванс приходит в день аванса этого месяца, зарплата — в день зарплаты следующего месяца: всё за месяц (смены и премия) минус аванс. Если суммы в «Сверке» не сходятся — поправьте здесь.</p>
+    <p class="hint" style="margin-top:8px">Аванс приходит в день аванса этого месяца, зарплата — в день зарплаты следующего месяца (если это выходной или праздник — в рабочий день перед ним): всё за месяц (смены и премия) минус аванс. Если суммы в «Сверке» не сходятся — поправьте здесь.</p>
   </details>
   </div>
 
@@ -1434,21 +1434,28 @@ window.LOOK = (function(){
     const T0 = totals[key(y,m)];
     // Баллы за период: общее количество, введённое вручную (по дату включительно) + дневные баллы после этой даты
     let pSum = ptsSum, pDone = scored;
+    // Сегодняшняя смена, пока она идёт (до конца смены), не считается отработанной:
+    // баллы, внесённые за неё, — частичные. Они видны в сумме, но не портят средний и цель на день.
+    const tNow=new Date(), [eh,em]=String((settings.shift||{}).to||"21:30").split(":").map(Number);
+    const tDay=new Date(tNow.getFullYear(), tNow.getMonth(), tNow.getDate());
+    const live = dates.some(d=>d.getTime()===tDay.getTime()) && tNow.getHours()*60+tNow.getMinutes() < (isFinite(eh)?eh:21)*60+(isFinite(em)?em:30);
+    const todayIt = list.find(it=>it.yy===tDay.getFullYear() && it.mo===tDay.getMonth() && it.d===tDay.getDate());
+    let part = 0, counted = !!todayIt;
     if(T0 && T0.pts!=null){
       const lim=new Date(T0.upTo+"T23:59:59"); let aSum=0, aCnt=0;
       for(const it of list){ if(new Date(it.yy, it.mo, it.d) > lim){ aSum+=it.p; aCnt++; } }
       pSum = +T0.pts + aSum; pDone = dates.filter(d=>d<=lim).length + aCnt;
-      // Общее посчитано на сегодня, а смена ещё идёт: сегодняшняя смена не считается отработанной (иначе средний занижается)
-      { const t=new Date(), tid=iso(t), [eh,em]=String((settings.shift||{}).to||"21:30").split(":").map(Number);
-        if(T0.upTo===tid && dates.some(d=>iso(d)===tid) && !list.some(it=>iso(new Date(it.yy,it.mo,it.d))===tid) && t.getHours()*60+t.getMinutes() < (eh||21)*60+(em||0)) pDone--; }
-    }
-    const avgP = pDone ? pSum/pDone : null, avgSrc = T0 && T0.pts!=null ? "manual" : (scored ? "daily" : "none");
+      counted = tDay<=lim || !!todayIt;
+      if(live && todayIt && tDay>lim) part = todayIt.p;
+    } else if(live && todayIt) part = todayIt.p;
+    if(live && counted) pDone--;
+    const avgP = pDone ? (pSum-part)/pDone : null, avgSrc = T0 && T0.pts!=null ? "manual" : (scored ? "daily" : "none");
     const bonusPct = pctFor(avgP), bonus = bonusBase*bonusPct/100, bonusMax = bonusBase*settings.pct/100;
     // Цена балла, запас до потери полной премии и прогноз, если дальше работать по норме
     const price = bonusDays && settings.maxPts>settings.minPts ? bonusBase*settings.pct/100/(settings.maxPts-settings.minPts)/bonusDays : 0;
-    const surplus = pDone ? pSum - pDone*settings.maxPts : 0;
-    const projAvg = bonusDays ? (pSum + (bonusDays-pDone)*settings.maxPts)/bonusDays : null, projBonus = bonusBase*pctFor(projAvg)/100;
-    return {cnt, base, bonus, bonusMax, bonusBase, price, surplus, projBonus, bonusPct, avgP, avgSrc, bonusDays, scored, avg: scored? ptsSum/scored : null, lv, ptsSum, pSum, pDone, list, dates, total: base+bonus, pm};
+    const surplus = pDone ? (pSum-part) - pDone*settings.maxPts : 0;
+    const projAvg = bonusDays ? (pSum - part + (bonusDays-pDone)*settings.maxPts)/bonusDays : null, projBonus = bonusBase*pctFor(projAvg)/100;
+    return {cnt, base, bonus, bonusMax, bonusBase, price, surplus, projBonus, bonusPct, avgP, avgSrc, bonusDays, scored, live, part, avg: scored? ptsSum/scored : null, lv, ptsSum, pSum, pDone, list, dates, total: base+bonus, pm};
   }
 
   function renderBrushes(){
@@ -1596,10 +1603,17 @@ window.LOOK = (function(){
         else if(cc.pDone && cc.price) facts.push(pill("балл ≈ "+fmt(cc.price),"warn"));
         btn("Внести баллы", enter, "save-btn");
       } else {
-        $("tBig").innerHTML = '<span class="tb-n num">'+f1(p)+'</span><span class="tb-l">баллов<br>сегодня</span>';
-        facts.push(p>=settings.maxPts ? pill("норма ✓ +"+f1(p-settings.maxPts),"good") : pill("до нормы −"+f1(settings.maxPts-p),"warn"));
-        if(st.perDay>0 && st.left>0) facts.push(pill("дальше по "+goalDay(st.perDay)));
-        else if(st.perDay===0) facts.push(pill("цель периода ✓","good"));
+        $("tBig").innerHTML = '<span class="tb-n num">'+f1(p)+'</span><span class="tb-l">'+pW(p)+'<br>'+(cc.live ? "уже сегодня" : "сегодня")+'</span>';
+        if(cc.live){
+          // Смена идёт: цель на сегодня считается без сегодняшних баллов, показываем, сколько ещё осталось
+          const tgt = st.left>0 ? goalDay(Math.max(0, st.need+(cc.part||0))/st.left) : settings.maxPts, rem = tgt-p;
+          facts.push(rem>0 ? pill("цель "+tgt+" · ещё "+f1(rem),"warn") : pill("цель "+tgt+" ✓ +"+f1(-rem),"good"));
+          if(p<settings.maxPts) facts.push(pill("до нормы "+settings.maxPts+" ещё "+f1(settings.maxPts-p)));
+        } else {
+          facts.push(p>=settings.maxPts ? pill("норма ✓ +"+f1(p-settings.maxPts),"good") : pill("до нормы −"+f1(settings.maxPts-p),"warn"));
+          if(st.perDay>0 && st.left>0) facts.push(pill("дальше по "+goalDay(st.perDay)));
+          else if(st.perDay===0) facts.push(pill("цель периода ✓","good"));
+        }
         if(cc.pDone && cc.surplus>=0) facts.push(pill("запас "+cc.surplus,"good"));
         btn("Изменить", enter);
       }
@@ -2877,8 +2891,10 @@ window.LOOK = (function(){
     const start=new Date(py,pm,21), end=new Date(P.y,P.m,20), t0=new Date(now.getFullYear(),now.getMonth(),now.getDate());
     $("tqHint").textContent = "21 "+GEN[pm]+" – 20 "+GEN[P.m];
     $("tqPts").value = T0 ? T0.pts : "";
-    // Дата — всегда сегодня: число из рабочей системы обычно посчитано на сегодня. Старая дата давала двойной счёт.
-    $("tqDate").value = iso(t0<start?start:t0>end?end:t0);
+    // Дата: сегодня, а пока сегодняшняя смена идёт — вчера (сегодняшние ремонты вы вносите сами, они прибавятся).
+    // Старую дату не подставляем: из-за неё баллы считались дважды.
+    const cP=calc(P.y,P.m), dDef = cP.live ? new Date(t0.getFullYear(), t0.getMonth(), t0.getDate()-1) : t0;
+    $("tqDate").value = iso(dDef<start?start:dDef>end?end:dDef);
     $("tqDate").min=iso(start); $("tqDate").max=iso(end);
     $("tqClear").hidden=!T0;
     $("tqForm").hidden=false; $("tqForm").dataset.k=k;
@@ -2896,7 +2912,7 @@ window.LOOK = (function(){
     for(const it of c.list){ if(new Date(it.yy,it.mo,it.d)>lim){ aSum+=it.p; aCnt++; } }
     // Пробный расчёт с новым общим числом — тем же способом, что и после сохранения
     const was=totals[k]; totals[k]={pts:v, upTo:dt}; const c2=calc(yy,mm-1); if(was) totals[k]=was; else delete totals[k];
-    out.textContent = now1+" Станет: "+f1(v)+" по "+shortDate(dt)+" включительно"+(aCnt ? " + "+f1(aSum)+" за "+shifts(aCnt)+" после" : "")+" = "+f1(c2.pSum)+(c2.avgP!=null ? ", средний "+f1(c2.avgP) : "")+". Баллы смен по "+shortDate(dt)+" берутся только из общего числа.";
+    out.textContent = now1+" Станет: "+f1(v)+" по "+shortDate(dt)+" включительно"+(aCnt ? " + "+f1(aSum)+" за "+plural(aCnt,"смену","смены","смен")+" после" : "")+" = "+f1(c2.pSum)+(c2.avgP!=null ? ", средний "+f1(c2.avgP) : "")+". Баллы смен по "+shortDate(dt)+" берутся только из общего числа."+(c2.live && dt===iso(new Date()) ? " Смена ещё идёт: ремонты, которые вы внесёте сегодня, не прибавятся — для этого поставьте вчерашнюю дату." : "");
   }
   ["tqPts","tqDate"].forEach(id=>$(id).addEventListener("input", tqPreview));
   $("tqOpen").onclick = ()=>{ if($("tqForm").hidden) tqOpen(); else $("tqForm").hidden=true; };
@@ -3195,7 +3211,7 @@ window.LOOK = (function(){
 
   // ======== Деньги: выплаты, сверка, цель, «что если», заработок за год ========
   const APP_VER = "3.0";
-  const PAYDEF = {adv:20, sal:5, mode:"half", fix:0, ndfl:false};
+  const PAYDEF = {adv:20, sal:5, mode:"fixed", fix:43300, ndfl:false};
   function payCfg(){ let p={}; try{ p=settings.payout||{}; }catch(e){} return Object.assign({}, PAYDEF, p); }
   function netv(v){ return payCfg().ndfl ? v*0.87 : v; }
   const dimOf = (y,m) => new Date(y,m+1,0).getDate();
@@ -3205,11 +3221,14 @@ window.LOOK = (function(){
   function advFor(y,m){ const P=payCfg(); if(P.mode==="fixed") return hasMarks(y,m) ? Math.max(0, +P.fix||0) : 0; const days=months[key(y,m)]||{}; let s=0; for(const d in days) if(+d<=15) s+=pay(days[d]); return netv(s); }
   // Зарплата за месяц: всё за месяц (смены и премия) минус аванс; приходит в следующем месяце
   function salFor(y,m){ return Math.max(0, netv(calc(y,m).total) - advFor(y,m)); }
+  // Выплата в выходной или праздник переносится на ближайший рабочий день раньше (ст. 136 ТК РФ)
+  const HOLI = ["01-01","01-02","01-03","01-04","01-05","01-06","01-07","01-08","02-23","03-08","05-01","05-09","06-12","11-04"];
+  function payDay(d){ const x=new Date(d); for(let i=0;i<14;i++){ const g=x.getDay(), md=String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0"); if(g!==0 && g!==6 && !HOLI.includes(md)) break; x.setDate(x.getDate()-1); } return x; }
   function payEvents(fromIdx, n){
     const P=payCfg(), out=[];
     for(let i=0;i<n;i++){ const ix=fromIdx+i, y=Math.floor(ix/12), m=ix%12, ny=Math.floor((ix+1)/12), nm=(ix+1)%12;
-      out.push({kind:"adv", y, m, date:new Date(y,m,Math.min(Math.max(1,+P.adv||20), dimOf(y,m))), amt:advFor(y,m)});
-      out.push({kind:"sal", y, m, date:new Date(ny,nm,Math.min(Math.max(1,+P.sal||5), dimOf(ny,nm))), amt:salFor(y,m)});
+      out.push({kind:"adv", y, m, date:payDay(new Date(y,m,Math.min(Math.max(1,+P.adv||20), dimOf(y,m)))), amt:advFor(y,m)});
+      out.push({kind:"sal", y, m, date:payDay(new Date(ny,nm,Math.min(Math.max(1,+P.sal||5), dimOf(ny,nm)))), amt:salFor(y,m)});
     }
     return out.sort((a,b)=>a.date-b.date);
   }
@@ -3225,13 +3244,14 @@ window.LOOK = (function(){
     if(h){
       const dd=Math.round((h.date-t0)/864e5);
       $("mnNextWhen").textContent = dd===0 ? "сегодня" : dd===1 ? "завтра" : "через "+dayz(dd);
-      $("mnNextAmt").textContent = h.amt>0 ? "≈ "+fmt(h.amt) : "—";
-      const what = h.kind==="adv" ? (P.mode==="fixed" ? "фиксированный аванс" : "смены с 1 по 15 "+GEN[h.m]) : "смены и премия за "+MONTHS[h.m]+" минус аванс";
-      const grow = (h.y*12+h.m)>=idx ? " · сумма растёт с каждой отмеченной сменой" : "";
+      const fixA = h.kind==="adv" && P.mode==="fixed";
+      $("mnNextAmt").textContent = h.amt>0 ? (fixA ? "" : "≈ ")+fmt(h.amt) : "—";
+      const what = h.kind==="adv" ? (P.mode==="fixed" ? "фиксированный, не зависит от смен" : "смены с 1 по 15 "+GEN[h.m]) : "смены и премия за "+MONTHS[h.m]+" минус аванс";
+      const grow = (h.y*12+h.m)>=idx && !fixA ? " · сумма растёт с каждой отмеченной сменой" : "";
       $("mnNextSub").textContent = evName(h)+", "+evDate(h)+" — "+what+(P.ndfl ? ", на руки" : "")+(h.amt>0 ? grow : " · отметьте смены в календаре");
     } else { $("mnNextWhen").textContent=""; $("mnNextAmt").textContent="—"; $("mnNextSub").textContent="Отметьте смены в календаре — здесь появится прогноз выплаты."; }
     const up=$("mnUpcoming"); up.textContent="";
-    fut.slice(1,3).forEach(e=>{ const r=el("div"); r.append(el("span","", evName(e)+", "+evDate(e)), el("b","", e.amt>0 ? "≈ "+fmt(e.amt) : "—")); up.appendChild(r); });
+    fut.slice(1,3).forEach(e=>{ const r=el("div"); r.append(el("span","", evName(e)+", "+evDate(e)), el("b","", e.amt>0 ? (e.kind==="adv" && P.mode==="fixed" ? "" : "≈ ")+fmt(e.amt) : "—")); up.appendChild(r); });
     { const c=calc(now.getFullYear(), now.getMonth()), r=el("div"); r.append(el("span","", "Всего за "+MONTHS[now.getMonth()]+" по отметкам"), el("b","", fmt(netv(c.total)))); up.appendChild(r); }
     // Сверка: прошедшие выплаты, свежие сверху
     const box=$("mnCheck"); box.textContent="";
@@ -3305,7 +3325,7 @@ window.LOOK = (function(){
   }
   function onWork(){
     const P=payCfg(), ad=parseInt($("payAdv").value,10), sl=parseInt($("paySal").value,10), fx=parseFloat($("advFix").value);
-    if(ad>=1 && ad<=31) P.adv=ad; if(sl>=1 && sl<=31) P.sal=sl; P.mode=$("advMode").value==="fixed" ? "fixed" : "half"; P.fix = isFinite(fx)&&fx>=0 ? Math.round(fx) : 0; P.ndfl=$("ndfl").checked;
+    if(ad>=1 && ad<=31) P.adv=ad; if(sl>=1 && sl<=31) P.sal=sl; P.mode=$("advMode").value==="fixed" ? "fixed" : "half"; P.fix = isFinite(fx)&&fx>=0 ? Math.round(fx) : PAYDEF.fix; P.ndfl=$("ndfl").checked;
     settings.payout=P; settings.shift={from:$("shFrom").value||"09:30", to:$("shTo").value||"21:30"};
     $("advFixL").hidden = P.mode!=="fixed"; saveSettings(); renderYear(); renderMoney(); renderGoal();
   }
