@@ -1,0 +1,19 @@
+# Настройки бота для автоматической выкладки в Cloudflare.
+# Номер хранилища (KV_ID) и доступ подставляются из секретов GitHub — здесь их нет.
+# BOT_TOKEN и HOOK_SECRET остаются в Cloudflare как были и при выкладке не трогаются.
+name = "smeny-bot"
+main = "worker.js"
+compatibility_date = "2025-04-01"
+workers_dev = true
+keep_vars = true
+
+[[kv_namespaces]]
+binding = "DB"
+id = "KV_ID"
+
+[ai]
+binding = "AI"
+
+# 21:00, 21:45 и 22:00 по Москве
+[triggers]
+crons = ["0 18 * * *", "45 18 * * *", "0 19 * * *"]

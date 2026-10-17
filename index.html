@@ -11,8 +11,8 @@
 <meta name="apple-mobile-web-app-title" content="Смены">
 <link rel="manifest" href="manifest.webmanifest">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link rel="apple-touch-icon" href="icon-180.png">
-<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png?v=2">
+<link rel="icon" type="image/png" href="icon-192.png?v=2">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,sans-serif;-webkit-tap-highlight-color:transparent}img{max-width:100%}[hidden]{display:none!important}html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}button,label,.day,.tabbar,summary{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}input:not(#edInput):not(#tqPts),select,textarea{font-size:16px!important}</style>
 <title>Календарь смен</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -712,6 +712,15 @@ html.priv.priv-show .pvt{filter:none}
 @keyframes shFade{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion: reduce){.sheet,.sheet-bg{animation:none}}
 
+.don-card{background:linear-gradient(135deg,color-mix(in srgb,#ffc23d 22%,var(--surface)),var(--surface) 70%);border:1px solid color-mix(in srgb,#ffb020 45%,var(--line));border-radius:20px;padding:14px 16px;margin:0 0 12px;display:flex;flex-direction:column;gap:12px}
+.don-top{display:flex;gap:12px;align-items:flex-start}.don-top b{display:block;font-size:17px}.don-top small{display:block;color:var(--muted);font-size:13.5px;line-height:1.35;margin-top:2px}
+.don-ic{font-size:30px;line-height:1;animation:donBeat 2.4s ease-in-out infinite}
+@keyframes donBeat{0%,100%{transform:scale(1)}8%{transform:scale(1.18)}16%{transform:scale(1)}24%{transform:scale(1.12)}32%{transform:scale(1)}}
+.don-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.don-row button{border:0;border-radius:14px;padding:11px 0;font:inherit;font-weight:700;font-size:15px;color:#5a3500;background:linear-gradient(180deg,#ffe07a,#ffb52e);box-shadow:0 2px 0 #d98a10;cursor:pointer;transition:transform .12s}
+.don-row button:active{transform:translateY(2px);box-shadow:0 0 0 #d98a10}.don-row button:disabled{opacity:.6}
+.don-msg{margin:0;font-size:13.5px;color:var(--muted)}.don-msg:empty{display:none}
+@media (prefers-reduced-motion: reduce){.don-ic{animation:none}}
 </style>
 <script>
 // Оформление: темы и шрифты. Применяется до отрисовки страницы, чтобы не было вспышки.
@@ -1342,6 +1351,12 @@ window.LOOK = (function(){
     </div>
   </details>
 
+  <div class="don-card" id="donBox">
+    <div class="don-top"><span class="don-ic" aria-hidden="true">💛</span><div><b>Поддержать проект</b><small>Календарь бесплатный и без рекламы. Если он помогает — можно поддержать звёздами Telegram.</small></div></div>
+    <div class="don-row" id="donRow"></div>
+    <p class="don-msg" id="donMsg"></p>
+  </div>
+
   <details id="helpBox">
     <summary>❔ Помощь</summary>
     <div class="backup">
@@ -1369,6 +1384,7 @@ window.LOOK = (function(){
 <div class="undo-bar" id="undoBar" role="status" aria-live="polite"><span id="undoTx"></span><button id="undoBtn">Отменить</button></div>
 <button class="toast" id="toast" aria-live="polite"><span class="em" id="toastEm"></span><span id="toastTx"></span></button>
 
+<script src="calc.js"></script>
 <script>
 (function(){
   const MONTHS = ["январь","февраль","март","апрель","май","июнь","июль","август","сентябрь","октябрь","ноябрь","декабрь"];
@@ -1523,66 +1539,20 @@ window.LOOK = (function(){
 
   // Старые записи хранили true вместо типа — это обычная смена.
   const norm = days => { const o={}; for(const d in (days||{})){ const v=days[d]; if(v===true) o[d]="w"; else if(T[v]) o[d]=v; } return o; };
-  const pay = t => t==="w" ? settings.rate : t==="o" ? 0 :
-    (settings.types[t].pay==null || settings.types[t].pay==="" ? settings.rate : +settings.types[t].pay);
-  const inBonus = t => t==="w" ? true : t==="o" ? false : !!settings.types[t].bonus;
-  const isShift = t => t==="w" || t==="x";
+  // ===== Расчёт денег и баллов — общий с ботом, в файле calc.js (там же проверки) =====
+  const SC = window.SmenyCalc;
+  const calcData = () => ({months, points: pts, totals, settings});
+  const nowParts = () => { const t=new Date(); return {y:t.getFullYear(), m:t.getMonth(), d:t.getDate(), hm:t.getHours()*60+t.getMinutes()}; };
+  const stOpts = () => SC.opts(settings);
+  const pay = t => SC.pay(stOpts(), t);
+  const inBonus = t => SC.inBonus(stOpts(), t);
+  const isShift = SC.isShift;
   // Процент премии за день по баллам: меньше минимума — 0, дальше равномерно до максимума.
-  function pctFor(p){
-    if(p==null) return settings.pct;
-    const lo=settings.minPts, hi=settings.maxPts;
-    if(p>=hi) return settings.pct;
-    if(p<lo || hi<=lo) return 0;
-    return settings.pct*(p-lo)/(hi-lo);
-  }
-  const level = p => p>=settings.maxPts ? "full" : p>=settings.minPts ? "mid" : "low";
+  const pctFor = p => SC.pctFor(stOpts(), p);
+  const level = p => SC.level(stOpts(), p);
   const pctTxt = v => (Math.round(v*10)/10).toString().replace(".",",")+"%";
-
   // Оплата — за календарный месяц. Премия — с 21 числа прошлого месяца по 20 число этого, включительно.
-  function calc(y, m){
-    const cur = months[key(y,m)] || {};
-    const py = m===0 ? y-1 : y, pm = m===0 ? 11 : m-1, prev = months[key(py,pm)] || {};
-    const cnt = {w:0,x:0,s:0,a:0,o:0}; let base = 0;
-    for(const d in cur){ cnt[cur[d]]++; base += pay(cur[d]); }
-    let bonusBase = 0, bonusDays = 0, scored = 0, ptsSum = 0, lv = {full:0, mid:0, low:0}, list = [], dates = [];
-    const add = (days, P, from, to, mo, yy) => { for(const d in days){
-      if(+d<from || +d>to || !inBonus(days[d])) continue;
-      const p = P && P[d]!=null ? +P[d] : null, b = pay(days[d]);
-      bonusBase += b; bonusDays++; dates.push(new Date(yy,mo,+d));
-      if(p!=null){ scored++; ptsSum+=p; lv[level(p)]++; list.push({yy, mo, d:+d, p}); }
-    } };
-    add(prev, pts[key(py,pm)], 21, 31, pm, py); add(cur, pts[key(y,m)], 1, 20, m, y);
-    // Премия за отчётный период: процент зависит от среднего балла за смену за весь период.
-    // Если введено общее количество — среднее = общее / смены по указанную дату; иначе по дневным баллам.
-    const T0 = totals[key(y,m)];
-    // Баллы за период: общее количество, введённое вручную (по дату включительно) + дневные баллы после этой даты
-    let pSum = ptsSum, pDone = scored;
-    // Сегодняшняя смена, пока она идёт (до конца смены), не считается отработанной:
-    // баллы, внесённые за неё, — частичные. Они видны в сумме, но не портят средний и цель на день.
-    const tNow=new Date(), [eh,em]=String((settings.shift||{}).to||"21:30").split(":").map(Number);
-    const tDay=new Date(tNow.getFullYear(), tNow.getMonth(), tNow.getDate());
-    const live = dates.some(d=>d.getTime()===tDay.getTime()) && tNow.getHours()*60+tNow.getMinutes() < (isFinite(eh)?eh:21)*60+(isFinite(em)?em:30);
-    const todayIt = list.find(it=>it.yy===tDay.getFullYear() && it.mo===tDay.getMonth() && it.d===tDay.getDate());
-    let part = 0, counted = !!todayIt;
-    if(T0 && T0.pts!=null){
-      const lim=new Date(T0.upTo+"T23:59:59"); let aSum=0, aCnt=0;
-      for(const it of list){ if(new Date(it.yy, it.mo, it.d) > lim){ aSum+=it.p; aCnt++; } }
-      // Баллы дня «по число», изменённые после сохранения общего (ремонт добавили или убрали), меняют итог
-      let dl=0; const [ly,lm,ld]=T0.upTo.split("-").map(Number), limIt=list.find(it=>it.yy===ly && it.mo===lm-1 && it.d===ld);
-      if(T0.dp!=null) dl=(limIt ? limIt.p : 0) - (+T0.dp||0);
-      pSum = +T0.pts + aSum + dl; pDone = dates.filter(d=>d<=lim).length + aCnt;
-      counted = tDay<=lim || !!todayIt;
-      if(live && todayIt && (tDay>lim || (T0.dp!=null && tDay.getTime()===new Date(ly,lm-1,ld).getTime()))) part = todayIt.p;
-    } else if(live && todayIt) part = todayIt.p;
-    if(live && counted) pDone--;
-    const avgP = pDone ? (pSum-part)/pDone : null, avgSrc = T0 && T0.pts!=null ? "manual" : (scored ? "daily" : "none");
-    const bonusPct = pctFor(avgP), bonus = bonusBase*bonusPct/100, bonusMax = bonusBase*settings.pct/100;
-    // Цена балла, запас до потери полной премии и прогноз, если дальше работать по норме
-    const price = bonusDays && settings.maxPts>settings.minPts ? bonusBase*settings.pct/100/(settings.maxPts-settings.minPts)/bonusDays : 0;
-    const surplus = pDone ? (pSum-part) - pDone*settings.maxPts : 0;
-    const projAvg = bonusDays ? (pSum - part + (bonusDays-pDone)*settings.maxPts)/bonusDays : null, projBonus = bonusBase*pctFor(projAvg)/100;
-    return {cnt, base, bonus, bonusMax, bonusBase, price, surplus, projBonus, bonusPct, avgP, avgSrc, bonusDays, scored, live, part, avg: scored? ptsSum/scored : null, lv, ptsSum, pSum, pDone, list, dates, total: base+bonus, pm};
-  }
+  const calc = (y, m) => SC.calc(calcData(), y, m, nowParts());
 
   function renderBrushes(){
     const box = $("brushes"); box.textContent = "";
@@ -1692,7 +1662,7 @@ window.LOOK = (function(){
   const dayKey = d => key(d.getFullYear(), d.getMonth());
   const typeOn = d => (months[dayKey(d)]||{})[d.getDate()];
   const ptsOn = d => { const P=pts[dayKey(d)]||{}; return P[d.getDate()]!=null ? +P[d.getDate()] : null; };
-  const periodOf = d => d.getDate()>=21 ? {y: d.getMonth()===11 ? d.getFullYear()+1 : d.getFullYear(), m:(d.getMonth()+1)%12} : {y:d.getFullYear(), m:d.getMonth()};
+  const periodOf = d => SC.periodOf(d.getFullYear(), d.getMonth(), d.getDate());
   const WDN = ["воскресенье","понедельник","вторник","среда","четверг","пятница","суббота"];
   function periodStats(y,m){
     const c=calc(y,m), T0=totals[key(y,m)], goal=c.bonusDays*settings.maxPts;
@@ -1703,7 +1673,7 @@ window.LOOK = (function(){
   }
   const f1 = v => (Math.round(v*10)/10).toString().replace(".",",");
   // Цель на смену: фактически нужное, округлённое вверх, но не ниже дневного минимума
-  const goalDay = v => Math.max(Math.ceil(v-1e-9), settings.minPts);
+  const goalDay = v => SC.goalDay(stOpts(), v);
   const goalText = st => st.perDay==null ? "смен в периоде не осталось"
     : st.perDay===0 ? "цель периода уже выполнена"
     : goalDay(st.perDay)+" баллов";
@@ -1769,11 +1739,7 @@ window.LOOK = (function(){
   function renderPoints(c){
     const k = key(view.y, view.m), T0 = totals[k];
     const goal = c.bonusDays*settings.maxPts;
-    let sum, done, avg, source;
-    if(false){
-      const lim = new Date(T0.upTo+"T23:59:59");
-      done = c.dates.filter(d=>d<=lim).length; sum = +T0.pts; avg = done ? sum/done : null; source = "manual";
-    } else { sum = c.pSum; done = c.pDone; avg = c.avgP; source = T0 && T0.pts!=null ? "manual" : "daily"; }
+    const sum = c.pSum, done = c.pDone, avg = c.avgP, source = c.avgSrc==="manual" ? "manual" : "daily";
     const left = c.bonusDays - done;
     $("ptsTitle").textContent = "Баллы · 21 "+GEN[c.pm].slice(0,3)+" – 20 "+GEN[view.m].slice(0,3);
     $("ptsTotal").textContent = sum;
@@ -3541,19 +3507,18 @@ window.LOOK = (function(){
 
   // ======== Деньги: выплаты, сверка, цель, «что если», заработок за год ========
   const APP_VER = window.SMENY_VER || "3.1";
-  const PAYDEF = {adv:20, sal:5, mode:"fixed", fix:43300, ndfl:false};
-  function payCfg(){ let p={}; try{ p=settings.payout||{}; }catch(e){} if(!p.pv) p={ndfl:!!p.ndfl}; return Object.assign({}, PAYDEF, p); }
-  function netv(v){ return payCfg().ndfl ? v*0.87 : v; }
+  const PAYDEF = SC.PAYDEF;
+  const payCfg = () => SC.payCfg(settings);
+  const netv = v => SC.netv(settings, v);
   const dimOf = (y,m) => new Date(y,m+1,0).getDate();
   const Cap1 = t => t ? t[0].toUpperCase()+t.slice(1) : t;
   const hasMarks = (y,m) => Object.keys(months[key(y,m)]||{}).length>0;
-  // Аванс за месяц: оплата смен с 1 по 15 число (без премии) или фиксированная сумма
-  function advFor(y,m){ const P=payCfg(); if(P.mode==="fixed") return hasMarks(y,m) ? Math.max(0, +P.fix||0) : 0; const days=months[key(y,m)]||{}; let s=0; for(const d in days) if(+d<=15) s+=pay(days[d]); return netv(s); }
-  // Зарплата за месяц: всё за месяц (смены и премия) минус аванс; приходит в следующем месяце
-  function salFor(y,m){ return Math.max(0, netv(calc(y,m).total) - advFor(y,m)); }
+  // Аванс: фиксированная сумма или оплата смен с 1 по 15; зарплата: всё за месяц минус аванс (calc.js)
+  const advFor = (y,m) => SC.advance(calcData(), y, m);
+  const salFor = (y,m) => SC.salary(calcData(), y, m, nowParts());
   // Выплата в выходной или праздник переносится на ближайший рабочий день раньше (ст. 136 ТК РФ)
-  const HOLI = ["01-01","01-02","01-03","01-04","01-05","01-06","01-07","01-08","02-23","03-08","05-01","05-09","06-12","11-04"];
-  function payDay(d){ const x=new Date(d); for(let i=0;i<14;i++){ const g=x.getDay(), md=String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0"); if(g!==0 && g!==6 && !HOLI.includes(md)) break; x.setDate(x.getDate()-1); } return x; }
+  const HOLI = SC.HOLI;
+  function payDay(d){ const r=SC.payDay(d.getFullYear(), d.getMonth(), d.getDate()); return new Date(r.y, r.m, r.d); }
   function payEvents(fromIdx, n){
     const P=payCfg(), out=[];
     for(let i=0;i<n;i++){ const ix=fromIdx+i, y=Math.floor(ix/12), m=ix%12, ny=Math.floor((ix+1)/12), nm=(ix+1)%12;
@@ -4090,7 +4055,9 @@ window.LOOK = (function(){
     "Костюм механика можно выбрать отдельно от темы",
     "Быстрый старт для новичков: зарплата за минуту",
     "Своя клавиатура во всех полях: цифры, русские и английские буквы, символы — системная больше не выскакивает",
-    "Мягкое перелистывание месяцев"]},{v:"3.0", d:"17 октября 2026", items:[
+    "Мягкое перелистывание месяцев",
+    "Новая иконка приложения",
+    "Можно поддержать проект звёздами Telegram — «Настройки» → «Поддержать проект»"]},{v:"3.0", d:"17 октября 2026", items:[
     "Новая вкладка «Деньги»: ближайшая выплата, сверка с расчёткой, цель на месяц, «что если» и заработок за год",
     "«Ещё» стала «Настройками»: звук и вибрация, синхронизация, уведомления, приватность, календарь, данные, помощь",
     "Бот может присылать копию данных по воскресеньям и итоги недели; можно поставить уведомления на паузу",
@@ -4122,6 +4089,29 @@ window.LOOK = (function(){
     }catch(e){ msg.textContent="Не отправилось. Проверьте интернет и попробуйте ещё раз."; }
     b.disabled=false;
   };
+  // ---- Поддержать проект звёздами Telegram ----
+  const DON=[50,100,250,500], BOT_LINK="https://t.me/smeny_mechanic_bot?start=donate";
+  (function(){ const row=$("donRow"); if(!row) return;
+    DON.forEach(v=>{ const b=el("button","","⭐ "+v); b.type="button"; b.onclick=()=>donate(v,b); row.appendChild(b); }); })();
+  async function donate(n,b){
+    const msg=$("donMsg"), inTgApp=!!(tg && tg.initData && tg.openInvoice);
+    sfx.click();
+    if(!inTgApp){ // вне Telegram — открываем бота, там те же кнопки
+      msg.textContent="Открываю бота — выберите сумму там."; try{ window.open(BOT_LINK,"_blank"); }catch(e){ location.href=BOT_LINK; } return; }
+    const bs=[...document.querySelectorAll("#donRow button")]; bs.forEach(x=>x.disabled=true); msg.textContent="Готовлю счёт…";
+    try{
+      const r=await fetch(API_URL.replace(/\/$/,"")+"/donate", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({initData: tg.initData, n})});
+      const j=await r.json().catch(()=>({}));
+      if(!j.ok || !j.link) throw 0;
+      msg.textContent="";
+      tg.openInvoice(j.link, st=>{
+        if(st==="paid"){ msg.textContent="💛 Спасибо за поддержку! Это очень помогает."; try{ burst(); }catch(e){} sfx.good();
+          try{ localStorage.setItem("salary:don", String((+localStorage.getItem("salary:don")||0)+n)); }catch(e){} }
+        else if(st==="failed") msg.textContent="Оплата не прошла. Можно попробовать ещё раз.";
+      });
+    }catch(e){ msg.textContent="Не получилось открыть оплату. Попробуйте в боте: команда /donate."; }
+    bs.forEach(x=>x.disabled=false);
+  }
   window.addEventListener("online", ()=>{ try{ renderSet(); }catch(e){} }); window.addEventListener("offline", ()=>{ try{ renderSet(); }catch(e){} });
 
   const sb=$("soundBtn"); sb.setAttribute("aria-pressed", sfx.on);
