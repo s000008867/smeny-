@@ -1475,6 +1475,7 @@ window.LOOK = (function(){
   }
 
   function render(){
+    try{ fixTodayTotal(); }catch(e){}
     const {y,m} = view, days = months[key(y,m)] || {}, P = pts[key(y,m)] || {};
     $("monthTitle").textContent = MONTHS[m] + " " + y;
     const grid = $("grid"); grid.textContent = "";
@@ -1830,7 +1831,7 @@ window.LOOK = (function(){
     const v=parseFloat($("totPts").value), dt=$("totDate").value;
     if(!isFinite(v) || v<0){ status("Введите количество баллов числом.", true); return; }
     if(!dt){ status("Укажите, по какое число посчитаны баллы.", true); return; }
-    const k=key(view.y,view.m); totals[k]={pts:Math.round(v*10)/10, upTo:dt};
+    const k=key(view.y,view.m); totals[k]={pts:Math.round(v*10)/10, upTo:dt, fx:1};
     $("totForm").hidden=true; render(); scheduleSave(k); sfx.save();
   };
   $("totClear").onclick = ()=>{ const k=key(view.y,view.m); delete totals[k]; render(); scheduleSave(k); };
@@ -2923,7 +2924,7 @@ window.LOOK = (function(){
     const v=parseFloat(String($("tqPts").value).replace(",",".")), dt=$("tqDate").value, k=$("tqForm").dataset.k;
     if(!isFinite(v) || v<0){ status("Введите количество баллов числом.", true); return; }
     if(!dt){ status("Укажите, по какое число посчитаны баллы.", true); return; }
-    totals[k]={pts:Math.round(v*10)/10, upTo:dt};
+    totals[k]={pts:Math.round(v*10)/10, upTo:dt, fx:1};
     $("tqForm").hidden=true; render(); scheduleSave(k); sfx.save();
     const [yy,mm]=k.split("-").map(Number), c=calc(yy,mm-1);
     status("Общее сохранено: "+f1(v)+" · средний "+(c.avgP!=null?f1(c.avgP):"—"));
@@ -3212,7 +3213,7 @@ window.LOOK = (function(){
   // ======== Деньги: выплаты, сверка, цель, «что если», заработок за год ========
   const APP_VER = "3.0";
   const PAYDEF = {adv:20, sal:5, mode:"fixed", fix:43300, ndfl:false};
-  function payCfg(){ let p={}; try{ p=settings.payout||{}; }catch(e){} return Object.assign({}, PAYDEF, p); }
+  function payCfg(){ let p={}; try{ p=settings.payout||{}; }catch(e){} if(!p.pv) p={ndfl:!!p.ndfl}; return Object.assign({}, PAYDEF, p); }
   function netv(v){ return payCfg().ndfl ? v*0.87 : v; }
   const dimOf = (y,m) => new Date(y,m+1,0).getDate();
   const Cap1 = t => t ? t[0].toUpperCase()+t.slice(1) : t;
@@ -3326,12 +3327,20 @@ window.LOOK = (function(){
   function onWork(){
     const P=payCfg(), ad=parseInt($("payAdv").value,10), sl=parseInt($("paySal").value,10), fx=parseFloat($("advFix").value);
     if(ad>=1 && ad<=31) P.adv=ad; if(sl>=1 && sl<=31) P.sal=sl; P.mode=$("advMode").value==="fixed" ? "fixed" : "half"; P.fix = isFinite(fx)&&fx>=0 ? Math.round(fx) : PAYDEF.fix; P.ndfl=$("ndfl").checked;
-    settings.payout=P; settings.shift={from:$("shFrom").value||"09:30", to:$("shTo").value||"21:30"};
+    P.pv=2; settings.payout=P; settings.shift={from:$("shFrom").value||"09:30", to:$("shTo").value||"21:30"};
     $("advFixL").hidden = P.mode!=="fixed"; saveSettings(); renderYear(); renderMoney(); renderGoal();
   }
   ["payAdv","paySal","advFix","shFrom","shTo"].forEach(id=>$(id).addEventListener("input", onWork));
   ["advMode","ndfl"].forEach(id=>$(id).addEventListener("change", onWork));
   renderWorkExtra();
+
+  // Общее, сохранённое старой версией «по сегодня» во время смены, считаем «по вчера» — тогда сегодняшние ремонты прибавляются
+  function fixTodayTotal(){
+    const t0=new Date(now.getFullYear(), now.getMonth(), now.getDate()), per=periodOf(t0), k=key(per.y, per.m), T0=totals[k];
+    if(!T0 || T0.fx || T0.upTo!==iso(t0)) return;
+    if(!calc(per.y, per.m).live) return;
+    totals[k]=Object.assign({}, T0, {upTo: iso(new Date(t0.getFullYear(), t0.getMonth(), t0.getDate()-1)), fx:1}); scheduleSave(k);
+  }
 
   // ======== Настройки ========
   function tgl(id, on, fn, dis){ const b=$(id); if(!b) return; b.setAttribute("aria-checked", String(!!on)); b.disabled=!!dis; b._fn=fn;
