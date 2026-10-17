@@ -56,7 +56,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .total .value{font-family:var(--font-display);font-weight:700;font-size:clamp(34px,10vw,46px);line-height:1.1}
 .total .sub{color:var(--muted)}
 
-.cal{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px;margin-inline:-8px;display:flex;flex-direction:column;gap:10px}
+.cal{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px;margin-inline:-8px;display:flex;flex-direction:column;gap:10px;overflow:hidden;flex-shrink:0}
 .brushes{display:flex;flex-wrap:wrap;gap:6px}
 .brush{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:transparent;font-size:14px}
 .brush .sw{width:12px;height:12px;border-radius:3px;background:var(--c)}
@@ -383,7 +383,7 @@ html[data-skin="circ"] .masc .o-circ,html[data-skin="circ"] .masc .h-circ,html[d
 html[data-skin="circ"] .masc .cap,html[data-skin="darg"] .masc .cap,html[data-skin="slav"] .masc .cap,html[data-skin="circ"] .masc .santa,html[data-skin="darg"] .masc .santa,html[data-skin="slav"] .masc .santa{display:none}
 .todaycard .tchip-row{padding-right:84px}
 .phrase{margin:2px 0 0;font-size:13px;color:var(--muted);font-style:italic;line-height:1.35}
-.mcover{height:58px;margin:-8px -8px 0;border-radius:14px 14px 0 0;overflow:hidden;position:relative;background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
+.mcover{height:58px;margin:-8px -8px 0;border-radius:0;flex:none;overflow:hidden;position:relative;background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
 .mcover svg{position:absolute;inset:0;width:100%;height:100%}
 .mcover b{position:absolute;left:14px;bottom:8px;font-family:var(--font-display);font-size:15px;text-transform:capitalize;color:var(--fg)}
 @media (prefers-reduced-motion: reduce){.masc .bob,.masc .zz,.masc .arm-up,.net-dot i{animation:none!important}.masc .zz{opacity:1}}
@@ -574,6 +574,7 @@ input[type=time]::-webkit-date-and-time-value,input[type=date]::-webkit-date-and
 .tq-date{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
 .tq-date input{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-height:52px;max-width:46vw}
 #tqPad{border-top:none;padding-top:0}
+.q-undo{align-self:flex-start;font-size:13px;margin-top:6px}
 /* ===== Настройки ===== */
 #pane-set details>summary,#pane-money details>summary{font-size:16px;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:8px}
 #pane-set details>summary::-webkit-details-marker,#pane-money details>summary::-webkit-details-marker{display:none}
@@ -2064,6 +2065,7 @@ window.LOOK = (function(){
   const repCats = () => (Array.isArray(settings.repCats) && settings.repCats.length===4) ? settings.repCats : DEF_CATS;
   function catOfWeight(w){ const C=repCats(); if(!(w>0)) return -1; let ci=0; for(let i=0;i<C.length;i++) if(w>=+C[i].from) ci=i; return ci; }
   function repInfo(r){
+    if(r.b!=null) return {w:0, auto:-1, ci:-1, manual:false, p:+r.b||0, nm:"внесено числом"};
     const w=repSum(r), auto=catOfWeight(w), C=repCats();
     const ci = r.cat!=null && C[r.cat] ? +r.cat : auto;
     return {w, auto, ci, manual: r.cat!=null && C[r.cat]!=null, p: ci>=0 ? +C[ci].p : 0, nm: ci>=0 ? C[ci].nm : "—"};
@@ -2435,7 +2437,7 @@ window.LOOK = (function(){
       if(id>today) continue;
       const dd = dayx[id]||{}, R = dd.reps||[];
       if(dd.note) notes++;
-      reps += R.length; if(R.length>perDay) perDay=R.length;
+      const RR=R.filter(r=>r.b==null); reps += RR.length; if(RR.length>perDay) perDay=RR.length;
       R.forEach(r=>(r.it||[]).forEach(x=>{ const w = x.i||x.nm; works[w]=(works[w]||0)+(+x.n||0); names[w]=x.nm; }));
     }
     let favN=0, favNm="";
@@ -2693,7 +2695,7 @@ window.LOOK = (function(){
     const pvals=Object.keys(pdays).filter(d=>isShift(pdays[d]) && PP[d]!=null).map(d=>+PP[d]);
     const prevAvg = pvals.length ? pvals.reduce((s,v)=>s+v,0)/pvals.length : null;
     let reps=0, maxDay=0; const works={}, names={};
-    for(let d=1; d<=dim; d++){ const R=(dayx[ds(y,m,d)]||{}).reps||[]; reps+=R.length; if(R.length>maxDay) maxDay=R.length;
+    for(let d=1; d<=dim; d++){ const R=((dayx[ds(y,m,d)]||{}).reps||[]).filter(r=>r.b==null); reps+=R.length; if(R.length>maxDay) maxDay=R.length;
       R.forEach(r=>(r.it||[]).forEach(x=>{ const w=x.i||x.nm; works[w]=(works[w]||0)+(+x.n||0); names[w]=x.nm; })); }
     let top=null; for(const w in works) if(!top || works[w]>top.n) top={nm:names[w], n:works[w]};
     const awards=[]; for(const id in (settings.ach||{})){ const r=settings.ach[id], x=(typeof ACH!=="undefined") ? ACH.find(a=>a.id===id) : null; if(x && r[1] && r[1].slice(0,7)===k) awards.push({x, lv:r[0]}); }
@@ -2894,7 +2896,7 @@ window.LOOK = (function(){
   }
   function renderTq(){
     const P=tqPeriod(), T0=totals[key(P.y,P.m)];
-    $("tqOpen").textContent = T0 ? "Общее "+f1(T0.pts)+" · изменить" : "Ввести общее";
+    $("tqOpen").textContent = T0 ? "Общее "+f1(T0.pts)+" · изменить" : "Из ремонтов · ввести общее";
     $("tqOpen").setAttribute("aria-label", T0 ? "Общее количество баллов "+f1(T0.pts)+" по "+shortDate(T0.upTo)+", изменить" : "Ввести общее количество баллов за период");
   }
   function tqClose(){ $("tqForm").hidden=true; $("tqShade").hidden=true; }
@@ -2989,22 +2991,37 @@ window.LOOK = (function(){
   function renderTodayQuick(){
     const box=$("tQuick"), t0=new Date(now.getFullYear(), now.getMonth(), now.getDate()), y=t0.getFullYear(), m=t0.getMonth(), d=t0.getDate();
     if(!isShift(typeOn(t0))){ box.hidden=true; return; }
-    const id=ds(y,m,d), reps=(dayData(id).reps||[]), C=repCats();
+    const id=ds(y,m,d), all=(dayData(id).reps||[]), reps=all.filter(r=>r.b==null), C=repCats(), curP=ptsOn(t0);
     box.hidden=false; box.textContent="";
-    const h=el("div","qh"); h.append(el("span","", reps.length ? "Ремонты сегодня" : "Сделали ремонт? Нажмите категорию"), reps.length ? el("b","num", f1(daySum(id))+" ВР · "+plural(reps.length,"ремонт","ремонта","ремонтов")) : el("span",""));
+    const sumNow = all.length ? daySum(id) : (curP||0);
+    const h=el("div","qh"); h.append(el("span","", reps.length ? "Ремонты сегодня" : "Сделали ремонт? Нажмите категорию"), reps.length || curP ? el("b","num", f1(sumNow)+" ВР"+(reps.length ? " · "+plural(reps.length,"ремонт","ремонта","ремонтов") : "")) : el("span",""));
     box.appendChild(h);
     const row=el("div","qb");
     C.forEach((c,ci)=>{ const b=el("button"); b.append(el("b","", "+"+f1(c.p)), el("small","", c.nm.toLowerCase().replace("сверхтяжёлый","сверх")));
       b.setAttribute("aria-label","Ремонт: "+c.nm+", +"+f1(c.p)+" балла");
       b.onclick=()=>{
         const S=snap([key(y,m)],[id]), dd=dayData(id), hadReps=!!(dd.reps&&dd.reps.length), before=hadReps ? daySum(id) : 0;
-        const R=JSON.parse(JSON.stringify(dd.reps||[])); R.push({t:"", it:[], cat:ci});
+        let R=JSON.parse(JSON.stringify(dd.reps||[]));
+        // Баллы дня уже стоят (внесены числом или из чата) и не совпадают с ремонтами — берём их за основу, ремонт прибавится сверху
+        const cur=ptsOn(t0); if(cur!=null && Math.abs(cur-(R.length ? daySum(id) : 0))>0.01) R=[{t:"", it:[], b:cur}];
+        R.push({t:"", it:[], cat:ci});
         setDay(id, Object.assign({}, dd, {reps:R})); applyDayPoints(y,m,d,hadReps);
         sfx.points(daySum(id), settings.maxPts); normCheck(id, before, daySum(id), true); render();
         offerUndo(c.nm+" +"+f1(c.p)+" · за день "+f1(daySum(id))+" ВР", S);
       };
       row.appendChild(b); });
     box.appendChild(row);
+    if(reps.length){
+      // Ошиблись кнопкой — убрать последний ремонт
+      const u=el("button","link-btn q-undo","↩ Убрать последний ремонт");
+      u.onclick=()=>{ const S=snap([key(y,m)],[id]), dd=dayData(id), R=JSON.parse(JSON.stringify(dd.reps||[]));
+        for(let i=R.length-1;i>=0;i--){ if(R[i].b==null){ R.splice(i,1); break; } }
+        const only=R.length===1 && R[0].b!=null, R2=only ? [] : R;
+        setDay(id, Object.assign({}, dd, {reps:R2}));
+        if(only){ const k=key(y,m); pts[k]=Object.assign({}, pts[k]||{}, {[d]:+R[0].b}); scheduleSave(k); } else applyDayPoints(y,m,d,true);
+        sfx.unmark(); render(); offerUndo("Ремонт убран · за день "+f1(ptsOn(t0)||0)+" ВР", S); };
+      box.appendChild(u);
+    }
   }
   // Кнопка «Сегодня» — вернуться к текущему месяцу
   $("goToday").onclick = ()=>{ const back = view.y*12+view.m > now.getFullYear()*12+now.getMonth(); view={y:now.getFullYear(), m:now.getMonth()}; closeEditor(); render(); animGrid(back ? "g-sr" : "g-sl"); sfx.nav(back?-1:1); };
@@ -3135,6 +3152,8 @@ window.LOOK = (function(){
     if(m>=5&&m<=7){ let r=''; for(let i=0;i<12;i++){ const a=i*30*Math.PI/180; r+='<path d="M'+(340+Math.cos(a)*24).toFixed(1)+' '+(26+Math.sin(a)*24).toFixed(1)+'L'+(340+Math.cos(a)*32).toFixed(1)+' '+(26+Math.sin(a)*32).toFixed(1)+'" stroke="#f59f00" stroke-width="3" stroke-linecap="round"/>'; }
       return '<svg viewBox="0 0 400 58" preserveAspectRatio="xMidYMid slice"><rect width="400" height="58" fill="color-mix(in srgb,var(--mid) 16%,var(--surface))"/><circle cx="340" cy="26" r="17" fill="#ffd43b"/>'+r+'<path d="M0 50q100-16 200 0t200 0v8H0z" fill="color-mix(in srgb,var(--accent) 45%,var(--surface))"/></svg>'; }
     let s=''; const cols=["#e8590c","#f59f00","#c92a2a","#b08900"]; for(let i=0;i<14;i++){ s+=leaf((i*61)%390+5, 8+((i*23)%40), 0.6+(i%3)*0.25, cols[i%4]); }
+    // листья и в углах, чтобы рисунок доходил до краёв
+    [[2,6,.9],[-6,30,.8],[4,52,.7],[368,4,.8],[380,28,.9],[372,52,.75],[200,2,.6],[120,54,.7],[280,54,.65]].forEach(([x,y,r],i)=>{ s+=leaf(x,y,r,cols[(i+1)%4]); });
     return '<svg viewBox="0 0 400 58" preserveAspectRatio="xMidYMid slice"><rect width="400" height="58" fill="color-mix(in srgb,var(--hot) 14%,var(--surface))"/>'+s+'</svg>';
   }
   function renderCover(){ const c=$("mCover"); if(!c) return; const k=view.m; if(c.dataset.m==String(k)) { c.querySelector("b").textContent=MONTHS[k]+" "+view.y; return; } c.dataset.m=k; c.innerHTML=coverSvg(k)+'<b></b>'; c.querySelector("b").textContent=MONTHS[k]+" "+view.y; }
