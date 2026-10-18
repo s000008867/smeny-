@@ -1477,7 +1477,9 @@ window.LOOK = (function(){
     let ctx=null, on=true, clk="click";
     try{ clk = localStorage.getItem("salary:clk") || "click"; }catch(e){}
     try{ on = localStorage.getItem("salary:sound")!=="off"; }catch(e){}
-    const ac = ()=>{ if(!ctx){ const C=window.AudioContext||window.webkitAudioContext; if(!C) return null; try{ ctx=new C({latencyHint:"interactive"}); }catch(e){ ctx=new C(); } } if(ctx.state!=="running") ctx.resume(); return ctx; };
+    // Разбудить звук. iPhone иногда отказывает (звонок, другое приложение занимает динамик) — это не ошибка, просто молчим
+    const wake = () => { try{ const p = ctx.resume(); if(p && p.catch) p.catch(()=>{}); }catch(e){} };
+    const ac = ()=>{ if(!ctx){ const C=window.AudioContext||window.webkitAudioContext; if(!C) return null; try{ ctx=new C({latencyHint:"interactive"}); }catch(e){ ctx=new C(); } } if(ctx.state!=="running") wake(); return ctx; };
     // Звук готовится заранее, с первого касания экрана, чтобы потом не было задержки
     let warmed=false;
     const warm = ()=>{
@@ -1485,7 +1487,7 @@ window.LOOK = (function(){
       if(!warmed){ try{ const b=a.createBuffer(1,1,22050), s=a.createBufferSource(); s.buffer=b; s.connect(a.destination); s.start(0); warmed=true; }catch(e){} }
     };
     ["touchstart","pointerdown","keydown"].forEach(ev=>document.addEventListener(ev, warm, {capture:true, passive:true}));
-    document.addEventListener("visibilitychange", ()=>{ if(!document.hidden && ctx && ctx.state!=="running") ctx.resume(); });
+    document.addEventListener("visibilitychange", ()=>{ if(!document.hidden && ctx && ctx.state!=="running") wake(); });
     function tone(freq, dur=0.08, type="sine", vol=0.12, delay=0, slide=0){
       if(!on) return; const a=ac(); if(!a) return;
       const t=a.currentTime+delay, o=a.createOscillator(), g=a.createGain();
