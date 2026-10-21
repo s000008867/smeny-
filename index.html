@@ -728,11 +728,15 @@ html.priv.priv-show .pvt{filter:none}
 @media (prefers-reduced-motion: reduce){.don-ic{animation:none}}
 .pts-prev{margin:-6px 4px 4px;font-size:13.5px;line-height:1.4;color:var(--muted)}
 .todaycard{position:relative}
-.pt-btn{position:absolute;top:12px;right:12px;z-index:2;display:flex;align-items:center;gap:8px;padding:7px 11px 7px 9px;border-radius:14px;border:1px solid color-mix(in srgb,#f0a020 70%,transparent);background:color-mix(in srgb,#f0a020 16%,var(--surface));color:var(--fg);font:inherit;text-align:left;cursor:pointer;max-width:48%}
+.todaycard .tc-head{grid-column:1/-1;grid-row:1;display:flex;align-items:center;flex-wrap:wrap;gap:8px;min-width:0}
+.tc-head #tChip{flex:none}
+.tc-head .pt-slot{flex:1 0 auto;display:flex;justify-content:center}
+.tc-head .pt-slot:not(:has(.pt-btn:not([hidden]))){display:none}
+.pt-btn{position:relative;z-index:2;display:flex;align-items:center;gap:8px;padding:7px 11px 7px 9px;border-radius:14px;border:1px solid color-mix(in srgb,#f0a020 70%,transparent);background:color-mix(in srgb,#f0a020 16%,var(--surface));color:var(--fg);font:inherit;text-align:left;cursor:pointer;max-width:48%}
 .pt-btn .pt-ic{font-size:19px;line-height:1}
 .pt-btn b{display:block;font-size:13px;line-height:1.1;color:color-mix(in srgb,#f0a020 65%,var(--fg))}
 .pt-btn small{display:block;font-size:11px;line-height:1.2;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.todaycard:has(.pt-btn:not([hidden])) .masc{margin-top:44px}
+.todaycard .masc{grid-row:2/5!important}
 body.pt-on{overflow:hidden}
 .pt-screen{position:fixed;inset:0;z-index:70;background:var(--bg);color:var(--fg);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top,0px) + 8px) 16px calc(env(safe-area-inset-bottom,0px) + 28px);display:flex;flex-direction:column;gap:12px}
 .pt-top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;min-height:44px}
@@ -1003,9 +1007,11 @@ window.LOOK = (function(){
   <div class="pane" id="pane-main" role="tabpanel">
   <button class="recap-ban" id="recapBan" hidden><span class="em" aria-hidden="true">🎞️</span><span><b id="recapBanTx">Итоги месяца готовы</b><small>Нажмите, чтобы посмотреть</small></span><span aria-hidden="true">›</span></button>
   <section class="todaycard" id="today" aria-live="polite" hidden>
-    <button class="pt-btn" id="ptBtn" type="button" hidden aria-label="Открыть парт-тайм"></button>
     <div class="masc" id="masc" aria-hidden="true"></div>
-    <span class="chip" id="tChip"></span>
+    <div class="tc-head">
+      <span class="chip" id="tChip"></span>
+      <div class="pt-slot"><button class="pt-btn" id="ptBtn" type="button" hidden aria-label="Открыть парт-тайм"></button></div>
+    </div>
     <div class="big num" id="tBig"></div>
     <p id="tText"></p>
     <div class="row" id="tActions"></div>
