@@ -535,7 +535,12 @@ body{overflow-x:hidden}.wrap{overflow-x:clip}
 .ck .bad{color:var(--absent);font-weight:700}
 .ck .more{color:var(--mid);font-weight:700}
 .ck .ck-btn{padding:6px 12px;border-radius:9px;border:1px solid var(--accent);background:none;color:var(--accent);font-weight:600;font-size:13px}
-.ck-form{grid-column:1/-1;display:flex;gap:8px;margin-top:8px}
+.ck-form{grid-column:1/-1;display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.ck-line{display:flex;gap:8px}
+.ck-same{padding:11px 12px;border-radius:12px;border:1px solid var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--fg);font:inherit;font-weight:700;text-align:left}
+.ck-warn{font-size:13px;color:var(--mid);line-height:1.35}
+.ck-del{align-self:flex-start;border:0;background:none;color:var(--absent);font:inherit;font-size:13px;padding:2px 0;text-decoration:underline}
+.ck .ck-edit{border:0;background:none;color:var(--muted);font:inherit;font-size:12px;padding:2px 0;text-decoration:underline}
 .ck-form input{flex:1;min-width:0;font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
 .ck-hint{grid-column:1/-1;font-size:12px;color:var(--muted);margin-top:4px}
 .mn-bar{height:10px;border-radius:999px;background:color-mix(in srgb,var(--fg) 9%,transparent);overflow:hidden}
@@ -721,6 +726,7 @@ html.priv.priv-show .pvt{filter:none}
 .don-row button:active{transform:translateY(2px);box-shadow:0 0 0 #d98a10}.don-row button:disabled{opacity:.6}
 .don-msg{margin:0;font-size:13.5px;color:var(--muted)}.don-msg:empty{display:none}
 @media (prefers-reduced-motion: reduce){.don-ic{animation:none}}
+.pts-prev{margin:-6px 4px 4px;font-size:13.5px;line-height:1.4;color:var(--muted)}
 </style>
 <script>
 // Оформление: темы и шрифты. Применяется до отрисовки страницы, чтобы не было вспышки.
@@ -967,6 +973,7 @@ window.LOOK = (function(){
     <div class="tile"><small>Средний балл</small><strong id="ptsAvg">—</strong><em id="ptsAvgSub"></em></div>
     <div class="tile"><small>Следующая смена</small><strong class="txt" id="tileNext">—</strong><em id="tileNextSub"></em></div>
   </section>
+  <p class="pts-prev" id="ptsPrev" hidden></p>
 
   <section class="totq">
     <div class="editor tq-sheet" id="tqForm" hidden role="dialog" aria-label="Общее количество баллов">
@@ -1621,7 +1628,8 @@ window.LOOK = (function(){
     else row("Баллов за период пока нет, премия посчитана по "+settings.pct+"%", "");
     if(c.bonusMax-c.bonus>0.5) row("Недобрано до максимума", "−"+fmt(c.bonusMax-c.bonus));
     row("Итого", fmt(c.total), "sum");
-    renderPoints(c);
+    // Баллы — за текущий период премии: с 21-го числа он уже следующий (21 окт – 20 ноя), а деньги — за календарный месяц
+    { const pp=tqPeriod(); renderPoints(pp.y===y && pp.m===m ? c : calc(pp.y, pp.m), pp); }
     try{ renderToday(); }catch(e){ $("today").hidden=true; }
     renderPane();
     renderYear();
@@ -1738,12 +1746,13 @@ window.LOOK = (function(){
     }
   }
 
-  function renderPoints(c){
-    const k = key(view.y, view.m), T0 = totals[k];
+  function renderPoints(c, pp){
+    pp = pp || {y:view.y, m:view.m};
+    const k = key(pp.y, pp.m), T0 = totals[k];
     const goal = c.bonusDays*settings.maxPts;
     const sum = c.pSum, done = c.pDone, avg = c.avgP, source = c.avgSrc==="manual" ? "manual" : "daily";
     const left = c.bonusDays - done;
-    $("ptsTitle").textContent = "Баллы · 21 "+GEN[c.pm].slice(0,3)+" – 20 "+GEN[view.m].slice(0,3);
+    $("ptsTitle").textContent = "Баллы · 21 "+GEN[c.pm].slice(0,3)+" – 20 "+GEN[pp.m].slice(0,3);
     $("ptsTotal").textContent = sum;
     $("ptsGoal").textContent = c.bonusDays ? "из "+goal : "смен нет";
     const ratio = goal ? Math.min(1, sum/goal) : 0, ring=$("ptsRing");
@@ -1775,6 +1784,14 @@ window.LOOK = (function(){
     if(source==="manual") $("ptsNote").textContent = "Общее количество введено вручную: "+T0.pts+" по "+shortDate(T0.upTo)+" включительно"+(sum>+T0.pts ? ", плюс "+(sum-T0.pts)+" за смены после этой даты" : "")+". Отработано "+shifts(done)+", осталось "+shifts(left)+".";
     else $("ptsNote").textContent = left>0 ? "Без баллов ещё "+shifts(left)+" в этом периоде." : (c.bonusDays? "Баллы внесены за все смены периода." : "");
     $("totClear").hidden = source!=="manual";
+    // Новый период начался — итог прошлого сохраняется и показывается одной строкой
+    const old = $("ptsPrev");
+    if(pp.y!==view.y || pp.m!==view.m){
+      const pc = calc(view.y, view.m), pm2 = view.m===0 ? 11 : view.m-1;
+      old.hidden = false;
+      old.textContent = "Прошлый период (21 "+GEN[pm2].slice(0,3)+" – 20 "+GEN[view.m].slice(0,3)+") закрыт: "+f1(pc.pSum)+" из "+(pc.bonusDays*settings.maxPts)+
+        (pc.avgP!=null ? ", средний "+f1(pc.avgP) : "")+", премия "+pctTxt(pc.bonusPct)+". Он сохранён и входит в зарплату за "+MONTHS[view.m].toLowerCase()+".";
+    } else old.hidden = true;
   }
 
   function renderYear(){
@@ -1928,7 +1945,7 @@ window.LOOK = (function(){
     const k=key(view.y,view.m), [dy,dm,dd2]=dt.split("-").map(Number), dP=(pts[key(dy,dm-1)]||{})[dd2]; totals[k]={pts:Math.round(v*10)/10, upTo:dt, fx:1, dp: dP!=null ? +dP : 0};
     $("totForm").hidden=true; render(); scheduleSave(k); sfx.save();
   };
-  $("totClear").onclick = ()=>{ const k=key(view.y,view.m); delete totals[k]; render(); scheduleSave(k); };
+  $("totClear").onclick = ()=>{ const P=tqPeriod(), k=key(P.y,P.m); delete totals[k]; render(); scheduleSave(k); };
   $("ptsEnter").onclick = ()=>{
     setTab("main");
     const k=key(view.y,view.m), days=months[k]||{}, P=pts[k]||{}, dim=new Date(view.y,view.m+1,0).getDate();
@@ -2175,6 +2192,7 @@ window.LOOK = (function(){
     if(t==="ach") setAchDot(0);
     if(t!=="main") closeEditor();
     renderPane();
+    refreshSoon(450);
   }
   // Свайп по ленте: вкладка определяется по положению прокрутки
   { const pg=$("pager"); let tm=null;
@@ -2186,6 +2204,21 @@ window.LOOK = (function(){
       }, {passive:true});
       window.addEventListener("resize", ()=>{ pg.scrollLeft = TABS.indexOf(tab)*pg.clientWidth; });
     } }
+  // Починка «пустой вкладки» на iPhone: после сворачивания приложения, клавиатуры или смены вкладки
+  // iOS иногда не перерисовывает прокручиваемую вкладку, и она выглядит пустой, пока не повернёшь телефон.
+  function refreshPane(){
+    const pg=$("pager"), p=$("pane-"+tab); if(!pg || !p) return;
+    const want = TABS.indexOf(tab)*pg.clientWidth;
+    if(Math.abs(pg.scrollLeft - want) > 2) pg.scrollLeft = want;     // лента стоит ровно на своей вкладке
+    const max = Math.max(0, p.scrollHeight - p.clientHeight);
+    if(p.scrollTop > max) p.scrollTop = max;                         // не прокручено ниже конца содержимого
+    const y = p.scrollTop; p.scrollTop = y + 1; p.scrollTop = y;     // лёгкий «толчок» — iOS перерисует вкладку
+  }
+  let refreshT=null;
+  const refreshSoon = (ms) => { clearTimeout(refreshT); refreshT = setTimeout(refreshPane, ms || 80); };
+  document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) refreshSoon(120); });
+  window.addEventListener("pageshow", ()=>refreshSoon(120));
+  try{ if(tg && tg.onEvent){ tg.onEvent("activated", ()=>refreshSoon(120)); tg.onEvent("viewportChanged", e=>{ if(!e || e.isStateStable) refreshSoon(80); }); } }catch(e){}
   // Высота экрана приложения (в Telegram — без клавиатуры)
   function setAppH(){ const h=(tg && tg.viewportStableHeight) ? tg.viewportStableHeight : window.innerHeight; document.documentElement.style.setProperty("--app-h", h+"px"); }
   setAppH(); window.addEventListener("resize", setAppH); try{ if(tg && tg.onEvent) tg.onEvent("viewportChanged", setAppH); }catch(e){}
@@ -3533,7 +3566,7 @@ window.LOOK = (function(){
   const evDate = e => e.date.getDate()+" "+GEN[e.date.getMonth()];
   const evKey = e => key(e.date.getFullYear(), e.date.getMonth());
   const evGot = e => { const L=(pays[evKey(e)]||[]).filter(p=> e.kind==="adv" ? p.t==="Аванс" : (p.t==="Зарплата" || p.t==="Премия")); return L.length ? L.reduce((s,p)=>s+(+p.a||0),0) : null; };
-  let ckOpen=null;
+  let ckOpen=null, ckDraft=null;
   function renderMoney(){
     const t0=new Date(now.getFullYear(), now.getMonth(), now.getDate()), idx=now.getFullYear()*12+now.getMonth();
     const ev=payEvents(idx-5, 7), fut=ev.filter(e=>e.date>=t0 && (hasMarks(e.y,e.m) || e.y*12+e.m>=idx)), past=ev.filter(e=>e.date<t0);
@@ -3562,18 +3595,44 @@ window.LOOK = (function(){
       if(got!=null){
         const df=got-e.amt, ok=Math.abs(df)<=Math.max(50, e.amt*0.005);
         rt.append(el("b","", fmt(got)), el("span", ok ? "ok" : df<0 ? "bad" : "more", ok ? "✓ сходится" : (df<0 ? "−" : "+")+fmt(Math.abs(df))));
-      } else { const b=el("button","ck-btn","Внести"); b.onclick=()=>{ ckOpen = ckOpen===id ? null : id; renderMoney(); }; rt.appendChild(b); }
+        const ed=el("button","ck-edit","изменить"); ed.onclick=()=>{ ckOpen = ckOpen===id ? null : id; ckDraft=null; renderMoney(); }; rt.appendChild(ed);
+      } else { const b=el("button","ck-btn","Внести"); b.onclick=()=>{ ckOpen = ckOpen===id ? null : id; ckDraft=null; renderMoney(); }; rt.appendChild(b); }
       row.append(lft, rt);
       if(got!=null && !P.ndfl && e.amt>0 && Math.abs(got-e.amt*0.87)<=e.amt*0.02) row.appendChild(el("div","ck-hint","Похоже на вычет НДФЛ 13%. Включите его в «Работа» внизу этой вкладки — расчёт станет на руки."));
       else if(got!=null && e.kind==="adv" && Math.abs(got-e.amt)>Math.max(50, e.amt*0.005) && P.mode!=="fixed") row.appendChild(el("div","ck-hint","Если аванс у вас фиксированный — укажите его сумму в «Работа»."));
-      if(ckOpen===id && got==null){
-        const f=el("div","ck-form"), inp=el("input"); inp.type="number"; inp.inputMode="numeric"; inp.min="0"; inp.step="100"; inp.placeholder="Сколько пришло, ₽"; inp.setAttribute("aria-label","Сколько пришло: "+evName(e));
-        const sv=el("button","save-btn","Сохранить");
-        sv.onclick=()=>{ const a=parseFloat(String(inp.value).replace(",",".")); if(!isFinite(a)||a<=0){ inp.focus(); sfx.error(); return; }
-          const k=evKey(e); pays[k]=(pays[k]||[]).concat({d:e.date.getDate(), a:Math.round(a), t: e.kind==="adv" ? "Аванс" : "Зарплата"}); saveX("p",k,pays[k]);
-          ckOpen=null; sfx.save(); renderMoney(); renderPays(); };
+      if(ckOpen===id){
+        const kind = e.kind==="adv" ? "Аванс" : "Зарплата", k=evKey(e);
+        // Сохранить сумму выплаты: старые записи этой выплаты заменяются новой (так её можно исправить)
+        const put = a => {
+          const keep=(pays[k]||[]).filter(p=> e.kind==="adv" ? p.t!=="Аванс" : (p.t!=="Зарплата" && p.t!=="Премия"));
+          pays[k] = a==null ? keep : keep.concat({d:e.date.getDate(), a:Math.round(a), t:kind});
+          if(!pays[k].length) delete pays[k];
+          saveX("p",k,pays[k]||null); ckOpen=null; ckDraft=null; sfx.save(); renderMoney(); renderPays();
+        };
+        const f=el("div","ck-form");
+        // Быстрый выбор: пришло ровно по расчёту — одно нажатие
+        if(e.amt>0){ const same=el("button","ck-same","✓ Как в расчёте · "+fmt(e.amt)); same.onclick=()=>put(e.amt); f.appendChild(same); }
+        const line=el("div","ck-line"), inp=el("input"); inp.type="number"; inp.min="0"; inp.placeholder="Другая сумма, ₽"; inp.setAttribute("aria-label","Сколько пришло: "+evName(e));
+        // Набранное не теряется, даже если экран перерисовался, пока вы печатаете
+        inp.value = ckDraft!=null ? ckDraft : (got!=null ? String(got) : "");
+        const wasTyping = document.activeElement && document.activeElement.classList.contains("ck-inp");
+        inp.classList.add("ck-inp");
+        const sv=el("button","save-btn","Сохранить"), warn=el("div","ck-warn"); warn.hidden=true;
+        let armed=null;
+        sv.onclick=()=>{
+          const a=parseFloat(String(inp.value).replace(",",".").replace(/\s/g,""));
+          if(!isFinite(a)||a<=0){ inp.focus(); sfx.error(); return; }
+          // Защита от опечатки: сумма в 3+ раза меньше или больше расчёта — сначала переспросим
+          const odd = e.amt>0 && (a < e.amt/3 || a > e.amt*3);
+          if(odd && armed!==a){ armed=a; warn.hidden=false; warn.textContent="Точно "+fmt(a)+"? По расчёту "+fmt(e.amt)+". Нажмите «Сохранить» ещё раз, если всё верно."; sfx.error(); return; }
+          put(a);
+        };
+        inp.addEventListener("input", ()=>{ armed=null; warn.hidden=true; ckDraft=inp.value; });
         inp.addEventListener("keydown", ev2=>{ if(ev2.key==="Enter"){ ev2.preventDefault(); sv.click(); } });
-        f.append(inp, sv); row.appendChild(f); setTimeout(()=>{ try{ inp.focus({preventScroll:true}); }catch(x){} }, 30);
+        line.append(inp, sv); f.append(line, warn);
+        if(got!=null){ const del=el("button","ck-del","Удалить запись"); del.onclick=()=>put(null); f.appendChild(del); }
+        row.appendChild(f);
+        if(wasTyping) setTimeout(()=>{ try{ inp.focus({preventScroll:true}); }catch(x){} }, 0);
       }
       box.appendChild(row);
     });
@@ -3800,7 +3859,7 @@ window.LOOK = (function(){
   }
   function kbHide(blur){
     if(!kbEl) return; const e=kbIn;
-    kbEl.classList.remove("on"); document.body.classList.remove("kb-open");
+    kbEl.classList.remove("on"); document.body.classList.remove("kb-open"); try{ refreshSoon(60); }catch(e){}
     document.querySelectorAll(".sheet,.tq-sheet").forEach(sh=>{ if(sh.dataset.kbb!=null){ if(sh.dataset.kbb==="b") sh.style.bottom=""; else sh.style.marginBottom=""; sh.style.maxHeight=""; delete sh.dataset.kbb; } });
     if(e){ e.classList.remove("kb-focus"); e.dispatchEvent(new Event("change",{bubbles:true})); if(blur) try{ e.blur(); }catch(x){} }
     kbIn=null;
