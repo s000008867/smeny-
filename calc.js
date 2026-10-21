@@ -147,6 +147,37 @@
     };
   }
 
-  G.SmenyCalc = { VERSION, key, ord, opts, tp, pay, inBonus, isShift, pctFor, level, calc, periodOf, goalDay,
+  // ---------- Парт-тайм: ремонт байков за деньги ----------
+  // Каждый ремонт хранится как [тип, сумма] — сумма запоминается в момент записи,
+  // поэтому смена цен не меняет уже заработанное.
+  const PT_PRICES = { n: 100, l: 230, m: 450, h: 900, s: 1400 };
+  const PT_NAMES = { n: "без типа", l: "лёгкий", m: "средний", h: "тяжёлый", s: "сверхтяжёлый" };
+  const ptPrices = settings => {
+    const out = Object.assign({}, PT_PRICES), p = (settings && settings.pt && settings.pt.prices) || {};
+    for (const c in PT_PRICES) if (p[c] != null && isFinite(+p[c]) && +p[c] >= 0) out[c] = +p[c];
+    return out;
+  };
+  // Один день: сумма, сколько байков и сколько каких типов
+  function ptDay(list) {
+    let sum = 0; const by = {};
+    for (const it of list || []) { sum += +it[1] || 0; by[it[0]] = (by[it[0]] || 0) + 1; }
+    return { sum, bikes: (list || []).length, by };
+  }
+  // Месяц: days = { "2026-10-21": { pt: [["l", 230], …] }, … }
+  function ptMonth(days, y, m) {
+    const pre = key(y, m) + "-", by = {}, perDay = {};
+    let sum = 0, bikes = 0, n = 0, best = null;
+    for (const id in days || {}) {
+      if (id.indexOf(pre) !== 0) continue;
+      const L = (days[id] || {}).pt; if (!L || !L.length) continue;
+      const r = ptDay(L), d = +id.slice(8);
+      perDay[d] = r.sum; sum += r.sum; bikes += r.bikes; n++;
+      for (const c in r.by) by[c] = (by[c] || 0) + r.by[c];
+      if (!best || r.sum > best.sum) best = { d, sum: r.sum, bikes: r.bikes };
+    }
+    return { sum, bikes, days: n, best, by, perDay, avg: n ? sum / n : 0 };
+  }
+
+  G.SmenyCalc = { PT_PRICES, PT_NAMES, ptPrices, ptDay, ptMonth, VERSION, key, ord, opts, tp, pay, inBonus, isShift, pctFor, level, calc, periodOf, goalDay,
     PAYDEF, payCfg, netv, advance, salary, HOLI, payDay, payDates, dim };
 })(typeof globalThis !== "undefined" ? globalThis : this);

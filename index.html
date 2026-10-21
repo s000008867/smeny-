@@ -727,6 +727,61 @@ html.priv.priv-show .pvt{filter:none}
 .don-msg{margin:0;font-size:13.5px;color:var(--muted)}.don-msg:empty{display:none}
 @media (prefers-reduced-motion: reduce){.don-ic{animation:none}}
 .pts-prev{margin:-6px 4px 4px;font-size:13.5px;line-height:1.4;color:var(--muted)}
+.todaycard{position:relative}
+.pt-btn{position:absolute;top:12px;right:12px;z-index:2;display:flex;align-items:center;gap:8px;padding:7px 11px 7px 9px;border-radius:14px;border:1px solid color-mix(in srgb,#f0a020 70%,transparent);background:color-mix(in srgb,#f0a020 16%,var(--surface));color:var(--fg);font:inherit;text-align:left;cursor:pointer;max-width:48%}
+.pt-btn .pt-ic{font-size:19px;line-height:1}
+.pt-btn b{display:block;font-size:13px;line-height:1.1;color:color-mix(in srgb,#f0a020 65%,var(--fg))}
+.pt-btn small{display:block;font-size:11px;line-height:1.2;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.todaycard:has(.pt-btn:not([hidden])) .masc{margin-top:44px}
+body.pt-on{overflow:hidden}
+.pt-screen{position:fixed;inset:0;z-index:70;background:var(--bg);color:var(--fg);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top,0px) + 8px) 16px calc(env(safe-area-inset-bottom,0px) + 28px);display:flex;flex-direction:column;gap:12px}
+.pt-top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;min-height:44px}
+.pt-back{justify-self:start;border:0;background:none;color:color-mix(in srgb,#f0a020 65%,var(--fg));font:inherit;font-size:16px;font-weight:600;padding:8px 0}
+.pt-ttl{text-align:center}.pt-ttl b{display:block;font-size:16px}.pt-ttl small{color:var(--muted);font-size:12px}
+.pt-mh{display:flex;align-items:center;justify-content:space-between}
+.pt-mh h2{margin:0;font-family:var(--font-display);font-size:24px;font-weight:600}
+.pt-nav{display:flex;gap:8px}.pt-nav button{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font:inherit;font-size:18px}
+.pt-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.pt-today{border-color:color-mix(in srgb,#f0a020 55%,var(--line))}
+.pt-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.pt-lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.pt-lbl2{margin-top:6px}
+.pt-sum{font-size:22px;color:color-mix(in srgb,#f0a020 65%,var(--fg))}
+.pt-sub{margin:0;font-size:13.5px;color:var(--muted);line-height:1.35}
+.pt-total{font-family:var(--font-display);font-size:38px;font-weight:600;line-height:1.05}
+.pt-btns{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.pt-add{display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 2px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--muted);font:inherit;font-size:11px}
+.pt-add b{font-size:15px;color:color-mix(in srgb,#f0a020 65%,var(--fg))}
+.pt-add:active{transform:scale(.96);border-color:#f0a020}
+.pt-undo{align-self:flex-start;border:0;background:none;color:var(--muted);font:inherit;font-size:13.5px;text-decoration:underline;padding:2px 0}
+.pt-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;margin-top:4px}
+.pt-dow{text-align:center;font-size:11px;color:var(--muted)}
+.pt-d{position:relative;height:46px;border-radius:10px;border:1px solid var(--line);background:none;color:var(--muted);font:inherit;padding:0}
+.pt-d.pad{border:0}
+.pt-d .dn{position:absolute;top:4px;left:6px;font-size:11px}
+.pt-d i{position:absolute;left:0;right:0;bottom:5px;font-style:normal;font-weight:700;font-size:11.5px;color:color-mix(in srgb,#f0a020 65%,var(--fg))}
+.pt-d.has{background:color-mix(in srgb,#f0a020 12%,transparent);border-color:color-mix(in srgb,#f0a020 45%,var(--line))}
+.pt-d.hi{background:color-mix(in srgb,#f0a020 26%,transparent)}
+.pt-d.today{outline:2px solid #f0a020;outline-offset:-2px}
+.pt-tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pt-tile{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:3px}
+.pt-tile small{font-size:12px;color:var(--muted)}.pt-tile b{font-size:21px}
+.pt-li{align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.pt-li:last-child{border-bottom:0}
+.pt-tag{font-size:11px;padding:2px 8px;border-radius:8px;background:color-mix(in srgb,#f0a020 16%,transparent);color:color-mix(in srgb,#f0a020 65%,var(--fg))}
+.pt-r{display:flex;align-items:center;gap:10px}
+.pt-del{width:30px;height:30px;border-radius:9px;border:1px solid var(--line);background:none;color:var(--muted);font:inherit;font-size:16px}
+.pt-sheet h2{margin:0;font-size:20px}
+.pt-list{display:flex;flex-direction:column}
+.pt-set summary{font-weight:600;cursor:pointer}
+.pt-prices{display:grid;grid-template-columns:1fr;gap:6px}
+.pt-price{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:14px}
+.pt-price input{width:110px;font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;text-align:right}
+.pt-seg{display:flex;gap:6px;flex-wrap:wrap}
+.pt-seg button{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font:inherit;font-size:13px}
+.pt-seg button[aria-pressed="true"]{border-color:#f0a020;background:color-mix(in srgb,#f0a020 18%,var(--bg))}
+.pt-tgl{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.35;margin-top:4px}
+.pt-tgl input{width:20px;height:20px;flex:none;margin-top:1px}
 </style>
 <script>
 // Оформление: темы и шрифты. Применяется до отрисовки страницы, чтобы не было вспышки.
@@ -948,6 +1003,7 @@ window.LOOK = (function(){
   <div class="pane" id="pane-main" role="tabpanel">
   <button class="recap-ban" id="recapBan" hidden><span class="em" aria-hidden="true">🎞️</span><span><b id="recapBanTx">Итоги месяца готовы</b><small>Нажмите, чтобы посмотреть</small></span><span aria-hidden="true">›</span></button>
   <section class="todaycard" id="today" aria-live="polite" hidden>
+    <button class="pt-btn" id="ptBtn" type="button" hidden aria-label="Открыть парт-тайм"></button>
     <div class="masc" id="masc" aria-hidden="true"></div>
     <span class="chip" id="tChip"></span>
     <div class="big num" id="tBig"></div>
@@ -1381,6 +1437,8 @@ window.LOOK = (function(){
   </div>
 </div>
 
+<div class="pt-screen" id="ptScreen" role="dialog" aria-label="Парт-тайм" hidden></div>
+
 <nav class="tabbar" role="tablist" aria-label="Разделы">
   <button role="tab" data-tab="main" aria-selected="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span>Календарь</span></button>
   <button role="tab" data-tab="money" aria-selected="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H18v4"/><path d="M3 7.5v10A2.5 2.5 0 0 0 5.5 20H20V9H5.5A2.5 2.5 0 0 1 3 7.5z"/><circle cx="16" cy="14.5" r="1.3" fill="currentColor"/></svg><span>Деньги</span></button>
@@ -1607,7 +1665,10 @@ window.LOOK = (function(){
     if(c.cnt.x) parts.push(c.cnt.x+" доп.");
     if(c.cnt.s) parts.push(c.cnt.s+" больн.");
     if(c.cnt.a) parts.push(c.cnt.a+" прогул"+(c.cnt.a===1?"":c.cnt.a<5?"а":"ов"));
-    $("total").textContent = fmt(c.total);
+    // Парт-тайм добавляется к заработку, если так выбрано в его настройках
+    const ptM = (settings.pt && settings.pt.inMoney) ? SC.ptMonth(dayx, y, m).sum : 0;
+    if(ptM) parts.push("парт-тайм "+fmt(ptM));
+    $("total").textContent = fmt(c.total + ptM);
     $("totalSub").textContent = parts.length ? parts.join(" · ") : "Пока нет отметок";
 
     const dl = $("breakdown"); dl.textContent = "";
@@ -1638,6 +1699,7 @@ window.LOOK = (function(){
     try{ renderTq(); }catch(e){}
     try{ liveAfterRender(); }catch(e){}
     try{ renderTodayQuick(); renderGoToday(); applyHeat(); }catch(e){}
+    try{ renderPtBtn(); renderPt(); }catch(e){}
     try{ renderMasc(); }catch(e){ console.error("masc", e); }
     try{ renderCover(); }catch(e){ console.error("cover", e); }
   }
@@ -2111,6 +2173,7 @@ window.LOOK = (function(){
     if(typeof s.mfmt==="string") settings.mfmt = s.mfmt;
     if(s.notifs && typeof s.notifs==="object") settings.notifs = Object.assign({}, s.notifs);
     if(typeof s.pauseUntil==="string") settings.pauseUntil = s.pauseUntil;
+    if(s.pt && typeof s.pt==="object") settings.pt = Object.assign({}, s.pt);
     if(typeof s.mascot==="string"){ settings.mascot = s.mascot; try{ localStorage.setItem("salary:masc", s.mascot); }catch(e){} }
     try{ renderWorkExtra(); }catch(e){}
     $("rate").value=settings.rate; $("pct").value=settings.pct; $("minPts").value=settings.minPts; $("maxPts").value=settings.maxPts; renderTypeSettings(); renderQuick();
@@ -2157,6 +2220,7 @@ window.LOOK = (function(){
     const clean = {};
     if(obj.note) clean.note = obj.note;
     if(obj.reps && obj.reps.length) clean.reps = obj.reps;
+    if(obj.pt && obj.pt.length) clean.pt = obj.pt;
     if(Object.keys(clean).length) dayx[id] = clean; else delete dayx[id];
     saveX("d", id, dayx[id] || null);
   }
@@ -3585,6 +3649,7 @@ window.LOOK = (function(){
     const up=$("mnUpcoming"); up.textContent="";
     fut.slice(1,3).forEach(e=>{ const r=el("div"); r.append(el("span","", evName(e)+", "+evDate(e)), el("b","", e.amt>0 ? (e.kind==="adv" && P.mode==="fixed" ? "" : "≈ ")+fmt(e.amt) : "—")); up.appendChild(r); });
     { const c=calc(now.getFullYear(), now.getMonth()), r=el("div"); r.append(el("span","", "Всего за "+MONTHS[now.getMonth()]+" по отметкам"), el("b","", fmt(netv(c.total)))); up.appendChild(r); }
+    { const pm=SC.ptMonth(dayx, now.getFullYear(), now.getMonth()); if(pm.sum){ const r=el("div"); r.append(el("span","", "Парт-тайм за "+MONTHS[now.getMonth()]+" · "+bikesW(pm.bikes)), el("b","", fmt(pm.sum))); up.appendChild(r); } }
     // Сверка: прошедшие выплаты, свежие сверху
     const box=$("mnCheck"); box.textContent="";
     const list=past.filter(e=>e.amt>0 || evGot(e)!=null).reverse().slice(0,4);
@@ -3931,6 +3996,154 @@ window.LOOK = (function(){
   setTimeout(()=>wxFetch(false), 1500); setInterval(()=>{ if(!document.hidden) wxFetch(false); }, 20*60e3);
   document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) wxFetch(false); });
 
+  // ======== Парт-тайм: ремонт байков на складе за деньги (отдельно от смен и баллов) ========
+  const PT_ORDER = ["n","l","m","h","s"], PT_SHORT = {n:"без типа", l:"лёгкий", m:"средний", h:"тяжёлый", s:"сверх"};
+  const ptCfg = () => Object.assign({inMoney:false, pay:"none"}, settings.pt||{}, {prices: SC.ptPrices(settings)});
+  const ptList = id => (dayData(id).pt || []).slice();
+  const ptSave = (id, list) => setDay(id, Object.assign({}, dayData(id), {pt:list}));
+  const ptK = a => a>=1000 ? (Math.round(a/100)/10).toString().replace(".",",")+"к" : String(a);
+  const bikesW = n => n+" "+(n%10===1 && n%100!==11 ? "байк" : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? "байка" : "байков");
+  const todayId = () => ds(now.getFullYear(), now.getMonth(), now.getDate());
+  let ptView = null;
+
+  // Кнопка в карточке «Сегодня»
+  function renderPtBtn(){
+    const b=$("ptBtn"); if(!b) return;
+    const t=SC.ptDay(ptList(todayId()));
+    b.innerHTML = '<span class="pt-ic" aria-hidden="true">🚲</span><span><b>Парт-тайм</b><small></small></span>';
+    b.querySelector("small").textContent = t.bikes ? "сегодня "+fmtFull(t.sum) : "ремонт байков";
+    b.hidden = false;
+  }
+  // Добавить ремонт: тип + цена на сегодня (цена запоминается вместе с ремонтом)
+  function ptAdd(id, c){
+    const L=ptList(id); L.push([c, ptCfg().prices[c]]); ptSave(id, L);
+    try{ haptic("i","light"); sfx.click(); }catch(e){}
+  }
+  function ptUndo(id){ const L=ptList(id); if(!L.length) return; L.pop(); ptSave(id, L); try{ haptic("i","soft"); }catch(e){} }
+
+  // Кнопки типов ремонта
+  function ptButtons(id, after){
+    const P=ptCfg().prices, box=el("div","pt-btns");
+    PT_ORDER.forEach(c=>{ const b=el("button","pt-add"); b.type="button";
+      b.append(el("b","", "+"+P[c]), el("span","", PT_SHORT[c]));
+      b.setAttribute("aria-label","Добавить ремонт: "+PT_SHORT[c]+", "+P[c]+" рублей");
+      b.onclick=()=>{ ptAdd(id, c); after(); }; box.appendChild(b); });
+    return box;
+  }
+
+  function ptOpen(){
+    ptView = {y:now.getFullYear(), m:now.getMonth()};
+    const S=$("ptScreen"); S.hidden=false; S.scrollTop=0; document.body.classList.add("pt-on");
+    try{ if(tg && tg.BackButton){ tg.BackButton.onClick(ptClose); tg.BackButton.show(); } }catch(e){}
+    renderPt(); try{ sfx.click(); }catch(e){}
+  }
+  function ptClose(){
+    $("ptScreen").hidden=true; document.body.classList.remove("pt-on");
+    try{ if(tg && tg.BackButton){ tg.BackButton.offClick(ptClose); tg.BackButton.hide(); } }catch(e){}
+    render();
+  }
+
+  function renderPt(){
+    const S=$("ptScreen"); if(!S || S.hidden) return;
+    const {y,m}=ptView, M=SC.ptMonth(dayx, y, m), cfg=ptCfg(), isCur = y===now.getFullYear() && m===now.getMonth();
+    S.textContent="";
+    // Шапка
+    const top=el("div","pt-top"), back=el("button","pt-back","‹ Смены"); back.type="button"; back.onclick=ptClose;
+    const ttl=el("div","pt-ttl"); ttl.append(el("b","","🚲 Парт-тайм"), el("small","","ремонт байков"));
+    top.append(back, ttl, el("span")); S.appendChild(top);
+    const mh=el("div","pt-mh"), nav=el("div","pt-nav"), pv=el("button","","‹"), nx=el("button","","›");
+    pv.setAttribute("aria-label","Прошлый месяц"); nx.setAttribute("aria-label","Следующий месяц");
+    pv.onclick=()=>{ ptView = m===0 ? {y:y-1,m:11} : {y, m:m-1}; renderPt(); };
+    nx.onclick=()=>{ ptView = m===11 ? {y:y+1,m:0} : {y, m:m+1}; renderPt(); };
+    nav.append(pv, nx); mh.append(el("h2","", MONTHS[m][0].toUpperCase()+MONTHS[m].slice(1)+" "+y), nav); S.appendChild(mh);
+
+    // Сегодня: быстрые кнопки (только в текущем месяце)
+    if(isCur){
+      const id=todayId(), t=SC.ptDay(ptList(id)), card=el("div","pt-card pt-today");
+      const h=el("div","pt-row"); h.append(el("span","pt-lbl","Сегодня, "+now.getDate()+" "+GEN[m]), el("b","pt-sum", fmtFull(t.sum)));
+      card.append(h, el("p","pt-sub", t.bikes ? bikesW(t.bikes)+" · нажмите тип ремонта, чтобы добавить" : "Сделали ремонт? Нажмите его тип"));
+      card.appendChild(ptButtons(id, ()=>{ renderPt(); renderPtBtn(); }));
+      if(t.bikes){ const u=el("button","pt-undo","↩ Убрать последний"); u.type="button"; u.onclick=()=>{ ptUndo(id); renderPt(); renderPtBtn(); }; card.appendChild(u); }
+      S.appendChild(card);
+    }
+
+    // Итог месяца + календарь
+    const sc=el("div","pt-card");
+    sc.append(el("span","pt-lbl","Заработано на парт-тайме"), el("div","pt-total num", fmtFull(M.sum)),
+      el("p","pt-sub", M.days ? bikesW(M.bikes)+" · "+dayz(M.days)+" · в среднем "+fmtFull(Math.round(M.avg))+" за день" : "Пока нет ремонтов в этом месяце"));
+    const sun = firstCol(2023,0)===0, L = sun ? ["Вс","Пн","Вт","Ср","Чт","Пт","Сб"] : ["Пн","Вт","Ср","Чт","Пт","Сб","Вс"];
+    const g=el("div","pt-grid"); L.forEach(x=>g.appendChild(el("span","pt-dow",x)));
+    const first=firstCol(y,m), dim=new Date(y,m+1,0).getDate(), top3=Object.values(M.perDay).sort((a,b)=>b-a)[2] || Infinity;
+    for(let i=0;i<first;i++) g.appendChild(el("span","pt-d pad"));
+    for(let d=1; d<=dim; d++){
+      const a=M.perDay[d], b=el("button","pt-d"+(a ? " has" : "")+(a && a>=top3 ? " hi" : "")+(isCur && d===now.getDate() ? " today" : ""));
+      b.type="button"; b.appendChild(el("span","dn", String(d))); if(a) b.appendChild(el("i","", ptK(a)));
+      b.setAttribute("aria-label", d+" "+GEN[m]+(a ? ", "+a+" рублей" : ""));
+      b.onclick=()=>ptDayOpen(y,m,d); g.appendChild(b);
+    }
+    sc.appendChild(g); S.appendChild(sc);
+
+    // Плитки: лучший день и выплата
+    const tiles=el("div","pt-tiles"), t1=el("div","pt-tile"), t2=el("div","pt-tile");
+    t1.append(el("small","","Лучший день"), el("b","", M.best ? fmtFull(M.best.sum) : "—"), el("small","", M.best ? M.best.d+" "+GEN[m].slice(0,3)+" · "+bikesW(M.best.bikes) : "ещё нет"));
+    let payW="не указана", paySub="укажите ниже";
+    if(cfg.pay==="sal"){ const pd=SC.payDates(settings, y, m).sal; payW=pd.d+" "+GEN[pd.m].slice(0,3); paySub="с зарплатой · "+fmtFull(M.sum); }
+    else if(cfg.pay==="now"){ payW="сразу"; paySub="после каждой смены"; }
+    t2.append(el("small","","Выплата"), el("b","", payW), el("small","", paySub));
+    tiles.append(t1, t2); S.appendChild(tiles);
+
+    // Сколько каких ремонтов
+    if(M.bikes){ const bt=el("div","pt-card"); bt.appendChild(el("span","pt-lbl","Ремонты за месяц"));
+      PT_ORDER.forEach(c=>{ const n=M.by[c]||0; if(!n) return; const r=el("div","pt-row pt-li"); r.append(el("span","", PT_SHORT[c][0].toUpperCase()+PT_SHORT[c].slice(1)), el("b","", String(n))); bt.appendChild(r); });
+      S.appendChild(bt); }
+
+    // Настройки парт-тайма: цены, выплата, учёт в «Заработано за месяц»
+    const st=el("details","pt-card pt-set"), sm=el("summary","","⚙️ Цены и выплата"); st.appendChild(sm);
+    st.appendChild(el("p","pt-sub","Цена за ремонт по типу. Если цены поменяются — уже записанные ремонты останутся по старой цене."));
+    const pg=el("div","pt-prices");
+    PT_ORDER.forEach(c=>{ const lb=el("label","pt-price"), inp=el("input"); inp.type="number"; inp.min="0"; inp.value=cfg.prices[c];
+      inp.setAttribute("aria-label","Цена: "+PT_SHORT[c]);
+      inp.addEventListener("change", ()=>{ const v=Math.round(+String(inp.value).replace(",",".")); if(!isFinite(v) || v<0){ inp.value=ptCfg().prices[c]; return; }
+        const pt=Object.assign({}, settings.pt||{}); pt.prices=Object.assign({}, pt.prices||{}, {[c]:v}); settings.pt=pt; saveSettings(); renderPtBtn(); });
+      lb.append(el("span","", SC.PT_NAMES[c]), inp); pg.appendChild(lb); });
+    st.appendChild(pg);
+    st.appendChild(el("span","pt-lbl pt-lbl2","Когда выплата"));
+    const seg=el("div","pt-seg");
+    [["none","Не указывать"],["sal","С зарплатой"],["now","Сразу"]].forEach(([v,t])=>{ const b=el("button","",t); b.type="button"; b.setAttribute("aria-pressed", String(cfg.pay===v));
+      b.onclick=()=>{ settings.pt=Object.assign({}, settings.pt||{}, {pay:v}); saveSettings(); renderPt(); }; seg.appendChild(b); });
+    st.appendChild(seg);
+    const tg2=el("label","pt-tgl"), cb=el("input"); cb.type="checkbox"; cb.checked=!!cfg.inMoney;
+    cb.onchange=()=>{ settings.pt=Object.assign({}, settings.pt||{}, {inMoney:cb.checked}); saveSettings(); };
+    tg2.append(cb, el("span","","Добавлять парт-тайм к «Заработано за месяц» на главном экране"));
+    st.appendChild(tg2);
+    if(sessionStorage.getItem("ptSetOpen")==="1") st.open=true;
+    st.addEventListener("toggle", ()=>{ try{ sessionStorage.setItem("ptSetOpen", st.open?"1":"0"); }catch(e){} });
+    S.appendChild(st);
+  }
+
+  // Нажали на день в календаре парт-тайма — ремонты этого дня
+  function ptDayOpen(y,m,d){
+    const id=ds(y,m,d), bg=el("div","sheet-bg"), sh=el("div","sheet pt-sheet"); sh.setAttribute("role","dialog");
+    const fill=()=>{
+      const L=ptList(id), t=SC.ptDay(L); sh.textContent="";
+      const h=el("div","pt-row"); h.append(el("h2","", d+" "+GEN[m]), el("b","pt-sum", fmtFull(t.sum))); sh.appendChild(h);
+      sh.appendChild(el("p","pt-sub", t.bikes ? bikesW(t.bikes)+" · нажмите тип ремонта, чтобы добавить" : "Нажмите тип ремонта, чтобы добавить"));
+      sh.appendChild(ptButtons(id, ()=>{ fill(); renderPt(); renderPtBtn(); }));
+      const list=el("div","pt-list");
+      L.forEach((it,i)=>{ const r=el("div","pt-row pt-li"), lft=el("span"); lft.append(document.createTextNode("Байк №"+(i+1)+" "), el("span","pt-tag", PT_SHORT[it[0]]||"—"));
+        const del=el("button","pt-del","×"); del.type="button"; del.setAttribute("aria-label","Удалить байк №"+(i+1));
+        del.onclick=()=>{ const L2=ptList(id); L2.splice(i,1); ptSave(id, L2); fill(); renderPt(); renderPtBtn(); };
+        const rt=el("span","pt-r"); rt.append(el("b","", fmtFull(+it[1]||0)), del); r.append(lft, rt); list.appendChild(r); });
+      sh.appendChild(list);
+      const ok=el("button","save-btn","Готово"); ok.type="button"; ok.onclick=close; sh.appendChild(ok);
+    };
+    const close=()=>{ bg.remove(); };
+    bg.onclick=e=>{ if(e.target===bg) close(); };
+    fill(); bg.appendChild(sh); document.body.appendChild(bg);
+  }
+  $("ptBtn").onclick = ptOpen;
+  try{ renderPtBtn(); }catch(e){}
+
   // ======== Быстрый старт: зарплата за минуту для нового человека ========
   let qsWait=false;
   function qsClose(bg){ if(bg) bg.remove(); document.body.style.overflow=""; try{ localStorage.setItem("salary:qs","1"); localStorage.setItem("salary:tour","1"); localStorage.setItem("salary:ver", APP_VER); }catch(e){} }
@@ -4121,7 +4334,8 @@ window.LOOK = (function(){
     "Своя клавиатура во всех полях: цифры, русские и английские буквы, символы — системная больше не выскакивает",
     "Мягкое перелистывание месяцев",
     "Новая иконка приложения",
-    "Можно поддержать проект звёздами Telegram — «Настройки» → «Поддержать проект»"]},{v:"3.0", d:"17 октября 2026", items:[
+    "Можно поддержать проект звёздами Telegram — «Настройки» → «Поддержать проект»",
+    "Парт-тайм: кнопка в карточке «Сегодня» — ремонт байков на складе за деньги, свой календарь и цены"]},{v:"3.0", d:"17 октября 2026", items:[
     "Новая вкладка «Деньги»: ближайшая выплата, сверка с расчёткой, цель на месяц, «что если» и заработок за год",
     "«Ещё» стала «Настройками»: звук и вибрация, синхронизация, уведомления, приватность, календарь, данные, помощь",
     "Бот может присылать копию данных по воскресеньям и итоги недели; можно поставить уведомления на паузу",

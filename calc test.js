@@ -147,3 +147,28 @@ test("общее 0 в первый день периода во время см�
   const c = S.calc(D, 2026, 10, { y: 2026, m: 9, d: 21, hm: 20 * 60 });
   assert.equal(c.pSum, 34);
 });
+
+test("парт-тайм: цены по умолчанию и свои", () => {
+  assert.deepEqual(S.ptPrices({}), { n: 100, l: 230, m: 450, h: 900, s: 1400 });
+  assert.equal(S.ptPrices({ pt: { prices: { m: 500 } } }).m, 500);
+  assert.equal(S.ptPrices({ pt: { prices: { m: "abc" } } }).m, 450); // мусор не ломает цену
+});
+
+test("парт-тайм: сумма за день и за месяц, старые цены сохраняются", () => {
+  const days = {
+    "2026-10-21": { pt: [["l", 230], ["m", 450], ["h", 900]] },
+    "2026-10-22": { pt: [["s", 1400], ["n", 100], ["m", 400]] },   // средний записан по старой цене 400
+    "2026-11-01": { pt: [["l", 230]] },                             // другой месяц — не считается
+    "2026-10-23": { reps: [], note: "без парт-тайма" },
+  };
+  const d = S.ptDay(days["2026-10-21"].pt);
+  assert.equal(d.sum, 1580); assert.equal(d.bikes, 3); assert.equal(d.by.m, 1);
+  const M = S.ptMonth(days, 2026, 9);
+  assert.equal(M.sum, 1580 + 1900);
+  assert.equal(M.bikes, 6); assert.equal(M.days, 2);
+  assert.deepEqual(M.best, { d: 22, sum: 1900, bikes: 3 });
+  assert.equal(M.by.m, 2);
+  assert.equal(M.perDay[21], 1580);
+  near(M.avg, 1740);
+  assert.equal(S.ptMonth({}, 2026, 9).sum, 0);
+});
