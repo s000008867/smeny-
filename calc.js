@@ -77,7 +77,9 @@
       for (const it of list) if (it.o > lim) { aSum += it.p; aCnt++; }
       // Баллы дня «по число», изменённые после сохранения общего (ремонт добавили или убрали), меняют итог
       let dl = 0;
-      if (T0.dp != null) { const li = list.find(it => it.o === lim); dl = (li ? li.p : 0) - (+T0.dp || 0); }
+      // Общее меньше баллов самого дня «по число» — значит, в него не вошли ремонты этого дня: считаем их сверху
+      const dp0 = T0.dp != null && +T0.pts < +T0.dp ? 0 : +T0.dp || 0;
+      if (T0.dp != null) { const li = list.find(it => it.o === lim); dl = (li ? li.p : 0) - dp0; }
       pSum = +T0.pts + aSum + dl;
       pDone = dates.filter(o => o <= lim).length + aCnt;
       counted = tOrd <= lim || !!todayIt;
