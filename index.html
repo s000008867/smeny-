@@ -728,11 +728,13 @@ html.priv.priv-show .pvt{filter:none}
 @media (prefers-reduced-motion: reduce){.don-ic{animation:none}}
 .pts-prev{margin:-6px 4px 4px;font-size:13.5px;line-height:1.4;color:var(--muted)}
 .todaycard{position:relative}
-.todaycard .tc-head{grid-column:1/-1;grid-row:1;display:flex;align-items:center;flex-wrap:wrap;gap:8px;min-width:0}
+.todaycard .tc-head{grid-column:1/-1;grid-row:1;display:flex;align-items:center;gap:8px;min-width:0;margin-right:-6px}
 .tc-head #tChip{flex:none}
-.tc-head .pt-slot{flex:1 0 auto;display:flex;justify-content:center}
+.tc-head .pt-slot{flex:1 1 0;min-width:0;display:flex;justify-content:center}
+.tc-head .pt-btn{min-width:0;gap:6px;padding:6px 10px 6px 8px}
+.tc-head .pt-btn>span:last-child{min-width:0}
 .tc-head .pt-slot:not(:has(.pt-btn:not([hidden]))){display:none}
-.pt-btn{position:relative;z-index:2;display:flex;align-items:center;gap:8px;padding:7px 11px 7px 9px;border-radius:14px;border:1px solid color-mix(in srgb,#f0a020 70%,transparent);background:color-mix(in srgb,#f0a020 16%,var(--surface));color:var(--fg);font:inherit;text-align:left;cursor:pointer;max-width:48%}
+.pt-btn{position:relative;z-index:2;display:flex;align-items:center;gap:8px;padding:7px 11px 7px 9px;border-radius:14px;border:1px solid color-mix(in srgb,#f0a020 70%,transparent);background:color-mix(in srgb,#f0a020 16%,var(--surface));color:var(--fg);font:inherit;text-align:left;cursor:pointer;max-width:100%}
 .pt-btn .pt-ic{font-size:19px;line-height:1}
 .pt-btn b{display:block;font-size:13px;line-height:1.1;color:color-mix(in srgb,#f0a020 65%,var(--fg))}
 .pt-btn small{display:block;font-size:11px;line-height:1.2;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -4019,27 +4021,7 @@ window.LOOK = (function(){
     b.innerHTML = '<span class="pt-ic" aria-hidden="true">🚲</span><span><b>Парт-тайм</b><small></small></span>';
     b.querySelector("small").textContent = t.bikes ? "сегодня "+fmtFull(t.sum) : "ремонт байков";
     b.hidden = false;
-    ptPlace();
   }
-  // Ставим кнопку посередине свободного места справа от плашки «Сегодня смена»
-  function ptPlace(){
-    const b=$("ptBtn"), chip=$("tChip"), card=$("today");
-    if(!b || b.hidden || !chip || !card || card.hidden) return;
-    // offsetLeft/offsetTop — место внутри карточки «как задумано», без учёта сдвигов и анимаций
-    const bw=b.offsetWidth, bh=b.offsetHeight, cw=chip.offsetWidth, ch=chip.offsetHeight;
-    if(!cw || !bw) return;
-    const from = chip.offsetLeft + cw + 6;           // свободный отрезок: от плашки…
-    const to   = card.clientWidth - 8;               // …до правого края карточки
-    if(to - from < bw){ b.style.transform = ""; return; } // места мало — оставляем как было
-    const x  = from + (to - from - bw) / 2;          // левый край кнопки, чтобы она была посередине
-    const dx = Math.round(x - b.offsetLeft);
-    const dy = Math.round((chip.offsetTop + ch/2) - (b.offsetTop + bh/2)); // по высоте — вровень с плашкой
-    b.style.transform = "translate("+dx+"px,"+dy+"px)";
-  }
-  try{
-    const ro = new ResizeObserver(() => requestAnimationFrame(ptPlace));
-    ro.observe($("tChip")); ro.observe($("today"));
-  }catch(e){ addEventListener("resize", () => requestAnimationFrame(ptPlace)); }
   // Добавить ремонт: тип + цена на сегодня (цена запоминается вместе с ремонтом)
   function ptAdd(id, c){
     const L=ptList(id); L.push([c, ptCfg().prices[c]]); ptSave(id, L);
@@ -4468,10 +4450,16 @@ window.LOOK = (function(){
 
   // Подсказка: где открыт календарь и как не потерять данные
   function openTransfer(){ setTab("set"); const d=$("copyCode").closest("details"); d.open=true; d.scrollIntoView({block:"start"}); }
-  function setupNotice(){
+  // Подсказку показываем один раз: после первого показа или «Понятно, скрыть» — больше никогда.
+  // Флажок храним и на телефоне, и в аккаунте Telegram (чтобы не вернулась после переустановки).
+  const noticeSeen = () => { try{ localStorage.setItem("salary:noticeHidden","1"); }catch(e){} if(cloud){ cset("notice","1").catch(()=>{}); } };
+  async function setupNotice(){
     let hidden=false; try{ hidden = localStorage.getItem("salary:noticeHidden")==="1"; }catch(e){}
+    if(!hidden && cloud){ try{ const v=await cget(["notice"]); hidden = v.notice==="1"; }catch(e){} }
+    if(hidden) return;
     const standalone = navigator.standalone===true || (window.matchMedia && matchMedia("(display-mode: standalone)").matches);
-    const telegram = !miniApp && typeof window.TelegramWebviewProxy!=="undefined" || typeof window.TelegramWebview!=="undefined" || /Telegram/i.test(navigator.userAgent||"");
+    // «Открыт в браузере внутри Telegram» — только если это НЕ наше мини-приложение
+    const telegram = !miniApp && (typeof window.TelegramWebviewProxy!=="undefined" || typeof window.TelegramWebview!=="undefined" || /Telegram/i.test(navigator.userAgent||""));
     const hasData = Object.values(months).some(m=>Object.keys(m||{}).length);
     const n=$("notice"), act=$("noticeAction");
     let title="", text="", btn="", fn=null;
@@ -4480,12 +4468,10 @@ window.LOOK = (function(){
       text="Отметки отсюда не попадут в иконку на экране «Домой». Нажмите «•••» вверху и выберите «Открыть в Safari», затем в Safari «Поделиться» → «На экран «Домой»».";
       if(hasData){ text+=" Ваши отметки сначала перенесите: скопируйте код и вставьте его в приложении с иконки."; btn="Скопировать код переноса"; fn=copyTransferCode; }
     } else if(!standalone && !miniApp){
-      if(hidden && !hasData) return;
       title="Календарь открыт в браузере";
       text="Данные в браузере и в иконке на экране «Домой» хранятся отдельно. Добавьте иконку: «Поделиться» → «На экран «Домой»» и пользуйтесь только ей.";
       if(hasData){ text+=" Ваши отметки перенесите: скопируйте код и вставьте его в приложении с иконки."; btn="Скопировать код переноса"; fn=copyTransferCode; }
-    } else if(!hasData){
-      if(hidden) return;
+    } else if(!hasData){                     // новичок: ещё ни одной отметки
       title="Добро пожаловать";
       text = miniApp
         ? "Данные сохраняются в вашем аккаунте Telegram и не пропадут. Если вы уже отмечали смены в приложении с иконки или в Safari, перенесите их: там нажмите «Скопировать код», а здесь «Вставить код»."
@@ -4495,8 +4481,9 @@ window.LOOK = (function(){
     $("noticeTitle").textContent=title; $("noticeText").textContent=text;
     act.hidden=!btn; act.textContent=btn; act.onclick=fn;
     n.hidden=false;
+    noticeSeen();                            // показали — в следующий раз уже не покажем
   }
-  $("noticeClose").onclick = ()=>{ $("notice").hidden=true; try{ localStorage.setItem("salary:noticeHidden","1"); }catch(e){} };
+  $("noticeClose").onclick = ()=>{ $("notice").hidden=true; noticeSeen(); };
 
   renderBrushes(); renderTypeSettings(); renderQuick(); render();
   // Отдельное приложение: всё хранится на телефоне каждого пользователя, у каждого свои данные.
