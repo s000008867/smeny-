@@ -4013,7 +4013,27 @@ window.LOOK = (function(){
     b.innerHTML = '<span class="pt-ic" aria-hidden="true">🚲</span><span><b>Парт-тайм</b><small></small></span>';
     b.querySelector("small").textContent = t.bikes ? "сегодня "+fmtFull(t.sum) : "ремонт байков";
     b.hidden = false;
+    ptPlace();
   }
+  // Ставим кнопку посередине свободного места справа от плашки «Сегодня смена»
+  function ptPlace(){
+    const b=$("ptBtn"), chip=$("tChip"), card=$("today");
+    if(!b || b.hidden || !chip || !card || card.hidden) return;
+    // offsetLeft/offsetTop — место внутри карточки «как задумано», без учёта сдвигов и анимаций
+    const bw=b.offsetWidth, bh=b.offsetHeight, cw=chip.offsetWidth, ch=chip.offsetHeight;
+    if(!cw || !bw) return;
+    const from = chip.offsetLeft + cw + 6;           // свободный отрезок: от плашки…
+    const to   = card.clientWidth - 8;               // …до правого края карточки
+    if(to - from < bw){ b.style.transform = ""; return; } // места мало — оставляем как было
+    const x  = from + (to - from - bw) / 2;          // левый край кнопки, чтобы она была посередине
+    const dx = Math.round(x - b.offsetLeft);
+    const dy = Math.round((chip.offsetTop + ch/2) - (b.offsetTop + bh/2)); // по высоте — вровень с плашкой
+    b.style.transform = "translate("+dx+"px,"+dy+"px)";
+  }
+  try{
+    const ro = new ResizeObserver(() => requestAnimationFrame(ptPlace));
+    ro.observe($("tChip")); ro.observe($("today"));
+  }catch(e){ addEventListener("resize", () => requestAnimationFrame(ptPlace)); }
   // Добавить ремонт: тип + цена на сегодня (цена запоминается вместе с ремонтом)
   function ptAdd(id, c){
     const L=ptList(id); L.push([c, ptCfg().prices[c]]); ptSave(id, L);
