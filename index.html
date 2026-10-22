@@ -2088,8 +2088,8 @@ window.LOOK = (function(){
   function prepareImport(j, src){
     if(!j || typeof j.months!=="object") throw 0;
     const ms={}; for(const k in j.months) if(/^\d{4}-\d{2}$/.test(k)) ms[k]=norm(j.months[k]);
-    const ps={}; for(const k in (j.points||{})) if(/^\d{4}-\d{2}$/.test(k)) ps[k]=j.points[k]||{};
-    imported={months:ms, points:ps, totals:j.totals||{}, settings:j.settings, days:j.days||null, pays:j.pays||null, catalog:Array.isArray(j.catalog)?j.catalog:null};
+    const ps={}; for(const k in objOr(j.points)) if(/^\d{4}-\d{2}$/.test(k)) ps[k]=cleanPts(j.points[k]);
+    imported={months:ms, points:ps, totals:objOr(j.totals), settings:objOr(j.settings), days:j.days?objOr(j.days):null, pays:j.pays?objOr(j.pays):null, catalog:Array.isArray(j.catalog)?j.catalog:null};
     $("importInfo").textContent = src+": "+Object.keys(ms).length+" мес. Текущие отметки за эти месяцы заменятся.";
     $("importConfirm").hidden=false; bmsg("");
     $("importConfirm").scrollIntoView({block:"center"});
@@ -2146,7 +2146,7 @@ window.LOOK = (function(){
     if(!imported) return; $("importConfirm").hidden=true;
     for(const k in imported.months){ months[k]=imported.months[k]; pts[k]=imported.points[k]||{}; if(imported.totals[k]) totals[k]=imported.totals[k]; else delete totals[k]; pending[k]=true; }
     if(imported.settings){ applySettings(imported.settings); setPending=true; }
-    if(imported.days) for(const id in imported.days){ if(/^\d{4}-\d{2}-\d{2}$/.test(id)){ dayx[id]=imported.days[id]; saveX("d", id, dayx[id]); } }
+    if(imported.days) for(const id in imported.days){ if(/^\d{4}-\d{2}-\d{2}$/.test(id)){ const D=cleanDay(imported.days[id]); if(D){ dayx[id]=D; saveX("d", id, D); } } }
     if(imported.pays) for(const k in imported.pays){ if(PAY_KEY.test(k)){ pays[k]=imported.pays[k]; saveX("p", k, pays[k]); } }
     if(imported.catalog && imported.catalog.length){ catalog=imported.catalog; saveX("cat","list",catalog); }
     imported=null; render(); bmsg("Восстанавливаю…");
@@ -2163,11 +2163,12 @@ window.LOOK = (function(){
 
   function applySettings(s){
     if(!s) return;
-    if(s.rate!=null) settings.rate = +s.rate;
-    if(s.pct!=null) settings.pct = +s.pct;
-    if(s.minPts!=null) settings.minPts = +s.minPts;
-    if(s.maxPts!=null) settings.maxPts = +s.maxPts;
-    if(s.types) for(const k of ["x","s","a"]) if(s.types[k]) settings.types[k] = Object.assign({}, settings.types[k], s.types[k]);
+    const okNum = v => v!=null && v!=="" && isFinite(+v);   // только настоящие числа: «abc» и пустота не ломают расчёт
+    if(okNum(s.rate)) settings.rate = +s.rate;
+    if(okNum(s.pct)) settings.pct = +s.pct;
+    if(okNum(s.minPts)) settings.minPts = +s.minPts;
+    if(okNum(s.maxPts) && +s.maxPts>0) settings.maxPts = +s.maxPts;
+    if(s.types && typeof s.types==="object") for(const k of ["x","s","a"]) if(s.types[k] && typeof s.types[k]==="object") settings.types[k] = Object.assign({}, settings.types[k], s.types[k]);
     if(s.goals && typeof s.goals==="object") settings.goals = Object.assign({}, s.goals);
     if(typeof s.fio==="string") settings.fio = s.fio;
     if(Array.isArray(s.repCats) && s.repCats.length===4) settings.repCats = s.repCats.map(x=>({nm:String(x.nm), from:+x.from||0, p:+x.p||0}));
@@ -2191,15 +2192,41 @@ window.LOOK = (function(){
     try{
       applySettings(JSON.parse(localStorage.getItem("salary:settings")||"null"));
       for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i);
-        if(/^salary:\d{4}-\d{2}$/.test(k)) { const j=JSON.parse(localStorage.getItem(k))||{}; months[k.slice(7)] = norm(j.days); pts[k.slice(7)] = j.points||{}; if(j.total) totals[k.slice(7)] = j.total; }
-        else if(/^salary:d:\d{4}-\d{2}-\d{2}$/.test(k)) dayx[k.slice(9)] = JSON.parse(localStorage.getItem(k))||{};
-        else if(/^salary:p:\d{4}-\d{2}$/.test(k)) pays[k.slice(9)] = JSON.parse(localStorage.getItem(k))||[];
-        else if(k==="salary:cat:list") catalog = JSON.parse(localStorage.getItem(k))||[]; }
+        // Каждая запись читается отдельно: одна испорченная не мешает загрузить остальные
+        try{
+          if(/^salary:\d{4}-\d{2}$/.test(k)) { const j=objOr(JSON.parse(localStorage.getItem(k))); months[k.slice(7)] = norm(j.days); pts[k.slice(7)] = cleanPts(j.points); if(j.total) totals[k.slice(7)] = j.total; }
+          else if(/^salary:d:\d{4}-\d{2}-\d{2}$/.test(k)) { const D=cleanDay(JSON.parse(localStorage.getItem(k))); if(D) dayx[k.slice(9)] = D; }
+          else if(/^salary:p:\d{4}-\d{2}$/.test(k)) pays[k.slice(9)] = arrOr(JSON.parse(localStorage.getItem(k)));
+          else if(k==="salary:cat:list") catalog = arrOr(JSON.parse(localStorage.getItem(k)));
+        }catch(e){ reportBad(k); }
+      }
     }catch(e){}
   }
 
   // ======== Дополнения: вкладки, ремонты, заметки, выплаты, цель, повтор графика, статистика ========
   let dayx = {};     // "2026-10-16" -> {note, reps:[{t, it:[{i, nm, p, n}]}]}
+  // Защита от испорченных данных (из старой версии, кода переноса или облака)
+  function objOr(v){ return v && typeof v==="object" && !Array.isArray(v) ? v : {}; }
+  function arrOr(v){ return Array.isArray(v) ? v : []; }
+  // Баллы месяца: только дни 1–31 и только числа
+  function cleanPts(v){ const o={}; for(const d in objOr(v)){ const n=v[d]; if(/^([1-9]|[12]\d|3[01])$/.test(d) && n!==null && n!=="" && isFinite(+n)) o[d]=+n; } return o; }
+  function cleanDay(o){
+    if(!o || typeof o!=="object" || Array.isArray(o)) return null;
+    const c = {};
+    if(typeof o.note==="string" && o.note) c.note = o.note.slice(0, 2000);
+    if(Array.isArray(o.reps)){
+      const r = o.reps.filter(x => x && typeof x==="object" && !Array.isArray(x))
+                      .map(x => Object.assign({}, x, {it: arrOr(x.it).filter(i => i && typeof i==="object")}));
+      if(r.length) c.reps = r;
+    }
+    if(Array.isArray(o.pt)){
+      const p = o.pt.filter(x => Array.isArray(x) && SC.PT_NAMES[x[0]] && isFinite(+x[1])).map(x => [x[0], +x[1]]);
+      if(p.length) c.pt = p;
+    }
+    return Object.keys(c).length ? c : null;
+  }
+  const badKeys = [];
+  function reportBad(k){ badKeys.push(k); }
   let pays = {};     // "2026-10" -> [{d, a, t}]
   let catalog = [];  // [{id, nm, p}] — справочник работ и баллов
   let tab = "main";
@@ -4497,8 +4524,9 @@ window.LOOK = (function(){
         const xkeys = allKeys.filter(k => /^d_\d{4}-\d{2}-\d{2}$/.test(k) || /^p_\d{4}-\d{2}$/.test(k) || k==="cat_list");
         if(xkeys.length){
           const xv = await cget(xkeys);
-          for(const k of xkeys){ const v=xv[k]; if(!v) continue; const j=JSON.parse(v);
-            if(k==="cat_list") catalog=j; else if(k[0]==="d") dayx[k.slice(2)]=j; else pays[k.slice(2)]=j;
+          for(const k of xkeys){ const v=xv[k]; if(!v) continue; let j;
+            try{ j=JSON.parse(v); }catch(e){ reportBad(k); continue; }     // испорченная запись — пропускаем только её
+            if(k==="cat_list") catalog=arrOr(j); else if(k[0]==="d"){ const D=cleanDay(j); if(D) dayx[k.slice(2)]=D; else continue; } else pays[k.slice(2)]=arrOr(j);
             try{ localStorage.setItem("salary:"+(k==="cat_list"?"cat:list":k[0]+":"+k.slice(2)), v); }catch(e){} }
         } else {
           // В облаке ещё нет ремонтов, заметок и выплат — отправляем то, что есть на телефоне
@@ -4508,9 +4536,9 @@ window.LOOK = (function(){
           const vals = await cget(keys);
           for(const k of keys){
             const v = vals[k]; if(!v) continue;
-            const j = JSON.parse(v);
-            if(k==="settings"){ applySettings(j); try{ localStorage.setItem("salary:settings", v); }catch(e){} }
-            else { const mk=k.slice(2); months[mk]=norm(j.days); pts[mk]=j.points||{}; if(j.total) totals[mk]=j.total; else delete totals[mk]; try{ localStorage.setItem("salary:"+mk, v); }catch(e){} }
+            let j; try{ j = JSON.parse(v); }catch(e){ reportBad(k); continue; }
+            if(k==="settings"){ applySettings(objOr(j)); try{ localStorage.setItem("salary:settings", v); }catch(e){} }
+            else { j=objOr(j); const mk=k.slice(2); months[mk]=norm(j.days); pts[mk]=cleanPts(j.points); if(j.total) totals[mk]=j.total; else delete totals[mk]; try{ localStorage.setItem("salary:"+mk, v); }catch(e){} }
           }
           render(); status("Данные загружены из Telegram");
         } else if(Object.values(months).some(m=>Object.keys(m||{}).length)){

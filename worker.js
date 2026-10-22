@@ -21,6 +21,9 @@ const SC = globalThis.SmenyCalc;
 const DEFAULT_APP = "https://s000008867.github.io/smeny-team/";
 const APP_PREFIX = "https://s000008867.github.io/";
 const TZ_OFFSET_H = 3; // Москва, без перехода на летнее время
+const SYNC_PER_DAY = 40;     // записей копии календаря в день на человека
+const ANON_ERR_PER_DAY = 20; // сообщений об ошибках из браузера (без Telegram) в день — на всех
+const ANON_AI_PER_DAY = 30;  // распознаваний графика из браузера (без Telegram) в день — на всех
 
 const GEN = ["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
 const MONTH_NOM = ["январь","февраль","март","апрель","май","июнь","июль","август","сентябрь","октябрь","ноябрь","декабрь"];
@@ -35,6 +38,14 @@ async function hmac(key, msg) {
   const k = await crypto.subtle.importKey("raw", typeof key === "string" ? enc(key) : key, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   return new Uint8Array(await crypto.subtle.sign("HMAC", k, enc(msg)));
 }
+// Сравнение секретов «за одинаковое время»: по скорости ответа нельзя угадать, сколько символов совпало
+function same(a, b) {
+  a = String(a || ""); b = String(b || "");
+  if (!a || a.length !== b.length) return false;
+  let d = 0; for (let i = 0; i < a.length; i++) d |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return d === 0;
+}
+const keyOk = (env, k) => !!env.HOOK_SECRET && same(k, env.HOOK_SECRET);
 const cors = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
@@ -368,7 +379,7 @@ async function verifyInitData(initData, botToken) {
   params.delete("hash");
   const check = [...params.entries()].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0).map(([k, v]) => k + "=" + v).join("\n");
   const secret = await hmac("WebAppData", botToken);
-  if (hex(await hmac(secret, check)) !== hash) return null;
+  if (!same(hex(await hmac(secret, check)), hash)) return null;
   const authDate = +params.get("auth_date") || 0;
   if (Date.now() / 1000 - authDate > 7 * 86400) return null;
   try { return JSON.parse(params.get("user") || "null"); } catch (e) { return null; }
@@ -459,8 +470,19 @@ async function endOfShift(env, u, job, today) {
   return false;
 }
 
-async function runJob(env, job) {
-  const today = mskNow(), users = await allUsers(env);
+// Бесплатный тариф Cloudflare на ОДИН запуск: 10 мс процессора и 50 запросов в Telegram.
+// Поэтому при многих пользователях рассылка идёт частями: 21:00, 21:01 … 21:09 — каждая минута берёт свою десятую часть.
+// Пока людей немного (до SLICE_FROM), всё уходит одним запуском в первую минуту, как раньше.
+const SLICES = 10, SLICE_FROM = 6;
+async function runJob(env, job, slice = -1) {
+  const today = mskNow();
+  let keys = null;
+  if (slice >= 0) {
+    keys = await listPrefix(env, "u:");
+    if (keys.length <= SLICE_FROM) { if (slice > 0) return; keys = null; }          // мало людей — всё в 0-ю минуту
+    else keys = keys.filter(k => (+k.slice(2) % SLICES + SLICES) % SLICES === slice); // своя часть людей
+  }
+  const users = keys ? (await Promise.all(keys.map(k => env.DB.get(k)))).filter(Boolean).map(v => JSON.parse(v)) : await allUsers(env);
   for (const u of users) {
     if (!u.enabled) continue;
     u.sent = u.sent || {};
@@ -480,7 +502,12 @@ async function runJob(env, job) {
   }
 }
 
-const CRON_JOBS = { "0 18 * * *": "eve", "45 18 * * *": "end1", "0 19 * * *": "end2" };
+// Расписание (UTC): 21:00–21:09, 21:45–21:54, 22:00–22:09 по Москве. start — первая минута окна.
+const CRON_JOBS = {
+  "0-9 18 * * *": { job: "eve", start: 0 }, "45-54 18 * * *": { job: "end1", start: 45 }, "0-9 19 * * *": { job: "end2", start: 0 },
+  // старое расписание (до обновления wrangler.toml) — всё одним запуском
+  "0 18 * * *": { job: "eve", start: 0 }, "45 18 * * *": { job: "end1", start: 45 }, "0 19 * * *": { job: "end2", start: 0 },
+};
 const NEED_NOTIF = "🔔 <b>Сначала включите уведомления</b>\nОткройте календарь кнопкой ниже → вкладка «Настройки» → «Уведомления» → «Включить». После этого бот сможет записывать баллы и показывать статистику.";
 
 async function handleMessage(env, msg) {
@@ -490,7 +517,10 @@ async function handleMessage(env, msg) {
   // Владелец бота: один раз отправить «/admin КЛЮЧ» (ключ — как в ссылке /setup)
   if (/^\/admin(\s|$)/i.test(text)) {
     const key = text.split(/\s+/)[1] || "";
-    if (env.HOOK_SECRET && key === env.HOOK_SECRET) {
+    const owner = await env.DB.get("owner");
+    // Владелец уже есть — сменить его через чат нельзя, даже зная ключ (только удалить запись owner в Cloudflare)
+    if (owner && owner !== String(chatId)) return send(env, chatId, "Неверный ключ.");
+    if (keyOk(env, key)) {
       await env.DB.put("owner", String(chatId));
       try { await tg(env, "deleteMessage", { chat_id: chatId, message_id: msg.message_id }); } catch (e) {}
       return send(env, chatId, "Готово: вы владелец бота. Команда /users покажет, кто пользуется календарём и ботом.\nСообщение с ключом я удалил.");
@@ -658,7 +688,7 @@ async function touchSeen(env, from, kind, app) {
   let s = null; try { s = JSON.parse((await env.DB.get(k)) || "null"); } catch (e) {}
   const name = [from.first_name, from.last_name].filter(Boolean).join(" ").slice(0, 60), un = from.username || "";
   // Не чаще одной записи в 10 минут, если ничего не поменялось — бережём лимиты хранилища
-  if (s && t - (s.last || 0) < 10 * 60e3 && s.name === name && s.un === un && (!app || s.app === app)) return;
+  if (s && t - (s.last || 0) < 3 * 3600e3 && s.name === name && s.un === un && (!app || s.app === app)) return;
   s = s || { id: from.id, first: t, opens: 0, msgs: 0 };
   s.name = name || s.name || ""; s.un = un || s.un || ""; if (app) s.app = app;
   if (kind === "open") { s.opens = (s.opens || 0) + 1; s.lastOpen = t; } else { s.msgs = (s.msgs || 0) + 1; s.lastMsg = t; }
@@ -700,7 +730,7 @@ async function textUsers(env) {
   if (out.length > 3700) out += "\n…и ещё " + list.length + " (список обрезан)";
   const dsum = +(await env.DB.get("don:sum")) || 0;
   if (dsum) out += "\n\n⭐ Поддержка звёздами: всего " + dsum;
-  return out + "\n\n🔔 — включены уведомления. «откр.» — сколько раз открывали календарь (не чаще раза в 10 минут).";
+  return out + "\n\n🔔 — включены уведомления. «откр.» — сколько раз открывали календарь (не чаще раза в 3 часа).";
 }
 
 export default {
@@ -733,7 +763,15 @@ export default {
       if (u.enabled && today.hm >= 21 * 60 + 30) { u.sent = u.sent || {}; sentNow = await endOfShift(env, u, "sync", today); }
       // Бережём лимит записей: сохраняем, только если что-то поменялось
       const after = JSON.stringify([u.enabled, u.appUrl, u.data, (u.inbox || []).length]);
-      if (after !== before || sentNow) await putUser(env, u);
+      if (after !== before || sentNow) {
+        // Не больше SYNC_PER_DAY записей в день на человека: обычно хватает 10–20.
+        // Защищает общий дневной лимит базы (1000 записей) от «зацикленного» телефона или злоумышленника.
+        const d = dayId(today), wc = (prev && prev.wc && prev.wc.d === d) ? prev.wc.n : 0;
+        const important = !prev || wasOn !== u.enabled || sentNow;   // включение/выключение и отправленная статистика — всегда
+        if (wc >= SYNC_PER_DAY && !important) return json({ ok: true, enabled: u.enabled, sentNow, throttled: true });
+        u.wc = { d, n: wc + 1 };
+        await putUser(env, u);
+      }
       return json({ ok: true, enabled: u.enabled, sentNow });
     }
 
@@ -764,10 +802,11 @@ export default {
       if (!/^data:image\/(png|jpe?g|webp);base64,/.test(image) || image.length > 6e6) return json({ ok: false, error: "bad_image" }, 400);
       if (name.length < 2) return json({ ok: false, error: "no_name" }, 400);
       const user = await verifyInitData(body.initData, env.BOT_TOKEN);
-      // Защита от злоупотреблений: не больше 25 распознаваний в день на человека
-      const who = user && user.id ? "u" + user.id : "ip" + (request.headers.get("CF-Connecting-IP") || "?");
+      // Защита от злоупотреблений: 25 распознаваний в день на человека из Telegram,
+      // из браузера — общий лимит на всех (иначе каждый новый адрес — новая запись в базу)
+      const who = user && user.id ? "u" + user.id : "anon";
       const limKey = "lim:" + dayId(mskNow()) + ":" + who, used = +(await env.DB.get(limKey)) || 0;
-      if (used >= 25) return json({ ok: false, error: "limit" }, 429);
+      if (used >= (user && user.id ? 25 : ANON_AI_PER_DAY)) return json({ ok: false, error: "limit" }, 429);
       await env.DB.put(limKey, String(used + 1), { expirationTtl: 2 * 86400 });
       try {
         const r = await readSchedule(env, image, name, String(body.hint || "").slice(0, 40));
@@ -780,9 +819,9 @@ export default {
       let body; try { body = await request.json(); } catch (e) { return json({ ok: false }, 400); }
       const owner = await env.DB.get("owner"); if (!owner) return json({ ok: false, error: "no_owner" });
       const user = body.initData ? await verifyInitData(body.initData, env.BOT_TOKEN) : null;
-      const who = user && user.id ? "u" + user.id : "ip" + (request.headers.get("CF-Connecting-IP") || "?");
+      const who = user && user.id ? "u" + user.id : "anon";
       const limKey = "lim:" + dayId(mskNow()) + ":err" + who, used = +(await env.DB.get(limKey)) || 0;
-      if (used >= 5) return json({ ok: false, error: "limit" });
+      if (used >= (user && user.id ? 5 : ANON_ERR_PER_DAY)) return json({ ok: false, error: "limit" });
       await env.DB.put(limKey, String(used + 1), { expirationTtl: 2 * 86400 });
       const name = user ? esc([user.first_name, user.last_name].filter(Boolean).join(" ") || "без имени") + (user.username ? " (@" + esc(user.username) + ")" : "") : "браузер (не Telegram)";
       const cut = (v, n) => esc(String(v || "").slice(0, n));
@@ -835,7 +874,7 @@ export default {
 
     // Сообщения и нажатия кнопок в боте
     if (url.pathname === "/webhook" && request.method === "POST") {
-      if (request.headers.get("X-Telegram-Bot-Api-Secret-Token") !== env.HOOK_SECRET) return new Response("forbidden", { status: 403 });
+      if (!keyOk(env, request.headers.get("X-Telegram-Bot-Api-Secret-Token"))) return new Response("forbidden", { status: 403 });
       const upd = await request.json().catch(() => null);
       try {
         if (upd && upd.message && upd.message.chat && upd.message.chat.type === "private") await handleMessage(env, upd.message);
@@ -850,7 +889,7 @@ export default {
 
     // После каждого обновления кода: подключить бота и команды
     if (url.pathname === "/setup") {
-      if (!env.HOOK_SECRET || url.searchParams.get("key") !== env.HOOK_SECRET) return new Response("Неверный ключ", { status: 403 });
+      if (!keyOk(env, url.searchParams.get("key"))) return new Response("Неверный ключ", { status: 403 });
       const r = await tg(env, "setWebhook", { url: url.origin + "/webhook", secret_token: env.HOOK_SECRET, allowed_updates: ["message", "callback_query", "pre_checkout_query"], drop_pending_updates: true });
       await tg(env, "setMyCommands", { commands: [
         { command: "menu", description: "☰ Меню с кнопками" },
@@ -876,7 +915,7 @@ export default {
 
     // Проверка вручную: /run?key=...&job=eve|end1|end2
     if (url.pathname === "/run") {
-      if (!env.HOOK_SECRET || url.searchParams.get("key") !== env.HOOK_SECRET) return new Response("Неверный ключ", { status: 403 });
+      if (!keyOk(env, url.searchParams.get("key"))) return new Response("Неверный ключ", { status: 403 });
       const job = url.searchParams.get("job");
       if (!["eve", "end1", "end2"].includes(job)) return new Response("job: eve, end1 или end2", { status: 400 });
       await runJob(env, job);
@@ -887,7 +926,11 @@ export default {
   },
 
   async scheduled(event, env, ctx) {
-    const job = CRON_JOBS[event.cron];
-    if (job) ctx.waitUntil(runJob(env, job));
+    const c = CRON_JOBS[event.cron];
+    if (!c) return;
+    const minute = new Date(event.scheduledTime || Date.now()).getUTCMinutes();
+    const slice = event.cron.includes("-") ? minute - c.start : -1;             // какая по счёту минута окна
+    if (slice >= SLICES) return;
+    ctx.waitUntil(runJob(env, c.job, slice));
   },
 };
