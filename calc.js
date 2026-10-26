@@ -178,6 +178,39 @@
     return { sum, bikes, days: n, best, by, perDay, avg: n ? sum / n : 0 };
   }
 
-  G.SmenyCalc = { PT_PRICES, PT_NAMES, ptPrices, ptDay, ptMonth, VERSION, key, ord, opts, tp, pay, inBonus, isShift, pctFor, level, calc, periodOf, goalDay,
+  // ---------- Парт-тайм: выплата раз в неделю, по четвергам ----------
+  // Рабочая неделя — понедельник…воскресенье. Деньги за неё приходят в ближайший четверг после неё
+  // (понедельник + 10 дней). Например, неделя 19–25 октября → выплата в четверг 29 октября.
+  const PT_PAY_WD = 4;                               // 4 = четверг (0 — воскресенье)
+  const ymd = t => ({ y: t.getUTCFullYear(), m: t.getUTCMonth(), d: t.getUTCDate() });
+  const utc = (y, m, d) => new Date(Date.UTC(y, m, d));
+  const idOf = t => t.toISOString().slice(0, 10);   // "2026-10-26"
+  // Неделя (пн–вс), в которую попадает день: начало, конец, день выплаты и сумма
+  function ptWeek(days, y, m, d) {
+    const t = utc(y, m, d), back = (t.getUTCDay() + 6) % 7;          // сколько дней назад был понедельник
+    const mon = utc(y, m, d - back), sun = utc(y, m, d - back + 6), pay = utc(y, m, d - back + 10); // пн + 10 дней = чт следующей недели
+    let sum = 0, bikes = 0, n = 0;
+    for (let i = 0; i < 7; i++) {
+      const L = ((days || {})[idOf(utc(y, m, d - back + i))] || {}).pt;
+      if (L && L.length) { const r = ptDay(L); sum += r.sum; bikes += r.bikes; n++; }
+    }
+    return { from: ymd(mon), to: ymd(sun), pay: ymd(pay), sum, bikes, days: n };
+  }
+  // Ближайшая выплата, если сегодня y-m-d: в четверг — сегодняшняя, иначе — следующий четверг.
+  // Она за прошлую неделю (пн–вс), которая закончилась перед этим четвергом.
+  function ptNextPay(days, y, m, d) {
+    const t = utc(y, m, d), ahead = (PT_PAY_WD - t.getUTCDay() + 7) % 7;
+    const thu = utc(y, m, d + ahead), w = ymd(utc(thu.getUTCFullYear(), thu.getUTCMonth(), thu.getUTCDate() - 7));
+    return ptWeek(days, w.y, w.m, w.d);
+  }
+  // Все недели, которые задевают месяц (для списка «по неделям»)
+  function ptWeeks(days, y, m) {
+    const out = [], last = dim(y, m);
+    for (let d = 1; d <= last; d += 7) out.push(ptWeek(days, y, m, d));
+    const w = ptWeek(days, y, m, last); if (!out.length || out[out.length - 1].from.d !== w.from.d || out[out.length - 1].from.m !== w.from.m) out.push(w);
+    return out;
+  }
+
+  G.SmenyCalc = { PT_PRICES, PT_NAMES, ptPrices, ptDay, ptMonth, ptWeek, ptNextPay, ptWeeks, VERSION, key, ord, opts, tp, pay, inBonus, isShift, pctFor, level, calc, periodOf, goalDay,
     PAYDEF, payCfg, netv, advance, salary, HOLI, payDay, payDates, dim };
 })(typeof globalThis !== "undefined" ? globalThis : this);
