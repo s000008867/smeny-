@@ -43,6 +43,77 @@ body{background:var(--bg);color:var(--fg);font-family:var(--font-body);font-size
 .num{font-variant-numeric:tabular-nums}
 header.month{display:flex;align-items:center;justify-content:space-between;gap:8px}
 header.month h1{font-family:var(--font-display);font-weight:500;font-size:20px;margin:0;text-transform:capitalize}
+/* ---- Раскладка экранов: одинаковая во всех темах, цвета берутся из темы ---- */
+:root{--ink:var(--fg);--ink-fg:var(--bg);--pill:var(--surface);--hero:var(--accent);--hero-fg:var(--accent-fg)}
+header.month{position:relative;margin:0 0 4px;padding:6px;border-radius:999px;background:var(--surface);border:1px solid var(--line)}
+header.month .mh-txt{display:flex;flex-direction:column;min-width:0;flex:1}
+header.month .mh-txt h1{font-size:12px!important;font-weight:500!important;color:var(--muted)!important;order:2;line-height:1.3!important;letter-spacing:0!important}
+header.month .icon-btn{width:38px;height:38px;border-radius:50%!important}
+.fx-av{width:38px;height:38px;flex:none;border-radius:50%;background:var(--ink);color:var(--ink-fg);display:flex;align-items:center;justify-content:center;font:600 13px/1 var(--font-body)}
+.fx-hi{font:600 14px/1.25 var(--font-body);order:1}
+.fx-greet{margin:6px 4px 10px}.fx-greet h2{margin:0;font:600 26px/1.15 var(--font-display);letter-spacing:-.02em}.fx-greet p{margin:2px 0 0;font-size:13px;color:var(--muted)}
+/* главная карточка «Сегодня» — цвета акцента темы */
+.todaycard .phrase,.mcover,.recap-ban .em{display:none!important}
+/* механик — только в темах, открытых за баллы («Русь», «Дарго», «Черкесия»), в образе темы; справа от приветствия */
+.fx-greet{position:relative}.fx-greet .masc{display:none}
+html:is([data-skin="slav"],[data-skin="darg"],[data-skin="circ"]) .fx-greet{padding-right:78px;min-height:84px}
+html:is([data-skin="slav"],[data-skin="darg"],[data-skin="circ"]) .fx-greet .masc{display:block;position:absolute;right:0;top:-22px;width:72px;height:110px}
+.todaycard{background:var(--hero)!important;color:var(--hero-fg)!important;border-color:color-mix(in srgb,var(--hero-fg) 30%,transparent)!important;grid-template-columns:minmax(0,1fr)!important}
+.todaycard::before{content:attr(data-lbl);font:500 12px/1.2 var(--font-body);color:color-mix(in srgb,var(--hero-fg) 90%,transparent)}
+.todaycard .tc-head,.todaycard #tActions{display:none!important}
+.todaycard .tb-n{font-size:46px!important}.todaycard .big{gap:6px!important;flex-wrap:wrap}.todaycard #tText{gap:4px!important}
+.todaycard .tb-l,.todaycard #tText{color:color-mix(in srgb,var(--hero-fg) 88%,transparent)!important}
+.todaycard .tf{font-size:11px!important;padding:3px 8px!important;background:color-mix(in srgb,var(--hero-fg) 18%,transparent)!important;border-color:color-mix(in srgb,var(--hero-fg) 35%,transparent)!important;color:var(--hero-fg)!important}
+.fx-row{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:10px;align-items:stretch}
+.fx-row .todaycard{margin:0;padding:14px!important;border-radius:24px!important;align-content:start}
+.fx-row:has(.todaycard[hidden]){display:none}
+.fx-side{display:grid;grid-template-rows:1fr 1fr;gap:10px}
+.fx-mini,.fx-k,.fx-card,.fx-rep,.total,.fx-chart{background:var(--surface);border:1px solid var(--line)}
+.fx-mini{display:flex;flex-direction:column;justify-content:center;gap:2px;padding:12px 14px;border-radius:20px}
+.fx-mini small,.fx-k small{font-size:11px;color:var(--muted);font-weight:500}
+.fx-mini b,.fx-k b{font:700 22px/1.1 var(--font-display);letter-spacing:-.02em}.fx-mini b em{font:500 12px var(--font-body);color:var(--muted);font-style:normal}
+/* «Заработано за месяц» */
+.total{padding:14px 16px;border-radius:24px;margin-top:12px!important}
+.fx-acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.fx-acts button{height:44px;border-radius:999px;border:none;font:600 13px/1 var(--font-body);display:flex;align-items:center;justify-content:center;gap:6px}
+.fx-acts .fx-dark{background:var(--ink);color:var(--ink-fg)}.fx-acts .fx-light{background:var(--pill);color:var(--fg);border:1px solid var(--line)}
+/* «Ремонты сегодня» и график */
+.fx-rep{margin-top:12px;padding:12px 14px;border-radius:22px}.fx-rep:has(#tQuick[hidden]){display:none}.fx-rep .qcat{padding-top:0;border-top:none}
+.fx-rep .qcat .qb button{border-radius:16px!important;padding:8px 2px!important}
+.fx-chart{margin-top:12px;padding:12px 14px 10px;border-radius:22px}.fx-chart.fx-empty{display:none}
+.tile{border-radius:22px!important}.tiles-head{margin-top:16px}
+/* «Отчёт» на вкладке «Статистика» */
+.fx-report{display:flex;flex-direction:column;gap:12px;margin-bottom:14px}
+.fx-pills{align-self:flex-start;display:flex;gap:4px;padding:4px;border-radius:999px;background:var(--surface);border:1px solid var(--line)}
+.fx-pills button{height:34px;padding:0 18px;border-radius:999px;border:none;background:transparent;color:var(--fg);font:600 13px var(--font-body)}
+.fx-pills button[aria-selected="true"]{background:var(--ink);color:var(--ink-fg)}
+.fx-kpi{display:grid;grid-template-columns:1fr 1fr;gap:10px}.fx-k{display:flex;flex-direction:column;gap:4px;padding:12px 14px;border-radius:20px}
+.fx-k-hero{background:var(--hero)!important;color:var(--hero-fg);border-color:transparent!important}.fx-k-hero small{color:color-mix(in srgb,var(--hero-fg) 90%,transparent)}
+.fx-badge{align-self:flex-start;font-size:10px;font-weight:600;padding:2px 7px;border-radius:999px;background:color-mix(in srgb,var(--accent) 20%,transparent);color:var(--fg)}
+.fx-card{padding:12px 14px;border-radius:22px}.fx-card .fx-ch-h b{font-size:13px;color:var(--fg)}.fx-card svg{display:block;margin-top:6px}
+.fx-donut-box{display:flex;align-items:center;gap:16px}.fx-donut{width:100px;height:100px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.fx-donut>div{width:64px;height:64px;border-radius:50%;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center}.fx-donut b{font-size:16px}.fx-donut small{font-size:9px;color:var(--muted)}
+.fx-dleg{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}.fx-dleg>b{font-size:13px}.fx-dl{display:flex;align-items:center;gap:6px;font-size:12px}.fx-dl i{width:9px;height:9px;border-radius:50%;flex:none}.fx-dl span{flex:1;color:var(--muted)}
+/* плавающее меню: только значки, выбранный — тёмный круг */
+.tabbar{left:50%!important;right:auto!important;transform:translateX(-50%);width:min(340px,calc(100% - 32px));bottom:calc(12px + env(safe-area-inset-bottom,0px))!important;padding:6px!important;border-radius:999px;border:1px solid var(--line)!important}
+nav.tabbar[role] button{min-height:46px!important;padding:0!important;font-size:0!important;gap:0!important;color:var(--fg)}
+nav.tabbar[role] button svg{padding:11px 15px!important;border-radius:999px!important}
+nav.tabbar[role] button span:not(.dot){display:none!important}
+nav.tabbar[role] button[aria-selected="true"] svg{background:var(--ink)!important;color:var(--ink-fg)!important;transform:none!important}
+.pager>.pane{padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))!important}
+.toast,.undo-bar{bottom:calc(90px + env(safe-area-inset-bottom,0px))!important}
+/* парт-тайм */
+.pt-top{padding:6px;border-radius:999px;background:var(--surface);border:1px solid var(--line)}
+.pt-back{width:38px;height:38px;border-radius:50%!important;background:var(--pill)!important;color:var(--fg)!important;font-size:0!important;padding:0!important;display:flex;align-items:center;justify-content:center}.pt-back::before{content:'‹';font-size:22px;line-height:1}
+.pt-ttl small{display:none}.pt-ttl b{font-size:15px!important}
+.pt-nav button{border-radius:50%!important}.pt-add{border-radius:15px!important}
+.fx-ch-h{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);font-weight:500}
+.fx-leg{display:flex;align-items:center;gap:4px;font-size:10px}.fx-leg i{width:8px;height:8px;border-radius:2px;display:inline-block;margin-left:6px}
+.fx-bars{display:flex;align-items:flex-end;gap:6px;height:72px;margin-top:8px;padding:0 2px;border-bottom:1px dashed color-mix(in srgb,var(--fg) 25%,transparent)}
+.fx-bars i{flex:1;border-radius:5px 5px 2px 2px;min-height:3px}
+.pane.blur-in>*{animation:paneBlur .6s cubic-bezier(.2,.7,.2,1) both}
+.pane.blur-in>*:nth-child(2){animation-delay:.05s}.pane.blur-in>*:nth-child(n+3){animation-delay:.1s}
+@keyframes paneBlur{from{filter:blur(14px);opacity:.2;transform:translateY(6px) scale(1.015)}to{filter:none;opacity:1;transform:none}}
 .nav{display:flex;gap:6px}
 button{font:inherit;color:inherit;cursor:pointer}
 #soundBtn{display:inline-flex;align-items:center;justify-content:center}
@@ -112,14 +183,33 @@ summary{cursor:pointer;font-weight:600}
 .backup p{margin:0;font-size:13px;color:var(--muted)}
 .backup .row{display:flex;flex-wrap:wrap;gap:8px}
 .ghost-btn{padding:9px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-weight:500}
-.splash{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:center;transition:opacity .35s ease}
-.splash.out{opacity:0;pointer-events:none}
-.splash-in{display:flex;flex-direction:column;align-items:center;gap:14px;animation:splashIn .5s ease both}
-.splash-logo{width:128px;height:128px;border-radius:50%;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-.splash-name{font-family:var(--font-display);font-weight:700;font-size:28px;color:var(--fg)}
-.splash-sub{font-size:14px;color:var(--muted);margin-top:-8px}
-@keyframes splashIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion: reduce){.splash-in{animation:none}.splash{transition:none}}
+/* ---- Заставка: живая — шестерёнка крутится, дни календаря отмечаются, тёплое свечение ---- */
+.splash{position:fixed;inset:0;z-index:50;overflow:hidden;display:flex;align-items:center;justify-content:center;
+  background:radial-gradient(60% 40% at 50% 42%,#3a2716 0%,#17110b 60%,#0d0a07 100%);transition:opacity .5s ease,filter .5s ease,transform .5s ease}
+.splash.out{opacity:0;filter:blur(18px);transform:scale(1.06);pointer-events:none}
+.sp-blob{position:absolute;border-radius:50%;filter:blur(60px);opacity:.55;pointer-events:none}
+.sp-blob.b1{width:340px;height:340px;left:-120px;top:8%;background:#c8761f;animation:spDrift 9s ease-in-out infinite alternate}
+.sp-blob.b2{width:300px;height:300px;right:-120px;bottom:6%;background:#8a4b1c;animation:spDrift 11s ease-in-out infinite alternate-reverse}
+.sp-blob.b3{width:220px;height:220px;left:50%;top:55%;margin-left:-110px;background:#2aa489;opacity:.22;animation:spDrift 13s ease-in-out infinite alternate}
+@keyframes spDrift{from{transform:translate(0,0) scale(1)}to{transform:translate(40px,-30px) scale(1.15)}}
+.splash-in{position:relative;display:flex;flex-direction:column;align-items:center;gap:14px}
+.splash-logo{width:136px;height:136px;border-radius:50%;overflow:hidden;animation:spLogoIn .9s cubic-bezier(.2,.8,.2,1) both,spGlow 2.4s ease-in-out .9s infinite}
+@keyframes spLogoIn{from{opacity:0;filter:blur(14px);transform:scale(.7) rotate(-20deg)}to{opacity:1;filter:none;transform:none}}
+@keyframes spGlow{0%,100%{box-shadow:0 10px 30px rgba(0,0,0,.45),0 0 0 0 rgba(242,163,58,.0)}50%{box-shadow:0 10px 30px rgba(0,0,0,.45),0 0 46px 6px rgba(242,163,58,.38)}}
+.sp-gear{transform-box:view-box;transform-origin:50% 50%;animation:spSpin 14s linear infinite}
+@keyframes spSpin{to{transform:rotate(360deg)}}
+.sp-c{transform-box:fill-box;transform-origin:50% 50%;animation:spPop .38s cubic-bezier(.3,1.6,.5,1) both;animation-delay:calc(.45s + var(--i) * .07s)}
+@keyframes spPop{from{opacity:0;transform:scale(.2)}to{opacity:1;transform:none}}
+.sp-check{stroke-dasharray:1;stroke-dashoffset:1;animation:spDraw .4s ease-out 1.25s forwards}
+@keyframes spDraw{to{stroke-dashoffset:0}}
+.splash-name{display:flex;font-family:var(--font-display);font-weight:700;font-size:32px;letter-spacing:-.01em;color:#f6ead8}
+.splash-name span{display:inline-block;animation:spRise .6s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(.35s + var(--i) * .06s)}
+@keyframes spRise{from{opacity:0;transform:translateY(14px);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+.splash-sub{font-size:14px;color:#c9b59a;margin-top:-8px;letter-spacing:.04em;animation:spRise .6s .7s both}
+.splash-bar{width:120px;height:3px;border-radius:999px;background:rgba(246,234,216,.14);overflow:hidden;margin-top:6px;animation:spRise .5s .8s both}
+.splash-bar i{display:block;width:40%;height:100%;border-radius:999px;background:linear-gradient(90deg,transparent,#f2a33a,transparent);animation:spLoad 1.1s ease-in-out infinite}
+@keyframes spLoad{from{transform:translateX(-100%)}to{transform:translateX(250%)}}
+@media (prefers-reduced-motion: reduce){.splash *,.splash-in,.splash-logo{animation:none!important}.splash{transition:none}.sp-check{stroke-dashoffset:0}}
 .tiles-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:-8px;padding:0 2px}
 .tiles-head span{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
@@ -280,6 +370,15 @@ summary{cursor:pointer;font-weight:600}
 .look-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
 .lk-card{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:14px;border:2px solid rgba(127,127,127,.28);text-align:left;min-width:0}
 .lk-card[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.lk-card.locked{position:relative;filter:saturate(.35);opacity:.75}
+.lk-card .lk-lock{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;background:rgba(0,0,0,.55);color:#fff;align-self:flex-start}
+.unl-box{display:flex;flex-direction:column;gap:8px}
+.unl-sum{font-size:13px;color:var(--muted)}.unl-sum b{color:var(--fg);font-size:15px}
+.unl-it{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;padding:10px 12px;border-radius:14px;background:var(--bg);border:1px solid var(--line)}
+.unl-it b{font-size:14px}.unl-it small{font-size:12px;color:var(--muted);text-align:right}
+.unl-it .bar{grid-column:1/-1;height:6px;border-radius:999px;background:color-mix(in srgb,var(--fg) 12%,transparent);overflow:hidden}.unl-it .bar i{display:block;height:100%;border-radius:999px;background:var(--accent)}
+.unl-it.open small{color:var(--accent);font-weight:600}
+.mp.locked{opacity:.5;filter:grayscale(.6)}
 .lk-card .nm{font-size:17px;font-weight:700;line-height:1.15}
 .lk-card .sub{font-size:12px;opacity:.75;line-height:1.2}
 .lk-card .sw{display:flex;gap:4px}
@@ -734,47 +833,51 @@ html.priv.priv-show .pvt{filter:none}
 .tc-head .pt-btn{min-width:0;gap:6px;padding:6px 10px 6px 8px}
 .tc-head .pt-btn>span:last-child{min-width:0}
 .tc-head .pt-slot:not(:has(.pt-btn:not([hidden]))){display:none}
-.pt-btn{position:relative;z-index:2;display:flex;align-items:center;gap:8px;padding:7px 11px 7px 9px;border-radius:14px;border:1px solid color-mix(in srgb,#f0a020 70%,transparent);background:color-mix(in srgb,#f0a020 16%,var(--surface));color:var(--fg);font:inherit;text-align:left;cursor:pointer;max-width:100%}
+.pt-btn{position:relative;z-index:2;display:flex;align-items:center;gap:8px;padding:7px 11px 7px 9px;border-radius:14px;border:1px solid color-mix(in srgb,var(--accent) 70%,transparent);background:color-mix(in srgb,var(--accent) 16%,var(--surface));color:var(--fg);font:inherit;text-align:left;cursor:pointer;max-width:100%}
 .pt-btn .pt-ic{font-size:19px;line-height:1}
-.pt-btn b{display:block;font-size:13px;line-height:1.1;color:color-mix(in srgb,#f0a020 65%,var(--fg))}
+.pt-btn b{display:block;font-size:13px;line-height:1.1;color:color-mix(in srgb,var(--accent) 65%,var(--fg))}
 .pt-btn small{display:block;font-size:11px;line-height:1.2;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .todaycard .masc{grid-row:2/5!important}
 body.pt-on{overflow:hidden}
 .pt-screen{position:fixed;inset:0;z-index:70;background:var(--bg);color:var(--fg);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:calc(env(safe-area-inset-top,0px) + 8px) 16px calc(env(safe-area-inset-bottom,0px) + 28px);display:flex;flex-direction:column;gap:12px}
 .pt-top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;min-height:44px}
-.pt-back{justify-self:start;border:0;background:none;color:color-mix(in srgb,#f0a020 65%,var(--fg));font:inherit;font-size:16px;font-weight:600;padding:8px 0}
+.pt-back{justify-self:start;border:0;background:none;color:color-mix(in srgb,var(--accent) 65%,var(--fg));font:inherit;font-size:16px;font-weight:600;padding:8px 0}
 .pt-ttl{text-align:center}.pt-ttl b{display:block;font-size:16px}.pt-ttl small{color:var(--muted);font-size:12px}
 .pt-mh{display:flex;align-items:center;justify-content:space-between}
+.pt-hero{display:flex;flex-direction:column;gap:4px;padding:16px;border-radius:24px;background:var(--hero);color:var(--hero-fg)}
+.pt-hero .pt-hl{font-size:12px;opacity:.92}.pt-hero .pt-hb{font-size:11px;font-weight:600;padding:4px 9px;border-radius:999px;background:color-mix(in srgb,var(--hero-fg) 22%,transparent)}
+.pt-hero .pt-hs{font-family:var(--font-display);font-size:36px;font-weight:700;line-height:1.05;letter-spacing:-.03em}
+.pt-tiles:has(.pt-tile:only-child){grid-template-columns:1fr!important}
 .pt-mh h2{margin:0;font-family:var(--font-display);font-size:24px;font-weight:600}
 .pt-nav{display:flex;gap:8px}.pt-nav button{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font:inherit;font-size:18px}
 .pt-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:8px}
-.pt-today{border-color:color-mix(in srgb,#f0a020 55%,var(--line))}
+.pt-today{border-color:color-mix(in srgb,var(--accent) 55%,var(--line))}
 .pt-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
 .pt-lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
 .pt-lbl2{margin-top:6px}
-.pt-sum{font-size:22px;color:color-mix(in srgb,#f0a020 65%,var(--fg))}
+.pt-sum{font-size:22px;color:color-mix(in srgb,var(--accent) 65%,var(--fg))}
 .pt-sub{margin:0;font-size:13.5px;color:var(--muted);line-height:1.35}
 .pt-total{font-family:var(--font-display);font-size:38px;font-weight:600;line-height:1.05}
 .pt-btns{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
 .pt-add{display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 2px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--muted);font:inherit;font-size:11px}
-.pt-add b{font-size:15px;color:color-mix(in srgb,#f0a020 65%,var(--fg))}
-.pt-add:active{transform:scale(.96);border-color:#f0a020}
+.pt-add b{font-size:15px;color:color-mix(in srgb,var(--accent) 65%,var(--fg))}
+.pt-add:active{transform:scale(.96);border-color:var(--accent)}
 .pt-undo{align-self:flex-start;border:0;background:none;color:var(--muted);font:inherit;font-size:13.5px;text-decoration:underline;padding:2px 0}
 .pt-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;margin-top:4px}
 .pt-dow{text-align:center;font-size:11px;color:var(--muted)}
 .pt-d{position:relative;height:46px;border-radius:10px;border:1px solid var(--line);background:none;color:var(--muted);font:inherit;padding:0}
 .pt-d.pad{border:0}
 .pt-d .dn{position:absolute;top:4px;left:6px;font-size:11px}
-.pt-d i{position:absolute;left:0;right:0;bottom:5px;font-style:normal;font-weight:700;font-size:11.5px;color:color-mix(in srgb,#f0a020 65%,var(--fg))}
-.pt-d.has{background:color-mix(in srgb,#f0a020 12%,transparent);border-color:color-mix(in srgb,#f0a020 45%,var(--line))}
-.pt-d.hi{background:color-mix(in srgb,#f0a020 26%,transparent)}
-.pt-d.today{outline:2px solid #f0a020;outline-offset:-2px}
+.pt-d i{position:absolute;left:0;right:0;bottom:5px;font-style:normal;font-weight:700;font-size:11.5px;color:color-mix(in srgb,var(--accent) 65%,var(--fg))}
+.pt-d.has{background:color-mix(in srgb,var(--accent) 12%,transparent);border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.pt-d.hi{background:color-mix(in srgb,var(--accent) 26%,transparent)}
+.pt-d.today{outline:2px solid var(--accent);outline-offset:-2px}
 .pt-tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .pt-tile{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:3px}
 .pt-tile small{font-size:12px;color:var(--muted)}.pt-tile b{font-size:21px}
 .pt-li{align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
 .pt-li:last-child{border-bottom:0}
-.pt-tag{font-size:11px;padding:2px 8px;border-radius:8px;background:color-mix(in srgb,#f0a020 16%,transparent);color:color-mix(in srgb,#f0a020 65%,var(--fg))}
+.pt-tag{font-size:11px;padding:2px 8px;border-radius:8px;background:color-mix(in srgb,var(--accent) 16%,transparent);color:color-mix(in srgb,var(--accent) 65%,var(--fg))}
 .pt-r{display:flex;align-items:center;gap:10px}
 .pt-del{width:30px;height:30px;border-radius:9px;border:1px solid var(--line);background:none;color:var(--muted);font:inherit;font-size:16px}
 .pt-sheet h2{margin:0;font-size:20px}
@@ -788,7 +891,7 @@ body.pt-on{overflow:hidden}
 .pt-wk{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:baseline}
 .pt-wk small{color:var(--muted);font-size:12px}
 .pt-wk.done b{color:var(--muted)}
-.pt-seg button[aria-pressed="true"]{border-color:#f0a020;background:color-mix(in srgb,#f0a020 18%,var(--bg))}
+.pt-seg button[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 18%,var(--bg))}
 .pt-tgl{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;line-height:1.35;margin-top:4px}
 .pt-tgl input{width:20px;height:20px;flex:none;margin-top:1px}
 </style>
@@ -796,7 +899,7 @@ body.pt-on{overflow:hidden}
 // Оформление: темы и шрифты. Применяется до отрисовки страницы, чтобы не было вспышки.
 window.LOOK = (function(){
   const GF = {
-    "Golos Text":"Golos+Text:wght@400;500;600", "Unbounded":"Unbounded:wght@500;700",
+    "Golos Text":"Golos+Text:wght@400;500;600", "Unbounded":"Unbounded:wght@500;700", "Inter":"Inter:wght@400;500;600;700",
     "Russo One":"Russo+One", "Exo 2":"Exo+2:wght@400;500;600;700",
     "Rubik":"Rubik:wght@400;500;600;700", "Nunito":"Nunito:wght@400;600;700;800",
     "Comfortaa":"Comfortaa:wght@500;700", "Manrope":"Manrope:wght@400;500;600;700",
@@ -808,7 +911,7 @@ window.LOOK = (function(){
     "Alegreya SC":"Alegreya+SC:wght@500;700;800", "Alegreya Sans":"Alegreya+Sans:wght@400;500;700",
     "Oranienbaum":"Oranienbaum", "Press Start 2P":"Press+Start+2P"
   };
-  const CARD = ".cal,details,.tile,.todaycard,.ptsbox,.rep-total,.rep-card,.pricecard,.chartbox,.notice,.ach,.ach-head,.editor";
+  const CARD = ".cal,details,.tile,.todaycard,.ptsbox,.rep-total,.rep-card,.pricecard,.chartbox,.notice,.ach,.ach-head,.editor,.total,.fx-mini,.fx-k,.fx-card,.fx-rep,.fx-chart";
   const CTRL = ".day,.icon-btn,.save-btn,.ghost-btn,.brush,.chip,.quick button,.stepper button,.stepper input,.counts div,.rc-chips button,.font-list button,.lk-card,.toast";
   const SHAPE = {
     sharp: CARD+","+CTRL+"{border-radius:3px!important}",
@@ -824,7 +927,28 @@ window.LOOK = (function(){
     "Oranienbaum": ".total .value{font-size:clamp(40px,12vw,54px)!important}.tile strong{font-size:30px!important}",
     "Ruslan Display": ".total .value{font-size:clamp(30px,9.5vw,42px)!important}.tile strong{font-size:23px!important}header.month h1{font-size:19px!important}.todaycard .big{font-size:26px!important}.ptsbox .big b,.rep-total strong,.pricecard strong{font-size:24px!important}.story-slide .huge{font-size:clamp(52px,17vw,88px)!important}.story-slide .huge.money{font-size:clamp(32px,10vw,54px)!important}"
   };
+  // ---------- «Тёплое стекло»: как перестраивается экран ----------
+  const GLASS = "-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4)";
+  const WARM = "radial-gradient(60% 22% at 30% 0%,#4a2f1b 0%,rgba(74,47,27,0) 100%),radial-gradient(45% 20% at 90% 8%,#6b4529 0%,rgba(107,69,41,0) 100%),radial-gradient(70% 35% at 70% 45%,#efe3d2 0%,rgba(239,227,210,0) 100%),radial-gradient(60% 30% at 8% 62%,#d9c3a6 0%,rgba(217,195,166,0) 100%),radial-gradient(80% 30% at 50% 100%,#8a6446 0%,rgba(138,100,70,0) 100%),linear-gradient(180deg,#a98663 0%,#d8c5ad 45%,#c6ab8b 100%) fixed";
+  const FROST_CSS = [
+    // фон: размытая тёплая комната (дерево, свет)
+    "body,.pt-screen{background:"+WARM+"!important}",
+    // цвета для общей раскладки: чёрные кнопки, белые «таблетки», бирюзовая главная карточка
+    ":root[data-skin=frost]{--ink:#1c140d;--ink-fg:#ffffff;--pill:#ffffff;--hero:linear-gradient(150deg,#2aa489 0%,#157a64 100%);--hero-fg:#ffffff}",
+    // всё «стеклянное»: размытие того, что под карточкой, и мягкая тень
+    CARD+",.pop-menu,.notice,.editor,.pt-card,.pt-tile,header.month,.pt-top,.tabbar,.fx-pills{"+GLASS+";box-shadow:0 8px 26px rgba(60,38,20,.14)}",
+    ".todaycard,.fx-k-hero,.pt-hero{box-shadow:0 12px 30px rgba(21,122,100,.35)!important}",
+    ".save-btn{background:#1c140d!important;color:#fff!important;border-color:#1c140d!important}.ghost-btn{background:rgba(255,255,255,.6)!important;border-color:rgba(255,255,255,.75)!important}",
+    "header.month .icon-btn,.pt-nav button{background:#fff!important;border:none!important;box-shadow:0 2px 8px rgba(60,38,20,.15)}",
+    ".qcat .qb button,.pt-add,.tf{background:rgba(255,255,255,.58)!important;border-color:rgba(255,255,255,.8)!important}.qcat .qb button b{color:#145f4f}"
+  ].join("");
   const themes = {
+    // «Тёплое стекло» — основной вид: матовые карточки на размытом тёплом фоне, бирюзовый акцент, чёрные кнопки,
+    // плавающее меню и переходы «из размытия». Вся перестройка экрана — в FROST_CSS ниже.
+    frost:{nm:"Тёплое стекло", sub:"основной вид", s:"light", d:"Inter", b:"Inter", r:"soft", hdr:"#8f6c4c",
+      c:{bg:"#ebe0d1",surface:"rgba(255,255,255,0.42)",fg:"#231a12",muted:"#4f3f31",line:"rgba(255,255,255,0.62)",accent:"#1f9478",accentFg:"#ffffff",weekend:"#a8431c",
+         extra:"#1d5fa8",sick:"#7a4fb0",absent:"#c62828",off:"rgba(255,255,255,0.45)",offFg:"#3d3024",mid:"#a35f00",hot:"#e8552f",hotFg:"#ffffff"},
+      css:FROST_CSS},
     auto:{nm:"Обычная", sub:"как в Telegram"},
     synth:{nm:"Синтвейв", sub:"неон и ночь", s:"dark", d:"Russo One", b:"Exo 2",
       c:{bg:"#120d24",surface:"#1d1636",fg:"#f4ecff",muted:"#a597c9",line:"#33295a",accent:"#3be0ff",accentFg:"#0b0820",weekend:"#ff7ac0",
@@ -936,7 +1060,7 @@ window.LOOK = (function(){
       c:Object.assign({bg:B.bg,surface:B.surface,fg:B.fg,muted:B.muted,line:B.line,accent:a,accentFg:fgOn,off:B.off,offFg:B.offFg}, S)};
   }
   try{ const ct=JSON.parse(localStorage.getItem("salary:customTheme")||"null"); if(ct) themes.custom=buildCustom(ct); }catch(e){}
-  let cur = {t:"auto", f:"auto"};
+  let cur = {t:"frost", f:"auto"};   // по умолчанию — «Тёплое стекло»; выбранная в «Оформлении» тема запоминается
   try{ const j=JSON.parse(localStorage.getItem("salary:look")||"null"); if(j){ if(themes[j.t]) cur.t=j.t; if(fonts[j.f]) cur.f=j.f; } }catch(e){}
   function apply(){
     const th=themes[cur.t]||themes.auto, fo=fonts[cur.f]||fonts.auto, root=document.documentElement;
@@ -962,7 +1086,7 @@ window.LOOK = (function(){
     if(!st){ st=document.createElement("style"); st.id="lookCss"; document.head.appendChild(st); }
     st.textContent = css;
     // Цвет шапки браузера и Telegram под тему
-    const bg = th.c ? th.c.bg : null;
+    const bg = th.c ? (th.hdr || th.c.bg) : null;   // hdr — цвет шапки Telegram, если он отличается от фона
     document.querySelectorAll('meta[name="theme-color"]').forEach((m,i)=>{ if(!m.dataset.def) m.dataset.def=m.content; m.content = bg || m.dataset.def; });
     if(inTg){
       try{
@@ -987,7 +1111,7 @@ window.LOOK = (function(){
 <body>
 <div class="lock" id="lock" hidden><div class="lock-in"><div class="lock-ic" aria-hidden="true">🔒</div><b>Смены закрыты</b><p id="lockTx">Подтвердите, что это вы</p><button class="save-btn" id="lockBtn">Открыть</button></div></div>
 <script>try{ if(localStorage.getItem("salary:lock")==="1" && /tgWebApp/.test(location.hash+location.search)) document.getElementById("lock").hidden=false; }catch(e){}</script>
-<div class="splash" id="splash" aria-hidden="true"><div class="splash-in"><div class="splash-logo"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" aria-hidden="true" viewBox="0 0 640 640"><defs><radialGradient id="splbg" cx="50%" cy="45%" r="70%"><stop offset="0" stop-color="#2a241b"/><stop offset="1" stop-color="#0f0d0a"/></radialGradient></defs><rect width="640" height="640" fill="url(#splbg)"/><path d="M560.0,320.0 L559.8,330.1 L587.5,336.6 L585.6,355.9 L557.2,356.8 L555.4,366.8 L553.2,376.7 L579.1,388.4 L573.5,407.1 L545.4,402.4 L541.7,411.8 L537.7,421.1 L560.8,437.7 L551.6,454.8 L525.0,444.8 L519.6,453.3 L513.7,461.6 L533.2,482.4 L520.9,497.4 L496.7,482.4 L489.7,489.7 L482.4,496.7 L497.4,520.9 L482.4,533.2 L461.6,513.7 L453.3,519.6 L444.8,525.0 L454.8,551.6 L437.7,560.8 L421.1,537.7 L411.8,541.7 L402.4,545.4 L407.1,573.5 L388.4,579.1 L376.7,553.2 L366.8,555.4 L356.8,557.2 L355.9,585.6 L336.6,587.5 L330.1,559.8 L320.0,560.0 L309.9,559.8 L303.4,587.5 L284.1,585.6 L283.2,557.2 L273.2,555.4 L263.3,553.2 L251.6,579.1 L232.9,573.5 L237.6,545.4 L228.2,541.7 L218.9,537.7 L202.3,560.8 L185.2,551.6 L195.2,525.0 L186.7,519.6 L178.4,513.7 L157.6,533.2 L142.6,520.9 L157.6,496.7 L150.3,489.7 L143.3,482.4 L119.1,497.4 L106.8,482.4 L126.3,461.6 L120.4,453.3 L115.0,444.8 L88.4,454.8 L79.2,437.7 L102.3,421.1 L98.3,411.8 L94.6,402.4 L66.5,407.1 L60.9,388.4 L86.8,376.7 L84.6,366.8 L82.8,356.8 L54.4,355.9 L52.5,336.6 L80.2,330.1 L80.0,320.0 L80.2,309.9 L52.5,303.4 L54.4,284.1 L82.8,283.2 L84.6,273.2 L86.8,263.3 L60.9,251.6 L66.5,232.9 L94.6,237.6 L98.3,228.2 L102.3,218.9 L79.2,202.3 L88.4,185.2 L115.0,195.2 L120.4,186.7 L126.3,178.4 L106.8,157.6 L119.1,142.6 L143.3,157.6 L150.3,150.3 L157.6,143.3 L142.6,119.1 L157.6,106.8 L178.4,126.3 L186.7,120.4 L195.2,115.0 L185.2,88.4 L202.3,79.2 L218.9,102.3 L228.2,98.3 L237.6,94.6 L232.9,66.5 L251.6,60.9 L263.3,86.8 L273.2,84.6 L283.2,82.8 L284.1,54.4 L303.4,52.5 L309.9,80.2 L320.0,80.0 L330.1,80.2 L336.6,52.5 L355.9,54.4 L356.8,82.8 L366.8,84.6 L376.7,86.8 L388.4,60.9 L407.1,66.5 L402.4,94.6 L411.8,98.3 L421.1,102.3 L437.7,79.2 L454.8,88.4 L444.8,115.0 L453.3,120.4 L461.6,126.3 L482.4,106.8 L497.4,119.1 L482.4,143.3 L489.7,150.3 L496.7,157.6 L520.9,142.6 L533.2,157.6 L513.7,178.4 L519.6,186.7 L525.0,195.2 L551.6,185.2 L560.8,202.3 L537.7,218.9 L541.7,228.2 L545.4,237.6 L573.5,232.9 L579.1,251.6 L553.2,263.3 L555.4,273.2 L557.2,283.2 L585.6,284.1 L587.5,303.4 L559.8,309.9 Z" fill="#f2a33a"/><circle cx="320" cy="320" r="200" fill="#1b1712"/><circle cx="320.0" cy="534.0" r="9" fill="#16130f"/><circle cx="116.5" cy="386.1" r="9" fill="#16130f"/><circle cx="194.2" cy="146.9" r="9" fill="#16130f"/><circle cx="445.8" cy="146.9" r="9" fill="#16130f"/><circle cx="523.5" cy="386.1" r="9" fill="#16130f"/><rect x="195" y="208" width="250" height="238" rx="30" fill="#f1ece4"/><path d="M195 238 a30 30 0 0 1 30 -30 h190 a30 30 0 0 1 30 30 v28 h-250 z" fill="#2c261d"/><rect x="250" y="186" width="22" height="50" rx="11" fill="#f2a33a"/><rect x="368" y="186" width="22" height="50" rx="11" fill="#f2a33a"/><rect x="213" y="282" width="52" height="44" rx="10" fill="#16130f"/><rect x="273" y="282" width="52" height="44" rx="10" fill="#16130f"/><rect x="336" y="285" width="46" height="38" rx="8" fill="none" stroke="#c9bfae" stroke-width="5"/><rect x="393" y="282" width="52" height="44" rx="10" fill="#f2a33a"/><path d="M407 305 l9 9 l16 -18" stroke="#16130f" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/><rect x="213" y="334" width="52" height="44" rx="10" fill="#16130f"/><rect x="273" y="334" width="52" height="44" rx="10" fill="#16130f"/><rect x="333" y="334" width="52" height="44" rx="10" fill="#16130f"/><rect x="396" y="337" width="46" height="38" rx="8" fill="none" stroke="#c9bfae" stroke-width="5"/><rect x="216" y="389" width="46" height="38" rx="8" fill="none" stroke="#c9bfae" stroke-width="5"/><rect x="276" y="389" width="46" height="38" rx="8" fill="none" stroke="#c9bfae" stroke-width="5"/><rect x="333" y="386" width="52" height="44" rx="10" fill="#16130f"/><rect x="393" y="386" width="52" height="44" rx="10" fill="#16130f"/></svg></div><div class="splash-name">Смены</div><div class="splash-sub">календарь механика</div></div></div>
+<div class="splash" id="splash" aria-hidden="true"><i class="sp-blob b1"></i><i class="sp-blob b2"></i><i class="sp-blob b3"></i><div class="splash-in"><div class="splash-logo"><svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" aria-hidden="true" viewBox="0 0 640 640"><defs><radialGradient id="splbg" cx="50%" cy="45%" r="70%"><stop offset="0" stop-color="#2a241b"/><stop offset="1" stop-color="#0f0d0a"/></radialGradient></defs><rect width="640" height="640" fill="url(#splbg)"/><g class="sp-gear"><path d="M560.0,320.0 L559.8,330.1 L587.5,336.6 L585.6,355.9 L557.2,356.8 L555.4,366.8 L553.2,376.7 L579.1,388.4 L573.5,407.1 L545.4,402.4 L541.7,411.8 L537.7,421.1 L560.8,437.7 L551.6,454.8 L525.0,444.8 L519.6,453.3 L513.7,461.6 L533.2,482.4 L520.9,497.4 L496.7,482.4 L489.7,489.7 L482.4,496.7 L497.4,520.9 L482.4,533.2 L461.6,513.7 L453.3,519.6 L444.8,525.0 L454.8,551.6 L437.7,560.8 L421.1,537.7 L411.8,541.7 L402.4,545.4 L407.1,573.5 L388.4,579.1 L376.7,553.2 L366.8,555.4 L356.8,557.2 L355.9,585.6 L336.6,587.5 L330.1,559.8 L320.0,560.0 L309.9,559.8 L303.4,587.5 L284.1,585.6 L283.2,557.2 L273.2,555.4 L263.3,553.2 L251.6,579.1 L232.9,573.5 L237.6,545.4 L228.2,541.7 L218.9,537.7 L202.3,560.8 L185.2,551.6 L195.2,525.0 L186.7,519.6 L178.4,513.7 L157.6,533.2 L142.6,520.9 L157.6,496.7 L150.3,489.7 L143.3,482.4 L119.1,497.4 L106.8,482.4 L126.3,461.6 L120.4,453.3 L115.0,444.8 L88.4,454.8 L79.2,437.7 L102.3,421.1 L98.3,411.8 L94.6,402.4 L66.5,407.1 L60.9,388.4 L86.8,376.7 L84.6,366.8 L82.8,356.8 L54.4,355.9 L52.5,336.6 L80.2,330.1 L80.0,320.0 L80.2,309.9 L52.5,303.4 L54.4,284.1 L82.8,283.2 L84.6,273.2 L86.8,263.3 L60.9,251.6 L66.5,232.9 L94.6,237.6 L98.3,228.2 L102.3,218.9 L79.2,202.3 L88.4,185.2 L115.0,195.2 L120.4,186.7 L126.3,178.4 L106.8,157.6 L119.1,142.6 L143.3,157.6 L150.3,150.3 L157.6,143.3 L142.6,119.1 L157.6,106.8 L178.4,126.3 L186.7,120.4 L195.2,115.0 L185.2,88.4 L202.3,79.2 L218.9,102.3 L228.2,98.3 L237.6,94.6 L232.9,66.5 L251.6,60.9 L263.3,86.8 L273.2,84.6 L283.2,82.8 L284.1,54.4 L303.4,52.5 L309.9,80.2 L320.0,80.0 L330.1,80.2 L336.6,52.5 L355.9,54.4 L356.8,82.8 L366.8,84.6 L376.7,86.8 L388.4,60.9 L407.1,66.5 L402.4,94.6 L411.8,98.3 L421.1,102.3 L437.7,79.2 L454.8,88.4 L444.8,115.0 L453.3,120.4 L461.6,126.3 L482.4,106.8 L497.4,119.1 L482.4,143.3 L489.7,150.3 L496.7,157.6 L520.9,142.6 L533.2,157.6 L513.7,178.4 L519.6,186.7 L525.0,195.2 L551.6,185.2 L560.8,202.3 L537.7,218.9 L541.7,228.2 L545.4,237.6 L573.5,232.9 L579.1,251.6 L553.2,263.3 L555.4,273.2 L557.2,283.2 L585.6,284.1 L587.5,303.4 L559.8,309.9 Z" fill="#f2a33a"/></g><circle cx="320" cy="320" r="200" fill="#1b1712"/><circle cx="320.0" cy="534.0" r="9" fill="#16130f"/><circle cx="116.5" cy="386.1" r="9" fill="#16130f"/><circle cx="194.2" cy="146.9" r="9" fill="#16130f"/><circle cx="445.8" cy="146.9" r="9" fill="#16130f"/><circle cx="523.5" cy="386.1" r="9" fill="#16130f"/><rect x="195" y="208" width="250" height="238" rx="30" fill="#f1ece4"/><path d="M195 238 a30 30 0 0 1 30 -30 h190 a30 30 0 0 1 30 30 v28 h-250 z" fill="#2c261d"/><rect x="250" y="186" width="22" height="50" rx="11" fill="#f2a33a"/><rect x="368" y="186" width="22" height="50" rx="11" fill="#f2a33a"/><rect class="sp-c" style="--i:1" x="213" y="282" width="52" height="44" rx="10" fill="#16130f"/><rect class="sp-c" style="--i:2" x="273" y="282" width="52" height="44" rx="10" fill="#16130f"/><rect x="336" y="285" width="46" height="38" rx="8" fill="none" stroke="#c9bfae" stroke-width="5"/><rect class="sp-c" style="--i:3" x="393" y="282" width="52" height="44" rx="10" fill="#f2a33a"/><path class="sp-check" pathLength="1" d="M407 305 l9 9 l16 -18" stroke="#16130f" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/><rect class="sp-c" style="--i:4" x="213" y="334" width="52" height="44" rx="10" fill="#16130f"/><rect class="sp-c" style="--i:5" x="273" y="334" width="52" height="44" rx="10" fill="#16130f"/><rect class="sp-c" style="--i:6" x="333" y="334" width="52" height="44" rx="10" fill="#16130f"/><rect x="396" y="337" width="46" height="38" rx="8" fill="none" stroke="#c9bfae" stroke-width="5"/><rect x="216" y="389" width="46" height="38" rx="8" fill="none" stroke="#c9bfae" stroke-width="5"/><rect x="276" y="389" width="46" height="38" rx="8" fill="none" stroke="#c9bfae" stroke-width="5"/><rect class="sp-c" style="--i:7" x="333" y="386" width="52" height="44" rx="10" fill="#16130f"/><rect class="sp-c" style="--i:8" x="393" y="386" width="52" height="44" rx="10" fill="#16130f"/></svg></div><div class="splash-name" aria-label="Смены"><span style="--i:0">С</span><span style="--i:1">м</span><span style="--i:2">е</span><span style="--i:3">н</span><span style="--i:4">ы</span></div><div class="splash-sub">календарь механика</div><div class="splash-bar"><i></i></div></div></div>
 <div class="wrap">
   <section class="notice" id="notice" hidden aria-live="polite">
     <b id="noticeTitle"></b>
@@ -998,7 +1122,8 @@ window.LOOK = (function(){
     </div>
   </section>
   <header class="month">
-    <h1 id="monthTitle">Октябрь 2026</h1>
+    <span class="fx-av fx-only" id="fxAv" aria-hidden="true"></span>
+    <div class="mh-txt"><span class="fx-hi fx-only" id="fxHi">Привет!</span><h1 id="monthTitle">Октябрь 2026</h1></div>
     <div class="nav">
       <button class="net-dot" id="netDot" aria-label="Связь: всё сохранено" data-st="ok"><i></i></button>
       <button class="icon-btn" id="soundBtn" aria-label="Звук" aria-pressed="true" hidden><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z" fill="currentColor"/><path class="wave" d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/><path class="mute" d="M16 9l6 6M22 9l-6 6"/></svg></button>
@@ -1011,8 +1136,9 @@ window.LOOK = (function(){
   <div class="pager" id="pager">
   <div class="pane" id="pane-main" role="tabpanel">
   <button class="recap-ban" id="recapBan" hidden><span class="em" aria-hidden="true">🎞️</span><span><b id="recapBanTx">Итоги месяца готовы</b><small>Нажмите, чтобы посмотреть</small></span><span aria-hidden="true">›</span></button>
+  <div class="fx-greet fx-only"><h2 id="fxGreet"></h2><p id="fxDate"></p><div class="masc" id="masc" aria-hidden="true"></div></div>
+  <div class="fx-row">
   <section class="todaycard" id="today" aria-live="polite" hidden>
-    <div class="masc" id="masc" aria-hidden="true"></div>
     <div class="tc-head">
       <span class="chip" id="tChip"></span>
       <div class="pt-slot"><button class="pt-btn" id="ptBtn" type="button" hidden aria-label="Открыть парт-тайм"></button></div>
@@ -1020,16 +1146,26 @@ window.LOOK = (function(){
     <div class="big num" id="tBig"></div>
     <p id="tText"></p>
     <div class="row" id="tActions"></div>
-    <div class="qcat" id="tQuick" hidden></div>
     <p class="phrase" id="tPhrase"></p>
   </section>
+  <div class="fx-side">
+    <div class="fx-mini"><small id="fxS1L">Нужно в день</small><b class="num" id="fxS1">—</b></div>
+    <div class="fx-mini"><small>Смен в месяце</small><b class="num" id="fxS2">—</b></div>
+  </div>
+  </div>
 
   <section class="total" aria-live="polite">
     <span class="label">Заработано за месяц</span>
     <span class="value num pvt" id="total">0 ₽</span>
     <span class="sub num" id="totalSub">0 смен</span>
+    <div class="fx-acts fx-only"><button type="button" class="fx-dark" id="fxStat"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg>Статистика</button><button type="button" class="fx-light" id="fxPts"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Внести баллы</button></div>
   </section>
 
+  <section class="fx-rep"><div class="qcat" id="tQuick" hidden></div></section>
+  <section class="fx-chart fx-only" aria-label="Баллы по сменам">
+    <div class="fx-ch-h"><span>Баллы по сменам</span><span class="fx-leg"><i style="background:var(--accent)"></i>норма<i style="background:var(--ink)"></i>ниже</span></div>
+    <div class="fx-bars" id="fxBars"></div>
+  </section>
   <div class="tiles-head"><span id="ptsTitle">Баллы за период</span><button class="tq-btn" id="tqOpen">Ввести общее</button></div>
   <section class="tiles num" aria-live="polite">
     <div class="tile ring">
@@ -1163,7 +1299,7 @@ window.LOOK = (function(){
   </section>
 
   <details id="payBox">
-    <summary>🧾 Журнал выплат</summary>
+    <summary>Журнал выплат</summary>
     <div class="backup">
       <p>Записывайте аванс и зарплату, чтобы сверять их с расчётом.</p>
       <div class="pay-add">
@@ -1178,7 +1314,7 @@ window.LOOK = (function(){
   </details>
 
   <details id="workBox">
-    <summary>⚙️ Работа: оплата, премия, выплаты</summary>
+    <summary>Работа: оплата, премия, выплаты</summary>
     <div class="settings">
       <label for="rate">Оплата за смену, ₽<input id="rate" type="number" inputmode="numeric" min="0" step="100" value="5800"></label>
       <label for="pct">Максимальная премия, %<input id="pct" type="number" inputmode="decimal" min="0" step="1" value="27"></label>
@@ -1205,7 +1341,24 @@ window.LOOK = (function(){
   </div>
 
   <div class="pane" id="pane-stat" role="tabpanel">
-  <section class="recap-card" id="recapBox">
+  <section class="fx-report" aria-label="Отчёт">
+    <div class="fx-pills" role="tablist" aria-label="Период"><button type="button" role="tab" data-per="m" aria-selected="true">Месяц</button><button type="button" role="tab" data-per="y" aria-selected="false">Год</button></div>
+    <div class="fx-kpi">
+      <div class="fx-k"><small>Заработано</small><b class="num" id="fxK1">—</b><span class="fx-badge" id="fxK1s" hidden></span></div>
+      <div class="fx-k"><small>Баллы</small><b class="num" id="fxK2">—</b><span class="fx-badge fx-badge-w" id="fxK2s" hidden></span></div>
+      <div class="fx-k"><small>Средний за смену</small><b class="num" id="fxK3">—</b></div>
+      <div class="fx-k fx-k-hero"><small>Премия</small><b class="num" id="fxK4">—</b></div>
+    </div>
+    <div class="fx-card" id="fxLineBox">
+      <div class="fx-ch-h"><b>Баллы и норма</b><span class="fx-leg"><i style="background:var(--accent);height:3px"></i>баллы<i style="background:none;border-top:2px dashed var(--fg);height:0"></i><span id="fxNormN">24</span></span></div>
+      <svg id="fxLine" viewBox="0 0 330 110" width="100%" height="110" role="img" aria-label="Баллы по сменам и норма"></svg>
+    </div>
+    <div class="fx-card fx-donut-box" id="fxDonutBox">
+      <div class="fx-donut" id="fxDonut" role="img" aria-label="Доля баллов по типам ремонта"><div><b class="num" id="fxDonutN">0</b><small>ремонтов</small></div></div>
+      <div class="fx-dleg"><b>Откуда баллы</b><div id="fxDLeg"></div></div>
+    </div>
+  </section>
+  <section class="recap-card" id="recapBox" hidden>
     <div class="rc-top">
       <button class="icon-btn" id="rcPrev" aria-label="Предыдущий месяц">‹</button>
       <div class="rc-mid"><small>Итоги месяца</small><b id="rcTitle">—</b></div>
@@ -1281,7 +1434,7 @@ window.LOOK = (function(){
 
   </div>
 
-  <div class="pane" id="pane-ach" role="tabpanel">
+  <div class="pane" id="pane-ach" role="tabpanel" hidden>
   <section class="ach-head" aria-live="polite">
     <div class="row">
       <div class="cup" aria-hidden="true">🏆</div>
@@ -1295,7 +1448,9 @@ window.LOOK = (function(){
 
   <div class="pane" id="pane-set" role="tabpanel">
   <details id="lookBox">
-    <summary>🎨 Оформление</summary>
+    <summary>Оформление</summary>
+    <h3 class="look-h">Открывается за баллы</h3>
+    <div class="unl-box" id="unlBox"></div>
     <h3 class="look-h">Тема</h3>
     <div class="look-grid" id="lookThemes" role="group" aria-label="Тема"></div>
     <div class="row" style="display:flex;margin-top:10px"><button class="ghost-btn" id="lookRandom">🎲 Случайная тема</button></div>
@@ -1307,22 +1462,19 @@ window.LOOK = (function(){
     </div>
     <h3 class="look-h">Шрифт</h3>
     <div class="font-list" id="lookFonts" role="group" aria-label="Шрифт"></div>
-    <button class="masc-row" id="mascRow" aria-expanded="false" aria-controls="mascPick"><span class="mp-i" id="mascRowI"></span><span class="mr-t"><small>Механик</small><b id="mascRowN">Как в теме</b></span><span class="mr-c" aria-hidden="true">›</span></button>
+    <button class="masc-row" id="mascRow" hidden aria-expanded="false" aria-controls="mascPick"><span class="mp-i" id="mascRowI"></span><span class="mr-t"><small>Механик</small><b id="mascRowN">Как в теме</b></span><span class="mr-c" aria-hidden="true">›</span></button>
     <div class="masc-pick" id="mascPick" role="group" aria-label="Как одет механик" hidden></div>
-    <div class="backup" style="margin-top:10px">
+    <div hidden class="backup" style="margin-top:10px">
       <div class="tg-row"><span><b>Механик одевается по погоде</b><small>В дождь — зонт, в мороз — ушанка и шарф, в жару — очки</small></span><button class="tgl" role="switch" id="wxToggle" aria-checked="false" aria-label="Механик одевается по погоде"></button></div>
       <div id="wxBox" hidden>
         <div class="wx-find"><input id="wxCity" placeholder="Ваш город" autocomplete="address-level2" aria-label="Город"><button class="ghost-btn" id="wxFind">Найти</button><button class="ghost-btn" id="wxGeo" aria-label="Определить по геопозиции">📍</button></div>
         <p id="wxMsg"></p>
       </div>
     </div>
-    <div class="backup">
-      <div class="tg-row"><span><b>Тепловая карта</b><small>Смены в календаре подсвечены по баллам</small></span><button class="tgl" role="switch" id="heatToggle" aria-checked="false" aria-label="Тепловая карта"></button></div>
-    </div>
   </details>
 
   <details id="sndBox">
-    <summary>🔊 Звук и вибрация</summary>
+    <summary>Звук и вибрация</summary>
     <div class="backup">
       <div class="tg-row"><span><b>Звуки</b><small>Щелчки, отметки дней, сохранение</small></span><button class="tgl" role="switch" id="sndToggle" aria-checked="false" aria-label="Звуки"></button></div>
     </div>
@@ -1333,7 +1485,7 @@ window.LOOK = (function(){
   </details>
 
   <details id="syncBox">
-    <summary>☁️ Синхронизация и копии</summary>
+    <summary>Синхронизация и копии</summary>
     <div class="backup">
       <div class="sync-st"><i id="syncDot"></i><span><b id="syncWhere">Данные хранятся на этом телефоне</b><small id="syncWhen"></small></span></div>
       <div class="row"><button class="save-btn" id="syncNow">Синхронизировать сейчас</button></div>
@@ -1364,7 +1516,7 @@ window.LOOK = (function(){
   </details>
 
   <details id="notifBox" hidden>
-    <summary>🔔 Уведомления</summary>
+    <summary>Уведомления</summary>
     <div class="backup">
       <p>Бот пишет в чат по вечерам. Выберите, что присылать.</p>
       <div class="row">
@@ -1383,7 +1535,7 @@ window.LOOK = (function(){
   </details>
 
   <details id="privBox">
-    <summary>🔒 Приватность</summary>
+    <summary>Приватность</summary>
     <div class="backup">
       <div class="tg-row"><span><b>Скрывать суммы</b><small>Деньги размыты, пока не нажмёте на них, — удобно показывать экран коллегам</small></span><button class="tgl" role="switch" id="privToggle" aria-checked="false" aria-label="Скрывать суммы"></button></div>
       <div class="tg-row" id="lockRow"><span><b>Вход по Face ID</b><small id="lockHint">Календарь откроется только после проверки лица или отпечатка</small></span><button class="tgl" role="switch" id="lockToggle" aria-checked="false" aria-label="Вход по Face ID"></button></div>
@@ -1392,7 +1544,10 @@ window.LOOK = (function(){
   </details>
 
   <details id="calSetBox">
-    <summary>📅 Календарь</summary>
+    <summary>Календарь</summary>
+    <div class="backup">
+      <div class="tg-row"><span><b>Тепловая карта</b><small>Смены в календаре подсвечены по баллам</small></span><button class="tgl" role="switch" id="heatToggle" aria-checked="false" aria-label="Тепловая карта"></button></div>
+    </div>
     <h3 class="look-h">Неделя начинается с</h3>
     <div class="font-list" id="wkList" role="group" aria-label="Первый день недели"></div>
     <h3 class="look-h">Формат сумм</h3>
@@ -1414,7 +1569,7 @@ window.LOOK = (function(){
   </details>
 
   <details id="dataBox">
-    <summary>🗂 Данные</summary>
+    <summary>Данные</summary>
     <div class="backup">
       <p>Таблица со всеми сменами, баллами и суммами по месяцам — откроется в Excel или Numbers.</p>
       <div class="row"><button class="ghost-btn" id="csvBtn">📊 Скачать таблицу для Excel</button></div>
@@ -1432,7 +1587,7 @@ window.LOOK = (function(){
   </div>
 
   <details id="helpBox">
-    <summary>❔ Помощь</summary>
+    <summary>Помощь</summary>
     <div class="backup">
       <div class="row"><button class="ghost-btn" id="tourOpen">Как пользоваться</button><button class="ghost-btn" id="newsOpen">Что нового</button><button class="ghost-btn" id="qsOpen">Быстрый старт</button></div>
       <div id="fbBox" hidden>
@@ -1451,11 +1606,11 @@ window.LOOK = (function(){
 <div class="pt-screen" id="ptScreen" role="dialog" aria-label="Парт-тайм" hidden></div>
 
 <nav class="tabbar" role="tablist" aria-label="Разделы">
-  <button role="tab" data-tab="main" aria-selected="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span>Календарь</span></button>
-  <button role="tab" data-tab="money" aria-selected="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H18v4"/><path d="M3 7.5v10A2.5 2.5 0 0 0 5.5 20H20V9H5.5A2.5 2.5 0 0 1 3 7.5z"/><circle cx="16" cy="14.5" r="1.3" fill="currentColor"/></svg><span>Деньги</span></button>
-  <button role="tab" data-tab="stat" aria-selected="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Статистика</span></button>
-  <button role="tab" data-tab="ach" aria-selected="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 21h8M9 17h6"/></svg><span>Награды</span><b class="dot num" id="achDot" hidden></b></button>
-  <button role="tab" data-tab="set" aria-selected="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Настройки</span></button>
+  <button role="tab" data-tab="main" aria-label="Календарь" aria-selected="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span>Календарь</span></button>
+  <button type="button" class="tb-pt" id="tbPt" aria-label="Парт-тайм"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M15 6h2l3 11.5M5.5 17.5 9 9h7l-4 8.5H5.5M9 9 7.5 6H6"/></svg>Парт-тайм</button>
+  <button role="tab" data-tab="money" aria-label="Деньги" aria-selected="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H18v4"/><path d="M3 7.5v10A2.5 2.5 0 0 0 5.5 20H20V9H5.5A2.5 2.5 0 0 1 3 7.5z"/><circle cx="16" cy="14.5" r="1.3" fill="currentColor"/></svg><span>Деньги</span></button>
+  <button role="tab" data-tab="stat" aria-label="Статистика" aria-selected="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Статистика</span></button>
+  <button role="tab" data-tab="set" aria-label="Настройки" aria-selected="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg><span>Настройки</span></button>
 </nav>
 <div class="undo-bar" id="undoBar" role="status" aria-live="polite"><span id="undoTx"></span><button id="undoBtn">Отменить</button></div>
 <button class="toast" id="toast" aria-live="polite"><span class="em" id="toastEm"></span><span id="toastTx"></span></button>
@@ -1491,8 +1646,10 @@ window.LOOK = (function(){
   function hideSplash(){
     if(splashGone) return; splashGone=true;
     const el=$("splash"); if(!el) return;
-    const wait=Math.max(0, 800-(((window.performance && performance.now())||0)-bootAt));
-    setTimeout(()=>{ el.classList.add("out"); try{ ringIntro(); }catch(e){} setTimeout(()=>el.remove(), 400); }, wait);
+    // заставка держится ~1,6 с — успевают отметиться дни и галочка; без анимаций (настройка телефона) — сразу
+    const reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const wait=Math.max(0, (reduce ? 300 : 1600)-(((window.performance && performance.now())||0)-bootAt));
+    setTimeout(()=>{ el.classList.add("out"); try{ ringIntro(); }catch(e){} setTimeout(()=>el.remove(), 550); }, wait);
   }
   setTimeout(hideSplash, 4000);
   let view = {y: now.getFullYear(), m: now.getMonth()};
@@ -1516,7 +1673,7 @@ window.LOOK = (function(){
   const cget = keys => new Promise((res,rej)=>{ try{ cloud.getItems(keys, (e,v)=> e ? rej(e) : res(v||{})); }catch(e){ rej(e); } });
   // Сервер уведомлений (Cloudflare Worker). Пусто — уведомления скрыты.
   const API_URL = "https://smeny-bot.dsw66b9fh2.workers.dev";
-  window.SMENY_VER = "3.1";
+  window.SMENY_VER = "3.2";
   // Ошибки у пользователя коротко уходят владельцу бота: не больше трёх за запуск, без повторов
   { let sent=0; const seen=new Set();
     const report=(msg, where)=>{ try{
@@ -1648,8 +1805,46 @@ window.LOOK = (function(){
     box.appendChild(b);
   }
 
+  // «Тёплое стекло»: аватар, приветствие, дата и график баллов по сменам (в других темах эти блоки скрыты)
+  function renderFx(){
+    const u = miniApp && tg.initDataUnsafe && tg.initDataUnsafe.user, name = (u && u.first_name) || "";
+    const ini = ((u && u.first_name || "")[0] || "") + ((u && u.last_name || "")[0] || "");
+    $("fxAv").textContent = (ini || "С").toUpperCase();
+    $("fxHi").textContent = name ? "Привет, "+name : "Привет!";
+    const h = new Date().getHours(), hello = h<5 ? "Доброй ночи" : h<12 ? "Доброе утро" : h<18 ? "Добрый день" : h<23 ? "Добрый вечер" : "Доброй ночи";
+    $("fxGreet").textContent = hello + (name ? ", "+name : "");
+    const t = (months[key(now.getFullYear(), now.getMonth())]||{})[now.getDate()];
+    const wd = ["воскресенье","понедельник","вторник","среда","четверг","пятница","суббота"][now.getDay()];
+    $("fxDate").textContent = wd[0].toUpperCase()+wd.slice(1)+", "+now.getDate()+" "+GEN[now.getMonth()] + (t && T[t] ? " · сегодня "+T[t].name.toLowerCase() : "");
+    // последние 12 смен с баллами (за два месяца назад от сегодня)
+    const vals = [];
+    for(let i=0; i<62 && vals.length<12; i++){
+      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate()-i), P = pts[key(d.getFullYear(), d.getMonth())] || {}, v = P[d.getDate()];
+      if(v!=null && isFinite(+v) && +v>0) vals.unshift(+v);
+    }
+    const box = $("fxBars"); box.textContent = "";
+    const max = Math.max(settings.maxPts||24, ...vals) * 1.1;
+    vals.forEach(v=>{ const b=document.createElement("i"); b.style.height = Math.round(v/max*100)+"%"; b.style.background = v>=(settings.maxPts||24) ? "var(--accent)" : "var(--ink)"; b.title = v+" баллов"; box.appendChild(b); });
+    box.closest(".fx-chart").classList.toggle("fx-empty", !vals.length);
+  }
+  // Две плитки рядом с бирюзовой карточкой: берут уже посчитанные числа из плиток периода и «Заработано»
+  function renderFxSide(){
+    $("fxS1L").textContent = $("ptsTargetLbl").textContent || "Нужно в день";
+    $("fxS1").textContent = $("ptsTarget").textContent || "—";
+    const sub = $("totalSub").textContent || "", n = (sub.match(/\d+/)||["0"])[0], rest = sub.split("·").slice(1).join("·").trim();
+    const b = $("fxS2"); b.textContent = n + " ";
+    if(rest){ const em=document.createElement("em"); em.textContent = rest; b.appendChild(em); }
+    const tc = $("today"), t = (months[key(now.getFullYear(), now.getMonth())]||{})[now.getDate()];
+    tc.dataset.lbl = isShift(t) ? "Баллы сегодня" : "Сегодня";
+    try{ applyUnlocks(); }catch(e){}
+    try{ if(tab==="stat") renderFxReport(); }catch(e){}
+  }
   function render(){
     try{ fixTodayTotal(); }catch(e){}
+    try{ renderFx(); }catch(e){}
+    try{ renderMain(); }finally{ try{ renderFxSide(); }catch(e){} }
+  }
+  function renderMain(){
     const {y,m} = view, days = months[key(y,m)] || {}, P = pts[key(y,m)] || {};
     $("monthTitle").textContent = MONTHS[m] + " " + y;
     const grid = $("grid"); grid.textContent = "";
@@ -2274,6 +2469,55 @@ window.LOOK = (function(){
     return {w, auto, ci, manual: r.cat!=null && C[r.cat]!=null, p: ci>=0 ? +C[ci].p : 0, nm: ci>=0 ? C[ci].nm : "—"};
   }
   const daySum = id => r1((dayData(id).reps||[]).reduce((s,r)=>s+repInfo(r).p,0));
+
+  // ======== Отчёт (вкладка «Статистика»): итоги, линия баллов и круг «откуда баллы» ========
+  let fxPer = "m";   // "m" — месяц, "y" — год
+  function renderFxReport(){
+    const {y,m} = view, M = fxPer==="m" ? [m] : [0,1,2,3,4,5,6,7,8,9,10,11];
+    let total=0, pctSum=0, pctN=0; const line=[];
+    for(const mm of M){
+      if(!hasMonth(y,mm)) continue;
+      const c = calc(y, mm); total += c.total;
+      if(c.bonusPct!=null && c.cnt){ pctSum += c.bonusPct; pctN++; }
+      const P = pts[key(y,mm)]||{}, D = months[key(y,mm)]||{};
+      for(let d=1; d<=31; d++) if(isShift(D[d]) && P[d]!=null && isFinite(+P[d])) line.push(+P[d]);
+    }
+    const avg = line.length ? line.reduce((a,b)=>a+b,0)/line.length : null;
+    $("fxK1").textContent = fmt(total);
+    $("fxK2").textContent = String(Math.round(line.reduce((a,b)=>a+b,0)));
+    $("fxK3").textContent = avg==null ? "—" : f1(avg);
+    $("fxK4").textContent = pctN ? Math.round(pctSum/pctN)+"%" : "—";
+    // сравнение с прошлым месяцем
+    const k1s=$("fxK1s"); k1s.hidden=true;
+    if(fxPer==="m"){ const py=m===0?y-1:y, pm=m===0?11:m-1; if(hasMonth(py,pm)){ const prev=calc(py,pm).total; if(prev>0){ const d=Math.round((total-prev)/prev*100); k1s.textContent=(d>=0?"+":"")+d+"% к прошлому"; k1s.hidden=false; } } }
+    const k2s=$("fxK2s"); k2s.hidden=!line.length; k2s.textContent = "норма "+settings.maxPts+" · "+line.filter(v=>v>=settings.maxPts).length+" из "+line.length;
+    // линия: баллы по сменам и пунктир нормы
+    const svg=$("fxLine"), W=330, H=110, top=Math.max(settings.maxPts*1.4, ...line, 1);
+    const Y=v=>(H-6-(v/top)*(H-14)).toFixed(1), X=i=>(line.length<2 ? W/2 : i*(W/(line.length-1))).toFixed(1);
+    let h='<defs><linearGradient id="fxFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--accent);stop-opacity:.35"/><stop offset="1" style="stop-color:var(--accent);stop-opacity:0"/></linearGradient></defs>';
+    h+='<line x1="0" x2="'+W+'" y1="'+Y(settings.maxPts)+'" y2="'+Y(settings.maxPts)+'" style="stroke:var(--fg)" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.6"/>';
+    if(line.length){
+      const pp=line.map((v,i)=>X(i)+" "+Y(v)).join(" L");
+      h+='<path d="M'+pp+" L"+X(line.length-1)+" "+H+" L"+X(0)+" "+H+' Z" fill="url(#fxFill)"/>';
+      h+='<path d="M'+pp+'" fill="none" style="stroke:var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>';
+      h+='<circle cx="'+X(line.length-1)+'" cy="'+Y(line[line.length-1])+'" r="4" style="fill:var(--accent);stroke:var(--bg)" stroke-width="2"/>';
+    }
+    svg.innerHTML=h; $("fxNormN").textContent=settings.maxPts; $("fxLineBox").hidden=!line.length;
+    // круг: какие ремонты дали больше баллов
+    const C=repCats(), by=C.map(()=>0); let n=0;
+    for(const mm of M) for(let d=1; d<=31; d++){ for(const r of (dayData(ds(y,mm,d)).reps||[])){ const inf=repInfo(r); if(inf.ci>=0){ by[inf.ci]+=inf.p; n++; } } }
+    const sum=by.reduce((a,b)=>a+b,0), COL=["#2aa489","#1c140d","#f39a4a","#e8552f"];
+    $("fxDonutBox").hidden=!sum; $("fxDonutN").textContent=n;
+    if(sum){
+      let acc=0; const stops=[]; const order=[3,2,1,0];
+      order.forEach(i=>{ if(!by[i]) return; const a=acc/sum*100; acc+=by[i]; stops.push(COL[i]+" "+a.toFixed(1)+"% "+(acc/sum*100).toFixed(1)+"%"); });
+      $("fxDonut").style.background="conic-gradient("+stops.join(",")+")";
+      const L=$("fxDLeg"); L.textContent="";
+      order.forEach(i=>{ if(!by[i]) return; const r=el("div","fx-dl"); const dot=el("i"); dot.style.background=COL[i]; r.append(dot, el("span","",C[i].nm), el("b","",Math.round(by[i]/sum*100)+"%")); L.appendChild(r); });
+    }
+    document.querySelectorAll(".fx-pills button").forEach(b=>b.setAttribute("aria-selected", String(b.dataset.per===fxPer)));
+  }
+  document.querySelectorAll(".fx-pills button").forEach(b=>b.onclick=()=>{ fxPer=b.dataset.per; renderFxReport(); });
   const dayWeight = id => r1((dayData(id).reps||[]).reduce((s,r)=>s+repSum(r),0));
 
   // Баллы смены считаются из журнала ремонтов
@@ -2286,11 +2530,20 @@ window.LOOK = (function(){
   }
 
   // ---- вкладки ----
-  const TABS=["main","money","stat","ach","set"];
-  function markTab(t){ for(const b of document.querySelectorAll(".tabbar button")) b.setAttribute("aria-selected", String(b.dataset.tab===t)); }
+  const TABS=["main","money","stat","set"];
+  function markTab(t){ for(const b of document.querySelectorAll(".tabbar button[data-tab]")) b.setAttribute("aria-selected", String(b.dataset.tab===t)); }
+  // Переход между вкладками «из размытия»
+  function blurIn(p){
+    if(!p) return;
+    if(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    p.classList.remove("blur-in"); void p.offsetWidth; p.classList.add("blur-in");   // перезапуск анимации
+    p.addEventListener("animationend", ()=>p.classList.remove("blur-in"), {once:true});
+  }
   function setTab(t, fromScroll){
     const changed = tab!==t; tab=t; markTab(t);
     if(!fromScroll){ const pg=$("pager"), i=TABS.indexOf(t); if(pg){ const reduce=window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches; pg.scrollTo({left:i*pg.clientWidth, behavior: changed && !reduce ? "smooth" : "auto"}); } }
+    if(changed) blurIn($("pane-"+t));
+    if(t==="stat") try{ renderFxReport(); }catch(e){}
     if(t==="ach") setAchDot(0);
     if(t!=="main") closeEditor();
     renderPane();
@@ -2324,7 +2577,7 @@ window.LOOK = (function(){
   // Высота экрана приложения (в Telegram — без клавиатуры)
   function setAppH(){ const h=(tg && tg.viewportStableHeight) ? tg.viewportStableHeight : window.innerHeight; document.documentElement.style.setProperty("--app-h", h+"px"); }
   setAppH(); window.addEventListener("resize", setAppH); try{ if(tg && tg.onEvent) tg.onEvent("viewportChanged", setAppH); }catch(e){}
-  for(const b of document.querySelectorAll(".tabbar button")) b.addEventListener("click", ()=>setTab(b.dataset.tab));
+  for(const b of document.querySelectorAll(".tabbar button[data-tab]")) b.addEventListener("click", ()=>setTab(b.dataset.tab));
   var otherTimer=null;
   function renderPane(){
     clearTimeout(otherTimer); otherTimer=setTimeout(renderOthers, 350);
@@ -2558,6 +2811,46 @@ window.LOOK = (function(){
     }catch(e){}
   }
 
+  // ======== Открывается за баллы ========
+  // Баллы за всё время — сумма баллов всех смен. Ничего не тратится: набрал нужное — открыто навсегда.
+  let dataReady = false;
+  const UNLOCKS = [
+    {id:"theme:slav", nm:"Тема «Русь» и механик-богатырь",  pts:600},
+    {id:"theme:darg", nm:"Тема «Дарго» и механик-горец",    pts:1000},
+    {id:"theme:circ", nm:"Тема «Черкесия» и механик-черкес", pts:1500},
+  ];
+  function lifePts(){ let s=0; for(const k in pts){ const P=pts[k]||{}; for(const d in P){ const v=+P[d]; if(isFinite(v) && v>0) s+=v; } } return Math.round(s); }
+  const unlockOf = id => UNLOCKS.find(x=>x.id===id);
+  const unlocked = id => { const u=unlockOf(id); return !u || lifePts()>=u.pts; };   // темы без цены — открыты всегда
+  const themeLocked = t => !unlocked("theme:"+t);
+  const ptsW = n => fmtN(n)+" "+plural(n,"балл","балла","баллов").replace(/^\S+\s/,"");   // «1 000 баллов»
+  const fmtN = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g," ");
+  // Вызывается после каждой перерисовки: механик, запрет закрытой темы, сообщение «открыто»
+  function applyUnlocks(){
+    // закрытую тему снимаем только когда все данные (и из облака Telegram) уже загружены
+    if(window.LOOK && dataReady){ const L=LOOK.get(); if(themeLocked(L.t)) LOOK.set("frost", L.f); }
+    let seen=null; try{ seen=localStorage.getItem("salary:unl"); }catch(e){}
+    const now_ = UNLOCKS.filter(u=>unlocked(u.id)).map(u=>u.id);
+    if(seen===null){ try{ localStorage.setItem("salary:unl", now_.join(",")); }catch(e){} return; }   // первый запуск — без сообщений
+    const was = seen ? seen.split(",") : [], fresh = now_.filter(id=>!was.includes(id));
+    if(fresh.length){
+      try{ localStorage.setItem("salary:unl", now_.join(",")); }catch(e){}
+      const u=unlockOf(fresh[fresh.length-1]);
+      toast("🔓", "Открыто за баллы: "+u.nm+". Найти — «Настройки» → «Оформление».");
+    }
+  }
+  function renderUnlocks(){
+    const box=$("unlBox"); if(!box) return; box.textContent="";
+    const have=lifePts(), sum=el("p","unl-sum"); sum.append("У вас ", el("b","",ptsW(have)), " за всё время. Ничего не тратится — набрали нужное, и открыто навсегда.");
+    box.appendChild(sum);
+    UNLOCKS.forEach(u=>{
+      const ok=have>=u.pts, it=el("div","unl-it"+(ok?" open":""));
+      it.append(el("b","",u.nm), el("small","", ok ? "открыто ✓" : fmtN(have)+" из "+fmtN(u.pts)));
+      if(!ok){ const bar=el("div","bar"), i=el("i"); i.style.width=Math.min(100, have/u.pts*100).toFixed(1)+"%"; bar.appendChild(i); it.appendChild(bar); }
+      box.appendChild(it);
+    });
+  }
+
   // ======== Оформление: темы и шрифты ========
   if(window.LOOK && !settings.look) settings.look = LOOK.get();
   function setLook(t, f){
@@ -2566,6 +2859,8 @@ window.LOOK = (function(){
   }
   function renderLook(){
     if(!window.LOOK) { $("lookBox").hidden = true; return; }
+    renderUnlocks();
+    $("mascRow").hidden = true;   // отдельного выбора костюма нет: механик есть только в темах за баллы
     const L = LOOK.get(), box = $("lookThemes"), fl = $("lookFonts");
     LOOK.loadAll();
     box.textContent = "";
@@ -2581,7 +2876,11 @@ window.LOOK = (function(){
       (c ? [c.accent, c.hot, c.extra, c.surface] : ["#1f7a4d","#e0603f","#2b63c9","#ffffff"]).forEach(col=>{ const i=el("i"); i.style.background=col; if(col===(c?c.surface:"#ffffff")) i.style.boxShadow="inset 0 0 0 1px rgba(127,127,127,.4)"; sw.appendChild(i); });
       b.append(nm, sub, sw);
       b.setAttribute("aria-label", "Тема «"+th.nm+"»");
-      b.onclick = ()=>{ setLook(id, L.f); sfx.good(); };
+      if(themeLocked(id)){
+        const u=unlockOf("theme:"+id), lk=el("span","lk-lock","Откроется за "+ptsW(u.pts));
+        b.classList.add("locked"); b.appendChild(lk); b.setAttribute("aria-label", "Тема «"+th.nm+"», откроется за "+ptsW(u.pts));
+        b.onclick = ()=>{ toast("🔒", "Тема «"+th.nm+"» откроется, когда наберёте "+ptsW(u.pts)+" за всё время. Сейчас — "+fmtN(lifePts())+"."); sfx.click(); };
+      } else b.onclick = ()=>{ setLook(id, L.f); sfx.good(); };
       box.appendChild(b);
     }
     fl.textContent = "";
@@ -2596,7 +2895,7 @@ window.LOOK = (function(){
     }
   }
   $("lookRandom").onclick = ()=>{
-    const L = LOOK.get(), ids = Object.keys(LOOK.themes).filter(id=>id!=="auto" && id!==L.t);
+    const L = LOOK.get(), ids = Object.keys(LOOK.themes).filter(id=>id!=="auto" && id!==L.t && !themeLocked(id));
     setLook(ids[Math.floor(Math.random()*ids.length)], L.f); sfx.good();
   };
 
@@ -2735,7 +3034,7 @@ window.LOOK = (function(){
   try{ achDotN = +localStorage.getItem("salary:achDot")||0; }catch(e){}
   function setAchDot(n){
     achDotN = n; try{ localStorage.setItem("salary:achDot", String(n)); }catch(e){}
-    const d=$("achDot"); d.hidden = !n; d.textContent = n>9 ? "9+" : String(n);
+    const d=$("achDot"); if(!d) return;   // вкладки «Награды» больше нет
     if(!n) setTimeout(()=>{ achFresh = new Set(); }, 4000);
   }
   function toast(em, text){
@@ -2744,6 +3043,7 @@ window.LOOK = (function(){
   }
   $("toast").onclick = ()=>{ $("toast").classList.remove("show"); setTab("ach"); };
   function checkAch(){
+    return;   // награды убраны из приложения
     if(!achReady) return;
     clearTimeout(achTimer);
     achTimer = setTimeout(()=>{
@@ -2941,7 +3241,7 @@ window.LOOK = (function(){
   function renderRecapBan(){
     const pm=now.getMonth()===0?11:now.getMonth()-1, py=now.getMonth()===0?now.getFullYear()-1:now.getFullYear(), k=key(py,pm);
     const show = now.getDate()<=10 && hasMonth(py,pm) && settings.recapSeen!==k;
-    $("recapBan").hidden = !show;
+    $("recapBan").hidden = true;   // итоги месяца убраны
     if(show) $("recapBanTx").textContent = "Итоги "+GEN[pm]+" готовы";
   }
   $("recapBan").onclick = ()=>{ const pm=now.getMonth()===0?11:now.getMonth()-1, py=now.getMonth()===0?now.getFullYear()-1:now.getFullYear(); openRecap(py,pm); };
@@ -3885,7 +4185,7 @@ window.LOOK = (function(){
   // Костюм механика: «как в теме» или свой
   const MASC_LIST=[["theme","Как в теме"],["base","Механик"],["circ","Черкесия"],["darg","Дарго"],["slav","Русь"],["viking","Викинг"],["steam","Стимпанк"],["synth","Синтвейв"],["ocean","Моряк"],["term","Хакер"],["pop","Поп-арт"],["notebook","Тетрадь"],["pixel","8-бит"]];
   function mascChoice(){ let v=""; try{ v=localStorage.getItem("salary:masc")||""; }catch(e){} if(!v && settings.mascot) v=settings.mascot; return v||"theme"; }
-  function mascSkin(){ const c=mascChoice(); return c==="theme" ? (document.documentElement.dataset.skin||"auto") : c; }
+  function mascSkin(){ return document.documentElement.dataset.skin||"auto"; }   // механик всегда в образе своей темы
   $("mascRow").onclick=()=>{ const b=$("mascPick"), open=b.hidden; b.hidden=!open; $("mascRow").setAttribute("aria-expanded", String(open)); };
   function renderMascPick(){
     const box=$("mascPick"); if(!box) return; box.textContent=""; const cur=mascChoice();
@@ -4053,7 +4353,7 @@ window.LOOK = (function(){
   function renderPtBtn(){
     const b=$("ptBtn"); if(!b) return;
     const t=SC.ptDay(ptList(todayId()));
-    b.innerHTML = '<span class="pt-ic" aria-hidden="true">🚲</span><span><b>Парт-тайм</b><small></small></span>';
+    b.innerHTML = '<span class="pt-ic" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M15 6h2l3 11.5M5.5 17.5 9 9h7l-4 8.5H5.5M9 9 7.5 6H6"/></svg></span><span><b>Парт-тайм</b><small></small></span>';
     b.querySelector("small").textContent = t.bikes ? "сегодня "+fmtFull(t.sum) : "ремонт байков";
     b.hidden = false;
   }
@@ -4100,6 +4400,14 @@ window.LOOK = (function(){
     nx.onclick=()=>{ ptView = m===11 ? {y:y+1,m:0} : {y, m:m+1}; renderPt(); };
     nav.append(pv, nx); mh.append(el("h2","", MONTHS[m][0].toUpperCase()+MONTHS[m].slice(1)+" "+y), nav); S.appendChild(mh);
 
+    // Ближайшая выплата (по четвергам) — бирюзовая карточка, как на макете
+    if(cfg.pay==="week"){
+      const np=ptNext(), hero=el("div","pt-hero");
+      const hr=el("div","pt-row"); hr.append(el("span","pt-hl","Ближайшая выплата"), el("span","pt-hb","чт, "+dShort(np.pay)));
+      hero.append(hr, el("div","pt-hs num", fmtFull(np.sum)), el("span","pt-hl", "за неделю "+wRange(np)+(np.bikes ? " · "+bikesW(np.bikes) : "")));
+      S.appendChild(hero);
+    }
+
     // Сегодня: быстрые кнопки (только в текущем месяце)
     if(isCur){
       const id=todayId(), t=SC.ptDay(ptList(id)), card=el("div","pt-card pt-today");
@@ -4134,7 +4442,8 @@ window.LOOK = (function(){
     else if(cfg.pay==="sal"){ const pd=SC.payDates(settings, y, m).sal; payW=pd.d+" "+GEN[pd.m].slice(0,3); paySub="с зарплатой · "+fmtFull(M.sum); }
     else if(cfg.pay==="now"){ payW="сразу"; paySub="после каждой смены"; }
     t2.append(el("small","","Выплата"), el("b","", payW), el("small","", paySub));
-    tiles.append(t1, t2); S.appendChild(tiles);
+    if(cfg.pay==="week") tiles.append(t1); else tiles.append(t1, t2);
+    S.appendChild(tiles);
 
     // Выплаты по неделям (пн–вс → четверг после)
     if(cfg.pay==="week" && M.bikes){
@@ -4156,7 +4465,7 @@ window.LOOK = (function(){
       S.appendChild(bt); }
 
     // Настройки парт-тайма: цены, выплата, учёт в «Заработано за месяц»
-    const st=el("details","pt-card pt-set"), sm=el("summary","","⚙️ Цены и выплата"); st.appendChild(sm);
+    const st=el("details","pt-card pt-set"), sm=el("summary","","Цены и выплата"); st.appendChild(sm);
     st.appendChild(el("p","pt-sub","Цена за ремонт по типу. Если цены поменяются — уже записанные ремонты останутся по старой цене."));
     const pg=el("div","pt-prices");
     PT_ORDER.forEach(c=>{ const lb=el("label","pt-price"), inp=el("input"); inp.type="number"; inp.min="0"; inp.value=cfg.prices[c];
@@ -4200,6 +4509,10 @@ window.LOOK = (function(){
     fill(); bg.appendChild(sh); document.body.appendChild(bg);
   }
   $("ptBtn").onclick = ptOpen;
+  $("tbPt").onclick = ptOpen;
+  $("fxStat").onclick = ()=>setTab("stat");
+  // «Внести баллы» — то же, что кнопка в карточке «Сегодня» (или «Ввести общее», если сегодня не смена)
+  $("fxPts").onclick = ()=>{ const b=$("tActions").querySelector("button"); if(b) b.click(); else $("tqOpen").click(); };
   try{ renderPtBtn(); }catch(e){}
 
   // ======== Быстрый старт: зарплата за минуту для нового человека ========
@@ -4384,7 +4697,13 @@ window.LOOK = (function(){
     closeEditor(); render(); sfx.unmark(); $("dMsg").textContent="Все данные удалены. Настройки остались."; status("Данные удалены");
   };
   // Помощь: что нового, написать разработчику
-  const NEWS = [{v:"3.1", d:"17 октября 2026", items:[
+  const NEWS = [{v:"3.2", d:"26 октября 2026", items:[
+    "Новый вид «Тёплое стекло»: матовые карточки, приветствие, график баллов по сменам, плавающее меню и переходы из размытия. Другие темы — в «Настройки» → «Оформление», раскладка у всех одна",
+    "Парт-тайм — прямо в нижнем меню. «Статистика» начинается с отчёта за месяц или год: заработано, баллы, премия, линия баллов и «откуда баллы»",
+    "Награды и итоги месяца убраны — приложение стало проще",
+    "За баллы открываются темы с механиком в образе: «Русь» (600 баллов), «Дарго» (1 000), «Черкесия» (1 500). Прогресс — «Настройки» → «Оформление»",
+    "Парт-тайм: выплата раз в неделю, по четвергам — видно, сколько придёт и за какую неделю"
+  ]},{v:"3.1", d:"17 октября 2026", items:[
     "Механик во весь рост: 8 поз по ситуации — кофе утром, колесо в работе, кубок за рекорд, плед на больничном",
     "Механик одевается по погоде: зонт в дождь, ушанка и шарф в мороз, очки в жару — включите в «Оформлении»",
     "Костюм механика можно выбрать отдельно от темы",
@@ -4577,6 +4896,7 @@ window.LOOK = (function(){
     pullServer();
     // Отметка «календарь открыт» — для статистики владельца бота (имя и время входа, без баллов и зарплаты)
     if(API_URL && miniApp){ try{ fetch(API_URL.replace(/\/$/,"")+"/hello", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({initData: tg.initData, appUrl: location.origin+location.pathname})}).catch(()=>{}); }catch(e){} }
+    dataReady = true; try{ applyUnlocks(); }catch(e){}
     setupNotice(); hideSplash();
     try{ seasonal(); }catch(e){}
     { let seen=false, qs=false; try{ seen = localStorage.getItem("salary:tour")==="1"; qs = localStorage.getItem("salary:qs")==="1"; }catch(e){}
