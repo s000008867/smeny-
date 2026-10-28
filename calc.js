@@ -179,16 +179,16 @@
   }
 
   // ---------- Парт-тайм: выплата раз в неделю, по четвергам ----------
-  // Рабочая неделя — понедельник…воскресенье. Деньги за неё приходят в ближайший четверг после неё
-  // (понедельник + 10 дней). Например, неделя 19–25 октября → выплата в четверг 29 октября.
+  // Отчётная неделя — четверг…среда. В среду неделя закрывается, деньги за неё приходят на следующий день,
+  // в четверг. Например, неделя 22–28 октября → выплата в четверг 29 октября.
   const PT_PAY_WD = 4;                               // 4 = четверг (0 — воскресенье)
   const ymd = t => ({ y: t.getUTCFullYear(), m: t.getUTCMonth(), d: t.getUTCDate() });
   const utc = (y, m, d) => new Date(Date.UTC(y, m, d));
   const idOf = t => t.toISOString().slice(0, 10);   // "2026-10-26"
   // Неделя (пн–вс), в которую попадает день: начало, конец, день выплаты и сумма
   function ptWeek(days, y, m, d) {
-    const t = utc(y, m, d), back = (t.getUTCDay() + 6) % 7;          // сколько дней назад был понедельник
-    const mon = utc(y, m, d - back), sun = utc(y, m, d - back + 6), pay = utc(y, m, d - back + 10); // пн + 10 дней = чт следующей недели
+    const t = utc(y, m, d), back = (t.getUTCDay() - PT_PAY_WD + 7) % 7;   // сколько дней назад был четверг
+    const mon = utc(y, m, d - back), sun = utc(y, m, d - back + 6), pay = utc(y, m, d - back + 7); // чт…ср, выплата — следующий чт
     let sum = 0, bikes = 0, n = 0;
     for (let i = 0; i < 7; i++) {
       const L = ((days || {})[idOf(utc(y, m, d - back + i))] || {}).pt;
@@ -197,7 +197,7 @@
     return { from: ymd(mon), to: ymd(sun), pay: ymd(pay), sum, bikes, days: n };
   }
   // Ближайшая выплата, если сегодня y-m-d: в четверг — сегодняшняя, иначе — следующий четверг.
-  // Она за прошлую неделю (пн–вс), которая закончилась перед этим четвергом.
+  // Она за неделю чт–ср, которая закончилась накануне этого четверга.
   function ptNextPay(days, y, m, d) {
     const t = utc(y, m, d), ahead = (PT_PAY_WD - t.getUTCDay() + 7) % 7;
     const thu = utc(y, m, d + ahead), w = ymd(utc(thu.getUTCFullYear(), thu.getUTCMonth(), thu.getUTCDate() - 7));
