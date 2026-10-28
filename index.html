@@ -99,12 +99,17 @@ nav.tabbar[role] button span:not(.dot){display:none!important}
 nav.tabbar[role]{background:var(--tb-bg,var(--surface))!important}
 nav.tabbar[role] button{position:relative;z-index:1;color:var(--tb-fg,var(--fg))!important;transition:color .3s}
 nav.tabbar[role] button svg{background:transparent!important;transform:none!important}
-nav.tabbar[role] button[aria-selected="true"]{color:var(--ind-fg,var(--ink-fg))!important}
+nav.tabbar[role] button[aria-selected="true"]{color:var(--tb-fg,var(--fg))!important}
 .tb-ind{position:absolute;left:0;top:0;width:52px;height:44px;border-radius:999px;background:var(--ind,var(--ink));z-index:0;pointer-events:none;opacity:0;
-  transition:transform .42s cubic-bezier(.3,1.3,.4,1),opacity .2s}
+  transition:transform .4s cubic-bezier(.3,1.16,.45,1),opacity .2s}
 .tb-ind.on{opacity:1}
+.tb-hi{position:absolute;left:0;top:0;width:52px;height:44px;border-radius:999px;overflow:hidden;z-index:2;pointer-events:none;color:var(--ind-fg,var(--ink-fg));opacity:0;
+  transition:transform .4s cubic-bezier(.3,1.16,.45,1),opacity .2s;-webkit-mask-image:-webkit-radial-gradient(white,black)}
+.tb-hi.on{opacity:1}
+.tb-hi>b{position:absolute;left:0;top:0;transition:transform .4s cubic-bezier(.3,1.16,.45,1)}
+.tb-hi svg{position:absolute;left:0;top:0;padding:0!important;margin:0;background:none!important}
 @keyframes duskIn{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
-@media (prefers-reduced-motion: reduce){.tb-ind{transition:none}}
+@media (prefers-reduced-motion: reduce){.tb-ind,.tb-hi,.tb-hi>b{transition:none}}
 .pager>.pane{padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))!important}
 .toast,.undo-bar{bottom:calc(90px + env(safe-area-inset-bottom,0px))!important}
 /* парт-тайм */
@@ -1510,6 +1515,7 @@ window.LOOK = (function(){
 
 <nav class="tabbar" role="tablist" aria-label="Разделы">
   <i class="tb-ind" id="tbInd" aria-hidden="true"></i>
+  <i class="tb-hi" id="tbHi" aria-hidden="true"><b id="tbHiIn"></b></i>
   <button role="tab" data-tab="main" aria-label="Календарь" aria-selected="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span>Календарь</span></button>
   <button type="button" class="tb-pt" id="tbPt" aria-label="Парт-тайм"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M15 6h2l3 11.5M5.5 17.5 9 9h7l-4 8.5H5.5M9 9 7.5 6H6"/></svg>Парт-тайм</button>
   <button role="tab" data-tab="money" aria-label="Деньги" aria-selected="false"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H18v4"/><path d="M3 7.5v10A2.5 2.5 0 0 0 5.5 20H20V9H5.5A2.5 2.5 0 0 1 3 7.5z"/><circle cx="16" cy="14.5" r="1.3" fill="currentColor"/></svg><span>Деньги</span></button>
@@ -2458,13 +2464,27 @@ window.LOOK = (function(){
   const TABS=["main","money","stat","set"];
   function markTab(t){ for(const b of document.querySelectorAll(".tabbar button[data-tab]")) b.setAttribute("aria-selected", String(b.dataset.tab===t)); moveInd(); }
   // «Пилюля» под выбранным значком: переезжает к нему, а не появляется рывком
+  // Второй слой значков (тёмных) лежит поверх и виден только внутри «пилюли» — она едет вместе с ним.
+  // Поэтому значок под пилюлей никогда не пропадает, даже посреди переезда.
+  function buildHi(){
+    const nav=document.querySelector("nav.tabbar"), hi=$("tbHiIn"); if(!nav || !hi || !nav.offsetWidth) return;
+    const btns=[...nav.querySelectorAll("button")].filter(b=>b.querySelector("svg"));
+    if(hi.childElementCount!==btns.length){ hi.textContent=""; for(const b of btns) hi.appendChild(b.querySelector("svg").cloneNode(true)); }
+    const nr=nav.getBoundingClientRect();
+    btns.forEach((b,k)=>{ const sv=b.querySelector("svg"), r=sv.getBoundingClientRect(), cs=getComputedStyle(sv);
+      const x=r.left-nr.left-nav.clientLeft+parseFloat(cs.paddingLeft), y=r.top-nr.top-nav.clientTop+parseFloat(cs.paddingTop);
+      hi.children[k].style.transform="translate("+x.toFixed(1)+"px,"+y.toFixed(1)+"px)"; });   // ставим копию ровно на место значка
+  }
   function moveInd(){
-    const ind=$("tbInd"), b=document.querySelector('.tabbar button[aria-selected="true"]'); if(!ind || !b) return;
-    const x=b.offsetLeft+(b.offsetWidth-52)/2, y=b.offsetTop+(b.offsetHeight-44)/2;
-    ind.style.transform="translate("+Math.round(x)+"px,"+Math.round(y)+"px)"; ind.classList.add("on");
+    const ind=$("tbInd"), hi=$("tbHi"), b=document.querySelector('.tabbar button[aria-selected="true"]'); if(!ind || !b) return;
+    const x=Math.round(b.offsetLeft+(b.offsetWidth-52)/2), y=Math.round(b.offsetTop+(b.offsetHeight-44)/2);
+    ind.style.transform="translate("+x+"px,"+y+"px)"; ind.classList.add("on");
+    // «окошко» едет вместе с пилюлей, а слой со значками внутри — ровно в обратную сторону, поэтому значки стоят на месте
+    if(hi){ buildHi(); hi.style.transform=ind.style.transform; $("tbHiIn").style.transform="translate("+(-x)+"px,"+(-y)+"px)"; hi.classList.add("on"); }
   }
   addEventListener("resize", ()=>requestAnimationFrame(moveInd));
   setTimeout(moveInd, 60);
+  try{ new ResizeObserver(()=>moveInd()).observe(document.querySelector("nav.tabbar")); }catch(e){}
   // Переход между вкладками «из размытия»
   function blurIn(p){
     if(!p) return;
@@ -2472,9 +2492,10 @@ window.LOOK = (function(){
     p.classList.remove("blur-in"); void p.offsetWidth; p.classList.add("blur-in");   // перезапуск анимации
     p.addEventListener("animationend", ()=>p.classList.remove("blur-in"), {once:true});
   }
+  let goI=-1, goT=null;   // куда лента едет после нажатия на значок: промежуточные вкладки по пути не подсвечиваем
   function setTab(t, fromScroll){
     const changed = tab!==t; tab=t; markTab(t);
-    if(!fromScroll){ const pg=$("pager"), i=TABS.indexOf(t); if(pg){ const reduce=window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches; pg.scrollTo({left:i*pg.clientWidth, behavior: changed && !reduce ? "smooth" : "auto"}); } }
+    if(!fromScroll){ const pg=$("pager"), i=TABS.indexOf(t); if(pg){ if(changed){ goI=i; clearTimeout(goT); goT=setTimeout(()=>{ goI=-1; }, 900); } const reduce=window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches; pg.scrollTo({left:i*pg.clientWidth, behavior: changed && !reduce ? "smooth" : "auto"}); } }
     if(t!=="main") closeEditor();
     if(fromScroll){
       // Свайп: вкладка уже на экране — никаких вспышек и рывков. Обновляем её, когда лента остановилась.
@@ -2492,11 +2513,13 @@ window.LOOK = (function(){
       let lastI=-1;
       pg.addEventListener("scroll", ()=>{
         const w=Math.max(1,pg.clientWidth), i=Math.round(pg.scrollLeft/w), t=TABS[Math.max(0,Math.min(TABS.length-1,i))];
+        if(goI>=0){ lastI=i; if(i===goI && Math.abs(pg.scrollLeft-i*w)<2) goI=-1; return; }   // едем по нажатию — пилюля уже у цели
         if(i!==lastI){ lastI=i; markTab(t); }          // значок в меню меняем, только когда сменилась вкладка (а не на каждый кадр)
         // вкладку «принимаем», только когда лента встала ровно (палец отпущен, докрутка закончилась)
         clearTimeout(tm); tm=setTimeout(()=>{ const snapped=Math.abs(pg.scrollLeft-i*w)<2; if(!snapped) return;
           if(t!==tab){ try{ haptic("s"); }catch(e){} setTab(t, true); } }, 120);
       }, {passive:true});
+      pg.addEventListener("touchstart", ()=>{ goI=-1; }, {passive:true});   // палец на ленте — снова следим за свайпом
       window.addEventListener("resize", ()=>{ pg.scrollLeft = TABS.indexOf(tab)*pg.clientWidth; });
     } }
   // Починка «пустой вкладки» на iPhone: после сворачивания приложения, клавиатуры или смены вкладки
