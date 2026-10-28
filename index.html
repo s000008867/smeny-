@@ -521,6 +521,38 @@ body{overflow-x:hidden}.wrap{overflow-x:clip}
 .pop-menu .pm-row{display:flex;gap:14px;flex-wrap:wrap}
 .pop-shade{position:fixed;inset:0;z-index:65;background:rgba(0,0,0,.18)}
 .burst{position:fixed;inset:0;pointer-events:none;z-index:68}
+/* ---- Празднование: огонь серии (норма подряд) и большой день в парт-тайме ---- */
+.cel{position:fixed;inset:0;z-index:95;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--fg);overflow:hidden;animation:celIn .35s ease both;-webkit-tap-highlight-color:transparent}
+.cel.out{animation:celOut .35s ease both}
+@keyframes celIn{from{opacity:0}to{opacity:1}}@keyframes celOut{to{opacity:0;transform:scale(1.04)}}
+.cel-flood{position:absolute;inset:0;background:radial-gradient(120% 80% at 50% 38%,#ff9a1a 0%,#ff6a1a 55%,#f04e12 100%);clip-path:circle(0% at 50% 38%);animation:celFlood .7s cubic-bezier(.6,0,.3,1) .7s forwards}
+@keyframes celFlood{to{clip-path:circle(150% at 50% 38%)}}
+.cel-in{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:24px;text-align:center}
+.cel-flame{position:relative;width:150px;height:180px;margin-bottom:-6px}
+.cel-flame svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.cel-ghost{animation:celPop .45s cubic-bezier(.3,1.5,.5,1) .1s both}
+.cel-fire{transform-origin:50% 95%;transform:scale(0);animation:celIgnite .55s cubic-bezier(.3,1.6,.5,1) .55s forwards}
+.cel-fire .fl{transform-origin:50% 95%;animation:celFlick .55s ease-in-out 1.2s infinite alternate}
+@keyframes celPop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+@keyframes celIgnite{0%{transform:scale(0) translateY(10px)}70%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes celFlick{from{transform:scaleY(1) skewX(0)}to{transform:scaleY(1.06) skewX(-2deg)}}
+.cel-sp{position:absolute;left:50%;top:55%;width:7px;height:7px;border-radius:50%;background:#ffd34d;opacity:0;animation:celSpark .9s ease-out forwards}
+@keyframes celSpark{0%{opacity:0;transform:translate(-50%,-50%)}15%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(.4)}}
+.cel-num{position:relative;height:84px;overflow:hidden;font:800 76px/84px var(--font-display);letter-spacing:-.03em;font-variant-numeric:tabular-nums;color:color-mix(in srgb,var(--fg) 30%,transparent);transition:color .3s}
+.cel.lit .cel-num{color:#fff}
+.cel-num span{display:block}
+.cel-num .nw{animation:celRoll .55s cubic-bezier(.3,1.4,.5,1) 1.15s both}.cel-num .od{animation:celRollOut .4s ease-in 1.1s forwards}
+@keyframes celRoll{from{transform:translateY(0)}to{transform:translateY(-84px)}}
+@keyframes celRollOut{to{opacity:0}}
+.cel-lbl{font-size:16px;font-weight:600;opacity:0;animation:celUp .45s 1.35s forwards;color:#fff}
+.cel-sub{font-size:13px;opacity:0;animation:celUp .45s 1.45s forwards;color:rgba(255,255,255,.85)}
+@keyframes celUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.cel-dots{display:flex;gap:8px;margin-top:14px}
+.cel-dots i{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font:700 14px/1 var(--font-body);font-style:normal;color:#f05a12;opacity:0;transform:scale(.4);animation:celDot .35s cubic-bezier(.3,1.6,.5,1) forwards}
+.cel-dots i.on{background:#fff}.cel-dots i.cur{box-shadow:0 0 0 3px rgba(255,255,255,.55)}
+@keyframes celDot{to{opacity:1;transform:none}}
+.cel-btn{margin-top:22px;min-width:220px;height:50px;border:0;border-radius:999px;background:#fff;color:#e2510f;font:700 16px var(--font-body);opacity:0;animation:celUp .45s 2.3s forwards;box-shadow:0 10px 26px rgba(120,30,0,.3)}
+@media (prefers-reduced-motion: reduce){.cel *,.cel,.cel-flood{animation-duration:.01s!important;animation-delay:0s!important}}
 @media (prefers-reduced-motion: reduce){.day.pop,.grid.g-sl,.grid.g-sr,.pane:not([hidden]),.pop-menu{animation:none!important}button:active,.day:active,.tile.ring:active{transform:none!important}}
 
 .totq{display:flex;flex-direction:column;gap:10px}
@@ -1579,8 +1611,8 @@ window.LOOK = (function(){
 
   // Звуки: синтезируются в браузере, без файлов. Включаются только после нажатия.
   const sfx = (()=>{
-    let ctx=null, on=true, clk="click";
-    try{ clk = localStorage.getItem("salary:clk") || "click"; }catch(e){}
+    let ctx=null, on=true, clk="tap";
+    try{ clk = localStorage.getItem("salary:clk") || "tap"; if(clk==="deep") clk="tap"; }catch(e){}
     try{ on = localStorage.getItem("salary:sound")!=="off"; }catch(e){}
     // Разбудить звук. iPhone иногда отказывает (звонок, другое приложение занимает динамик) — это не ошибка, просто молчим
     const wake = () => { try{ const p = ctx.resume(); if(p && p.catch) p.catch(()=>{}); }catch(e){} };
@@ -1600,11 +1632,33 @@ window.LOOK = (function(){
       g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(vol,t+0.008); g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
       o.connect(g).connect(a.destination); o.start(t); o.stop(t+dur+0.02);
     }
+    // Короткий шум для «щелчка» — создаётся один раз
+    let noiseBuf=null;
+    const noise = a => { if(noiseBuf) return noiseBuf; const n=a.sampleRate*0.03|0, b=a.createBuffer(1,n,a.sampleRate), d=b.getChannelData(0); for(let i=0;i<n;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/n,3); return noiseBuf=b; };
+    // «Касание» — как щелчок клавиатуры iPhone: короткий звонкий «тик» около 2 кГц, гаснет за ~15 мс,
+    // плюс едва слышный низкий толчок. Высота каждый раз чуть другая (±3%) — звук живой, а не «машинный».
+    function deep(vol){
+      if(!on) return; const a=ac(); if(!a) return;
+      const t=a.currentTime+0.001, j=1+(Math.random()*0.06-0.03), v=vol||1;
+      const out=a.createGain(); out.gain.value=v; out.connect(a.destination);
+      const o=a.createOscillator(), g=a.createGain();                          // звонкий «тик»
+      o.type="sine"; o.frequency.setValueAtTime(2000*j,t);
+      g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.26,t+0.0006); g.gain.setTargetAtTime(0,t+0.0006,0.0022);
+      o.connect(g).connect(out); o.start(t); o.stop(t+0.03);
+      const lo=a.createOscillator(), lg=a.createGain();                        // лёгкий толчок под пальцем
+      lo.type="sine"; lo.frequency.setValueAtTime(120*j,t);
+      lg.gain.setValueAtTime(0,t); lg.gain.linearRampToValueAtTime(0.03,t+0.001); lg.gain.setTargetAtTime(0,t+0.001,0.003);
+      lo.connect(lg).connect(out); lo.start(t); lo.stop(t+0.03);
+      const ns=a.createBufferSource(), f=a.createBiquadFilter(), ng=a.createGain();   // сам момент касания
+      ns.buffer=noise(a); f.type="bandpass"; f.frequency.value=2000*j; f.Q.value=3; ng.gain.setValueAtTime(0.05,t); ng.gain.setTargetAtTime(0,t,0.0015);
+      ns.connect(f).connect(ng).connect(out); ns.start(t); ns.stop(t+0.012);
+    }
     const PITCH={w:660,x:740,s:520,a:330,o:440};
     return {
       get on(){ return on; },
       set(v){ on=v; try{ localStorage.setItem("salary:sound", v?"on":"off"); }catch(e){} },
-      click(k){ const c=k||clk; if(c==="soft") tone(560,0.05,"sine",0.09); else if(c==="drop") tone(620,0.07,"sine",0.09,0,1.9); else if(c==="mech"){ tone(1700,0.012,"square",0.03); tone(260,0.03,"triangle",0.07,0.006); } else tone(900,0.035,"triangle",0.07); },
+      deep,
+      click(k){ const c=k||clk; if(c==="tap"||c==="deep") return deep(); if(c==="soft") tone(560,0.05,"sine",0.09); else if(c==="drop") tone(620,0.07,"sine",0.09,0,1.9); else if(c==="mech"){ tone(1700,0.012,"square",0.03); tone(260,0.03,"triangle",0.07,0.006); } else tone(900,0.035,"triangle",0.07); },
       get clk(){ return clk; },
       setClk(v){ clk=v; try{ localStorage.setItem("salary:clk", v); }catch(e){} },
       mark(t){ tone(PITCH[t]||600,0.07,"triangle",0.11); tone((PITCH[t]||600)*1.5,0.06,"sine",0.05,0.03); },
@@ -1613,6 +1667,8 @@ window.LOOK = (function(){
       save(){ tone(784,0.1,"sine",0.1); tone(1046,0.16,"sine",0.1,0.09); },
       points(v, norm){ if(v==null) return this.unmark(); const r=Math.max(0.6, Math.min(1.8, v/norm)); tone(440*r,0.06,"triangle",0.09); },
       good(){ tone(659,0.09,"sine",0.1); tone(784,0.09,"sine",0.1,0.08); tone(1046,0.18,"sine",0.1,0.16); },
+      fire(){ tone(140,0.5,"sawtooth",0.025,0,3.2); tone(110,0.25,"sine",0.14,0,0.6); tone(523,0.14,"sine",0.09,0.42); tone(659,0.14,"sine",0.09,0.5); tone(784,0.16,"sine",0.1,0.58); tone(1046,0.32,"sine",0.1,0.66); },
+      tick(i){ tone(880+i*70,0.05,"triangle",0.06); },
       error(){ tone(200,0.16,"square",0.05,0,0.8); },
     };
   })();
@@ -3213,8 +3269,63 @@ window.LOOK = (function(){
   var normSeen={};
   function normCheck(id, before, after, isRep){
     const N=settings.maxPts, M=settings.minPts, b=+before||0, a=+after||0;
-    if(a>=N && b<N && !normSeen[id+"N"]){ normSeen[id+"N"]=1; burst(); toast("🎉", "Норма "+N+"+ за смену! "+f1(a)+" "+pW(a)); sfx.good(); }
+    if(a>=N && b<N && !normSeen[id+"N"]){ normSeen[id+"N"]=1;
+      setTimeout(()=>{
+        const st=streakFor(id);
+        const shown = st && st.cur>=2 && celebrate({key:"st:"+id, from:st.cur-1, to:st.cur, label: plural(st.cur,"смена","смены","смен").replace(/^\S+\s/,"")+" подряд с нормой "+N+"+", sub:"Сегодня "+f1(a)+" "+pW(a)+" — серия держится!", dots:st.dots});
+        if(!shown){ burst(); toast("🎉", "Норма "+N+"+ за смену! "+f1(a)+" "+pW(a)); sfx.good(); }
+      }, 0);
+    }
     else if(isRep && a>=M && b<M && !normSeen[id+"M"]){ normSeen[id+"M"]=1; toast("💪", "Минимум "+M+" набран. До нормы "+N+" осталось "+f1(N-a)); haptic("n","success"); }
+  }
+  // ======== Празднование: «огонь» за серию норм подряд и за большой день на парт-тайме ========
+  // o: {key — один раз на день, from → to (число), fmt — как писать число, label, sub, dots — кружки снизу}
+  function celebrate(o){
+    try{ if(localStorage.getItem("salary:cel:"+o.key)) return false; localStorage.setItem("salary:cel:"+o.key,"1"); }catch(e){}
+    const fmtv = o.fmt || (v=>String(v));
+    const w=el("div","cel"); w.setAttribute("role","dialog"); w.setAttribute("aria-label", o.label+": "+fmtv(o.to));
+    const FL='<path d="M50 4C58 26 82 38 82 70C82 96 66 114 50 114C34 114 18 96 18 70C18 52 28 42 34 30C36 44 42 50 46 52C44 34 46 18 50 4Z"/>';
+    const IN='<path d="M50 54C56 66 68 72 68 88C68 102 60 110 50 110C40 110 32 102 32 88C32 78 38 72 42 66C44 74 47 78 50 79C48 70 48 62 50 54Z"/>';
+    w.innerHTML='<div class="cel-flood"></div><div class="cel-in"><div class="cel-flame">'+
+      '<svg class="cel-ghost" viewBox="0 0 100 120" fill="color-mix(in srgb, currentColor 14%, transparent)">'+FL+'</svg>'+
+      '<svg class="cel-fire" viewBox="0 0 100 120"><defs><linearGradient id="celA" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe066"/><stop offset=".55" stop-color="#ffb21a"/><stop offset="1" stop-color="#ff7a00"/></linearGradient>'+
+      '<linearGradient id="celB" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fffbe0"/><stop offset="1" stop-color="#ffd54a"/></linearGradient></defs>'+
+      '<g class="fl"><g fill="url(#celA)" stroke="#fff" stroke-width="3" stroke-linejoin="round">'+FL+'</g><g fill="url(#celB)">'+IN+'</g></g></svg></div>'+
+      '<div class="cel-num"><span class="od"></span><span class="nw"></span></div><div class="cel-lbl"></div><div class="cel-sub"></div><div class="cel-dots"></div>'+
+      '<button class="cel-btn" type="button">Продолжить</button></div>';
+    // искры
+    const fl=w.querySelector(".cel-flame");
+    for(let i=0;i<14;i++){ const sp=el("i","cel-sp"), a=Math.PI*2*i/14, r=70+Math.random()*50;
+      sp.style.setProperty("--x", Math.round(Math.cos(a)*r)+"px"); sp.style.setProperty("--y", Math.round(Math.sin(a)*r-30)+"px");
+      sp.style.animationDelay=(0.62+Math.random()*0.15).toFixed(2)+"s"; if(i%3===0) sp.style.background="#fff"; fl.appendChild(sp); }
+    const num=w.querySelector(".cel-num"), od=num.querySelector(".od"), nw=num.querySelector(".nw");
+    od.textContent=fmtv(o.from); nw.textContent=fmtv(o.to);
+    if(o.count){   // деньги: число «набегает», а не перекатывается
+      od.style.display="none"; nw.style.animation="none"; nw.textContent=fmtv(o.from); num.style.fontSize="clamp(44px,13vw,64px)";
+      setTimeout(()=>{ const t0=performance.now(), d=900; const step=n=>{ const q=Math.min(1,(n-t0)/d), e=1-Math.pow(1-q,3); nw.textContent=fmtv(Math.round(o.from+(o.to-o.from)*e)); if(q<1) requestAnimationFrame(step); }; requestAnimationFrame(step); }, 1100);
+    }
+    w.querySelector(".cel-lbl").textContent=o.label; w.querySelector(".cel-sub").textContent=o.sub||"";
+    const dots=w.querySelector(".cel-dots");
+    (o.dots||[]).forEach((d,i)=>{ const x=el("i", (d.on?"on":"")+(d.cur?" cur":""), d.on?"✓":""); x.style.animationDelay=(1.55+i*0.12).toFixed(2)+"s"; dots.appendChild(x);
+      setTimeout(()=>{ try{ sfx.tick(i); }catch(e){} }, 1550+i*120); });
+    const close=()=>{ if(w.classList.contains("out")) return; w.classList.add("out"); setTimeout(()=>w.remove(), 360); };
+    w.querySelector(".cel-btn").onclick=close;
+    w.addEventListener("click", e=>{ if(e.target===w || e.target.closest(".cel-in")) { if(performance.now()-born>1200) close(); } });
+    const born=performance.now();
+    document.body.appendChild(w);
+    setTimeout(()=>{ try{ sfx.fire(); haptic("n","success"); }catch(e){} }, 550);
+    setTimeout(()=>w.classList.add("lit"), 1000);   // фон стал оранжевым — число становится белым
+    return true;
+  }
+  // Серия смен подряд с нормой — по смене с датой id (y-m-d); праздник, только если это последняя смена с баллами
+  function streakFor(id){
+    const [Y,M,D]=String(id).split("-").map(Number), N=settings.maxPts, t0=new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime(), list=[];
+    for(const k in months){ const [yy,mm]=k.split("-").map(Number), P=pts[k]||{};
+      for(const d in months[k]){ if(!isShift(months[k][d]) || P[d]==null) continue; const o=new Date(yy,mm-1,+d).getTime(); if(o<=t0) list.push({o, p:+P[d], y:yy, m:mm-1, d:+d}); } }
+    list.sort((a,b)=>a.o-b.o); if(!list.length) return null;
+    const last=list[list.length-1]; if(!(last.y===Y && last.m===M-1 && last.d===D)) return null;
+    let cur=0; for(const it of list){ cur = it.p>=N ? cur+1 : 0; }
+    return {cur, dots: list.slice(-7).map((it,i,arr)=>({on: it.p>=N, cur: i===arr.length-1}))};
   }
   function burst(){ if(reduceMotion()) return; const w=el("div","burst"); document.body.appendChild(w); confetti(w); setTimeout(()=>w.remove(), 3500); }
 
@@ -3499,9 +3610,15 @@ window.LOOK = (function(){
     b.hidden = false;
   }
   // Добавить ремонт: тип + цена на сегодня (цена запоминается вместе с ремонтом)
+  const PT_BIG = 5000;   // от этой суммы за день — праздник
   function ptAdd(id, c){
-    const L=ptList(id); L.push([c, ptCfg().prices[c]]); ptSave(id, L);
+    const L=ptList(id), before=SC.ptDay(L).sum; L.push([c, ptCfg().prices[c]]); ptSave(id, L);
+    const after=SC.ptDay(L).sum;
     try{ haptic("i","light"); sfx.click(); }catch(e){}
+    if(before<PT_BIG && after>=PT_BIG){
+      const t=SC.ptDay(L);
+      setTimeout(()=>celebrate({key:"pt:"+id, from:before, to:after, count:true, fmt:fmtFull, label:"Огонь! За день на парт-тайме", sub: bikesW(t.bikes)+" · больше "+fmtFull(PT_BIG)}), 120);
+    }
   }
   function ptUndo(id){ const L=ptList(id); if(!L.length) return; L.pop(); ptSave(id, L); try{ haptic("i","soft"); }catch(e){} }
 
@@ -3767,7 +3884,7 @@ window.LOOK = (function(){
     
     tgl("heatToggle", heatOn, v=>{ heatOn=v; try{ localStorage.setItem("salary:heat", v?"1":"0"); }catch(e){} render(); });
     tgl("sndToggle", sfx.on, v=>{ sfx.set(v); const sb2=$("soundBtn"); if(sb2) sb2.setAttribute("aria-pressed", String(v)); if(v) sfx.good(); renderSet(); });
-    seg("clkList", [["click","Щелчок"],["soft","Мягкий"],["drop","Капля"],["mech","Механика"]], sfx.clk, v=>{ sfx.setClk(v); if(!sfx.on){ sfx.set(true); } sfx.click(v); renderSet(); });
+    seg("clkList", [["tap","Касание"],["click","Щелчок"],["soft","Мягкий"],["drop","Капля"],["mech","Механика"]], sfx.clk, v=>{ sfx.setClk(v); if(!sfx.on){ sfx.set(true); } sfx.click(v); renderSet(); });
     seg("hapList", [["off","Выключена"],["on","Лёгкая"],["strong","Сильная"]], hapLv==="off" ? "off" : hapLv==="strong" ? "strong" : "on", setHap);
     // синхронизация
     let last=0; try{ last=+localStorage.getItem("salary:lastSave")||0; }catch(e){}
