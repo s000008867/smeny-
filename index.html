@@ -877,6 +877,34 @@ window.LOOK = (function(){
   // ---------- «Тёплое стекло»: как перестраивается экран ----------
   const GLASS = "-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4)";
   const WARM = "radial-gradient(60% 22% at 30% 0%,#4a2f1b 0%,rgba(74,47,27,0) 100%),radial-gradient(45% 20% at 90% 8%,#6b4529 0%,rgba(107,69,41,0) 100%),radial-gradient(70% 35% at 70% 45%,#efe3d2 0%,rgba(239,227,210,0) 100%),radial-gradient(60% 30% at 8% 62%,#d9c3a6 0%,rgba(217,195,166,0) 100%),radial-gradient(80% 30% at 50% 100%,#8a6446 0%,rgba(138,100,70,0) 100%),linear-gradient(180deg,#a98663 0%,#d8c5ad 45%,#c6ab8b 100%) fixed";
+  // ---------- «Вечернее стекло»: панорамное окно на закате, тёмные дымчатые панели ----------
+  // Фон — неподвижный слой: небо, горы, свет заката и рамы окна; он чуть размыт, поэтому панели выглядят стеклянными
+  const DUSK_BG = [
+    "linear-gradient(180deg,#0c0c0e 0,#0c0c0e 5.5%,rgba(12,12,14,0) 5.6%)",                      // верхняя балка окна
+    "repeating-linear-gradient(90deg,rgba(9,9,11,.92) 0 9px,rgba(9,9,11,0) 9px 33.33%)",          // вертикальные рамы
+    "linear-gradient(180deg,rgba(9,9,11,0) 0,rgba(9,9,11,0) 71%,#121014 71.2%,#0b0a0c 100%)",     // пол комнаты
+    "radial-gradient(70% 7% at 28% 66%,#1f2029 0 55%,rgba(31,32,41,0) 56%)",                      // горы
+    "radial-gradient(60% 6% at 78% 67%,#24252e 0 55%,rgba(36,37,46,0) 56%)",
+    "radial-gradient(45% 12% at 62% 63%,rgba(255,168,104,.4) 0%,rgba(255,168,104,0) 100%)",     // свет заката
+    "linear-gradient(180deg,#1a2030 0%,#2c3246 28%,#4f4a5e 45%,#86645f 56%,#b0805e 62%,#332d2f 66%,#18161a 100%)"
+  ].join(",");
+  const DUSK_CSS = [
+    "body{background:#16151a!important}body::before{content:'';position:fixed;inset:-6px;z-index:-1;background:"+DUSK_BG+";filter:blur(2.5px);pointer-events:none}",
+    ".pt-screen{background:"+DUSK_BG+"!important}",
+    ":root[data-skin=dusk]{--ink:#f4f4f6;--ink-fg:#111114;--pill:rgba(255,255,255,.12);--hero:linear-gradient(150deg,#3b82f6 0%,#1d4ed8 100%);--hero-fg:#ffffff}",
+    CARD+",.pop-menu,.notice,.editor,.pt-card,.pt-tile,header.month,.pt-top,.fx-pills{box-shadow:0 10px 30px rgba(0,0,0,.35)}",
+    ".tabbar,.pop-menu{"+GLASS+";box-shadow:0 10px 30px rgba(0,0,0,.45)}",
+    ".todaycard,.fx-k-hero,.pt-hero{box-shadow:0 12px 30px rgba(29,78,216,.45)!important}",
+    ".save-btn{background:#f4f4f6!important;color:#111114!important;border-color:#f4f4f6!important}",
+    "header.month .icon-btn,.pt-nav button{background:rgba(255,255,255,.14)!important;border:1px solid rgba(255,255,255,.18)!important;color:#f4f4f6!important}",
+    ".fx-av{background:#f97316!important;color:#fff!important}",
+    // текст прямо на фоне (не в карточке) — с мягкой тенью, чтобы читался и на светлом закате
+    ".fx-greet,.tiles-head,.pts-prev,.pane>p,.pane>.hint,.pt-mh h2{text-shadow:0 1px 10px rgba(0,0,0,.65)}",
+    // появление карточек по очереди при переходе на вкладку (как в ролике): без тяжёлого размытия, только прозрачность и сдвиг
+    ".pane.blur-in{animation:none!important}.pane.blur-in>*{animation:duskIn .5s cubic-bezier(.2,.7,.2,1) both}",
+    ".pane.blur-in>*:nth-child(2){animation-delay:.05s}.pane.blur-in>*:nth-child(3){animation-delay:.1s}.pane.blur-in>*:nth-child(4){animation-delay:.15s}.pane.blur-in>*:nth-child(5){animation-delay:.2s}.pane.blur-in>*:nth-child(n+6){animation-delay:.25s}",
+    "@keyframes duskIn{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}"
+  ].join("");
   const FROST_CSS = [
     // фон: размытая тёплая комната (дерево, свет)
     "body{background:#c9b08f!important}body::before{content:'';position:fixed;inset:0;z-index:-1;background:"+WARM.replace(' fixed','')+";pointer-events:none}.pt-screen{background:"+WARM.replace(' fixed','')+"!important}",
@@ -898,6 +926,11 @@ window.LOOK = (function(){
       c:{bg:"#ebe0d1",surface:"rgba(255,255,255,0.42)",fg:"#231a12",muted:"#4f3f31",line:"rgba(255,255,255,0.62)",accent:"#1f9478",accentFg:"#ffffff",weekend:"#a8431c",
          extra:"#1d5fa8",sick:"#7a4fb0",absent:"#c62828",off:"rgba(255,255,255,0.45)",offFg:"#3d3024",mid:"#a35f00",hot:"#e8552f",hotFg:"#ffffff"},
       css:FROST_CSS},
+    dusk:{nm:"Вечернее стекло", sub:"окно на закате", s:"dark", d:"Inter", b:"Inter", r:"soft", hdr:"#14141a",
+      c:{bg:"#1c1c22",surface:"rgba(28,28,34,0.52)",fg:"#f2f2f5",muted:"#a9abb6",line:"rgba(255,255,255,0.12)",accent:"#3b82f6",accentFg:"#ffffff",weekend:"#f87171",
+         extra:"#a78bfa",sick:"#c084fc",absent:"#f87171",off:"rgba(255,255,255,0.08)",offFg:"#d4d4dc",mid:"#fbbf24",hot:"#f97316",hotFg:"#ffffff"},
+      css:DUSK_CSS},
+    daynight:{nm:"День и вечер", sub:"днём тёплое, после заката вечернее", pv:"linear-gradient(135deg,#e6d6c2 0 50%,#1c1c22 50% 100%)"},
     auto:{nm:"Обычная", sub:"как в Telegram"},
     synth:{nm:"Синтвейв", sub:"неон и ночь", s:"dark", d:"Russo One", b:"Exo 2",
       c:{bg:"#120d24",surface:"#1d1636",fg:"#f4ecff",muted:"#a597c9",line:"#33295a",accent:"#3be0ff",accentFg:"#0b0820",weekend:"#ff7ac0",
@@ -1011,11 +1044,18 @@ window.LOOK = (function(){
   try{ const ct=JSON.parse(localStorage.getItem("salary:customTheme")||"null"); if(ct) themes.custom=buildCustom(ct); }catch(e){}
   let cur = {t:"frost", f:"auto"};   // по умолчанию — «Тёплое стекло»; выбранная в «Оформлении» тема запоминается
   try{ const j=JSON.parse(localStorage.getItem("salary:look")||"null"); if(j){ if(themes[j.t]) cur.t=j.t; if(fonts[j.f]) cur.f=j.f; } }catch(e){}
+  // «День и вечер»: после заката по Москве — «Вечернее стекло», днём — «Тёплое стекло».
+  // Восход и закат — примерно, по месяцам (часы с долями): январь…декабрь
+  const RISE=[9,8.3,7,5.8,4.5,3.8,4.2,5.3,6.5,7.5,8.3,9], SET=[16.5,17.5,18.5,20,21,21.5,21.3,20.3,19,17.5,16.3,16];
+  function evening(){ const d=new Date(), h=d.getHours()+d.getMinutes()/60, m=d.getMonth(); return h<RISE[m] || h>=SET[m]; }
+  const resolved = () => cur.t==="daynight" ? (evening() ? "dusk" : "frost") : cur.t;
+  let dnTimer=null;
   function apply(){
-    const th=themes[cur.t]||themes.auto, fo=fonts[cur.f]||fonts.auto, root=document.documentElement;
+    const rt=resolved(), th=themes[rt]||themes.auto, fo=fonts[cur.f]||fonts.auto, root=document.documentElement;
+    clearInterval(dnTimer); if(cur.t==="daynight") dnTimer=setInterval(()=>{ if(document.documentElement.dataset.skin!==resolved()) apply(); }, 5*60e3);
     const tg=(window.Telegram && window.Telegram.WebApp) || null, inTg=!!(tg && tg.initData);
     const tgv = v => { try{ return !!(tg && tg.isVersionAtLeast && tg.isVersionAtLeast(v)); }catch(e){ return false; } };
-    root.setAttribute("data-skin", cur.t);
+    root.setAttribute("data-skin", rt);
     let css="";
     if(th.c){
       root.setAttribute("data-theme", th.s);
@@ -2790,7 +2830,7 @@ window.LOOK = (function(){
       const th = LOOK.themes[id], c = th.c, b = el("button","lk-card");
       b.setAttribute("aria-pressed", String(L.t===id));
       if(c){ b.style.background = c.bg; b.style.color = c.fg; }
-      else { b.style.background = "linear-gradient(135deg,#eef1ef 0 50%,#111614 50% 100%)"; b.style.color = "#17201c"; }
+      else { b.style.background = th.pv || "linear-gradient(135deg,#eef1ef 0 50%,#111614 50% 100%)"; b.style.color = "#17201c"; }
       const nm = el("span","nm", th.nm); nm.style.fontFamily = '"'+(th.d||"Unbounded")+'",system-ui,sans-serif';
       if(!c){ nm.style.background="#ffffffcc"; nm.style.borderRadius="6px"; nm.style.padding="0 4px"; nm.style.alignSelf="flex-start"; }
       const sub = el("span","sub", th.sub); if(!c){ sub.style.background="#ffffffcc"; sub.style.borderRadius="6px"; sub.style.padding="0 4px"; sub.style.alignSelf="flex-start"; }
