@@ -816,6 +816,8 @@ body.pt-on{overflow:hidden}
 .pt-d .dn{position:absolute;top:4px;left:6px;font-size:11px}
 .pt-d i{position:absolute;left:0;right:0;bottom:5px;font-style:normal;font-weight:700;font-size:11.5px;color:color-mix(in srgb,var(--accent) 65%,var(--fg))}
 .pt-d.has{background:color-mix(in srgb,var(--accent) 12%,transparent);border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.pt-d.has.paid{opacity:.5}
+.pt-sub2{margin:2px 0 0;font-size:13px;color:var(--muted)}
 .pt-d.hi{background:color-mix(in srgb,var(--accent) 26%,transparent)}
 .pt-d.today{outline:2px solid var(--accent);outline-offset:-2px}
 .pt-tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -3701,14 +3703,29 @@ window.LOOK = (function(){
 
     // Итог месяца + календарь
     const sc=el("div","pt-card");
-    sc.append(el("span","pt-lbl","Заработано на парт-тайме"), el("div","pt-total num", fmtFull(M.sum)),
-      el("p","pt-sub", M.days ? bikesW(M.bikes)+" · "+dayz(M.days)+" · в среднем "+fmtFull(Math.round(M.avg))+" за день" : "Пока нет ремонтов в этом месяце"));
+    const monthLine = M.days ? bikesW(M.bikes)+" · "+dayz(M.days)+" · в среднем "+fmtFull(Math.round(M.avg))+" за день" : "Пока нет ремонтов в этом месяце";
+    let paidBefore="";                     // дни раньше этой даты уже выплачены — в календаре они бледнее
+    if(cfg.pay==="week" && isCur){
+      // Счёт с последней выплаты: в день выплаты (чт) ещё видна неделя, которая приходит сегодня, а с пятницы — с нуля
+      const Y=now.getFullYear(), Mo=now.getMonth(), D=now.getDate(), thu = now.getDay()===4;
+      const cur=SC.ptWeek(dayx, Y, Mo, D), prev = thu ? SC.ptWeek(dayx, Y, Mo, D-1) : null;
+      const sum = cur.sum + (prev ? prev.sum : 0), bikes = cur.bikes + (prev ? prev.bikes : 0);
+      const from = prev && prev.sum ? prev.from : cur.from;
+      paidBefore = ds(from.y, from.m, from.d);
+      const sub = prev && prev.sum ? bikesW(bikes)+" · с "+dShort(prev.from)+" · "+fmtFull(prev.sum)+" приходит сегодня"
+                : cur.bikes ? bikesW(cur.bikes)+" · с "+dShort(cur.from)+" · выплата "+dShort(cur.pay)
+                : "С "+dShort(cur.from)+" ремонтов ещё нет · выплата "+dShort(cur.pay);
+      sc.append(el("span","pt-lbl","Заработано на парт-тайме"), el("div","pt-total num", fmtFull(sum)), el("p","pt-sub", sub),
+        el("p","pt-sub2", M.days ? "Всего за "+MONTHS[m]+": "+fmtFull(M.sum)+" · "+monthLine : "За этот месяц ремонтов пока нет"));
+    } else {
+      sc.append(el("span","pt-lbl","Заработано на парт-тайме"), el("div","pt-total num", fmtFull(M.sum)), el("p","pt-sub", monthLine));
+    }
     const sun = firstCol(2023,0)===0, L = sun ? ["Вс","Пн","Вт","Ср","Чт","Пт","Сб"] : ["Пн","Вт","Ср","Чт","Пт","Сб","Вс"];
     const g=el("div","pt-grid"); L.forEach(x=>g.appendChild(el("span","pt-dow",x)));
     const first=firstCol(y,m), dim=new Date(y,m+1,0).getDate(), top3=Object.values(M.perDay).sort((a,b)=>b-a)[2] || Infinity;
     for(let i=0;i<first;i++) g.appendChild(el("span","pt-d pad"));
     for(let d=1; d<=dim; d++){
-      const a=M.perDay[d], b=el("button","pt-d"+(a ? " has" : "")+(a && a>=top3 ? " hi" : "")+(isCur && d===now.getDate() ? " today" : ""));
+      const a=M.perDay[d], b=el("button","pt-d"+(a ? " has" : "")+(a && a>=top3 ? " hi" : "")+(isCur && d===now.getDate() ? " today" : "")+(a && paidBefore && ds(y,m,d)<paidBefore ? " paid" : ""));
       b.type="button"; b.appendChild(el("span","dn", String(d))); if(a) b.appendChild(el("i","", ptK(a)));
       b.setAttribute("aria-label", d+" "+GEN[m]+(a ? ", "+a+" рублей" : ""));
       b.onclick=()=>ptDayOpen(y,m,d); g.appendChild(b);
