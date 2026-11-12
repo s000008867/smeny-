@@ -149,9 +149,36 @@ test("общее 0 в первый день периода во время см�
 });
 
 test("парт-тайм: цены по умолчанию и свои", () => {
-  assert.deepEqual(S.ptPrices({}), { n: 100, l: 230, m: 450, h: 900, s: 1400 });
+  assert.deepEqual(S.ptPrices({}), { n: 90, l: 200, m: 400, h: 800, s: 1250 });
   assert.equal(S.ptPrices({ pt: { prices: { m: 500 } } }).m, 500);
-  assert.equal(S.ptPrices({ pt: { prices: { m: "abc" } } }).m, 450); // мусор не ломает цену
+  assert.equal(S.ptPrices({ pt: { prices: { m: "abc" } } }).m, 400); // мусор не ломает цену
+});
+
+test("парт-тайм: ставки с 12 ноября 2026", () => {
+  assert.deepEqual(S.ptPrices({}, "2026-11-11"), { n: 100, l: 230, m: 450, h: 900, s: 1400 });
+  assert.deepEqual(S.ptPrices({}, "2026-11-12"), { n: 90, l: 200, m: 400, h: 800, s: 1250 });
+  assert.equal(S.ptPrices({ pt: { prices: { l: 210 } } }, "2026-11-01").l, 210);
+});
+
+test("парт-тайм: переход на новые ставки", () => {
+  const days = {
+    "2026-11-11": { pt: [["l", 230]] },                      // до новой ставки — не трогаем
+    "2026-11-12": { pt: [["l", 230], ["s", 1400], ["m", 400]] },
+    "2026-11-13": { pt: [["h", 777]] },                      // необычная цена — не трогаем
+  };
+  const r = S.ptFix(days, {});
+  assert.equal(r.prices, null);
+  assert.deepEqual(r.days, { "2026-11-12": [["l", 200], ["s", 1250], ["m", 400]] });
+  // свои цены, равные старой ставке, убираются; другие свои цены остаются и их ремонты не меняются
+  const r2 = S.ptFix(days, { pt: { prices: { l: 230, s: 1400, m: 450, h: 1000 } } });
+  assert.deepEqual(r2.prices, { h: 1000 });
+  assert.deepEqual(r2.days, { "2026-11-12": [["l", 200], ["s", 1250], ["m", 400]] });
+  const r3 = S.ptFix(days, { pt: { prices: { l: 260 } } });
+  assert.equal(r3.prices, null);
+  assert.deepEqual(r3.days, { "2026-11-12": [["l", 230], ["s", 1250], ["m", 400]] });
+  // повторный вызов ничего не меняет
+  const fixed = Object.assign({}, days, { "2026-11-12": { pt: r.days["2026-11-12"] } });
+  assert.deepEqual(S.ptFix(fixed, {}).days, {});
 });
 
 test("парт-тайм: сумма за день и за месяц, старые цены сохраняются", () => {

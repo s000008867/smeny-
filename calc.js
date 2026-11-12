@@ -150,13 +150,46 @@
   // ---------- Парт-тайм: ремонт байков за деньги ----------
   // Каждый ремонт хранится как [тип, сумма] — сумма запоминается в момент записи,
   // поэтому смена цен не меняет уже заработанное.
-  const PT_PRICES = { n: 100, l: 230, m: 450, h: 900, s: 1400 };
+  // Ставки по датам: с какого дня (включительно) какие цены. Новые — первыми.
+  const PT_RATES = [
+    { from: "2026-11-12", p: { n: 90, l: 200, m: 400, h: 800, s: 1250 } },
+    { from: "", p: { n: 100, l: 230, m: 450, h: 900, s: 1400 } },
+  ];
+  const PT_PRICES = PT_RATES[0].p;
   const PT_NAMES = { n: "без типа", l: "лёгкий", m: "средний", h: "тяжёлый", s: "сверхтяжёлый" };
-  const ptPrices = settings => {
-    const out = Object.assign({}, PT_PRICES), p = (settings && settings.pt && settings.pt.prices) || {};
-    for (const c in PT_PRICES) if (p[c] != null && isFinite(+p[c]) && +p[c] >= 0) out[c] = +p[c];
+  const ptRate = id => (id ? PT_RATES.find(r => id >= r.from) : PT_RATES[0]).p;
+  // Цены на день id ("2026-11-12"; без даты — текущие). Свои цены из настроек важнее ставок.
+  const ptPrices = (settings, id) => {
+    const out = Object.assign({}, ptRate(id)), p = (settings && settings.pt && settings.pt.prices) || {};
+    for (const c in out) if (p[c] != null && isFinite(+p[c]) && +p[c] >= 0) out[c] = +p[c];
     return out;
   };
+  // Переход на новые ставки. Свои цены, совпадающие со старой ставкой, убираются из настроек,
+  // а ремонты с даты новой ставки, записанные по старой цене, получают новую. Повторный вызов ничего не меняет.
+  // Возвращает { prices, days } — prices: новые свои цены или null, если менять нечего; days: { id: новый список }.
+  function ptFix(days, settings) {
+    const own = (settings && settings.pt && settings.pt.prices) || {}, keep = {};
+    let pricesChanged = false;
+    for (const c in own) {
+      if (PT_RATES.slice(1).some(r => +own[c] === r.p[c] && +own[c] !== PT_PRICES[c])) pricesChanged = true;
+      else keep[c] = own[c];
+    }
+    const out = {};
+    for (let i = 0; i < PT_RATES.length - 1; i++) {
+      const cur = PT_RATES[i], prev = PT_RATES[i + 1], next = PT_RATES[i - 1];
+      for (const id in days || {}) {
+        if (id < cur.from || (next && id >= next.from)) continue;
+        const L = (days[id] || {}).pt; if (!L || !L.length) continue;
+        let changed = false;
+        const N = L.map(it => {
+          if (keep[it[0]] == null && +it[1] === prev.p[it[0]] && prev.p[it[0]] !== cur.p[it[0]]) { changed = true; return [it[0], cur.p[it[0]]]; }
+          return it;
+        });
+        if (changed) out[id] = N;
+      }
+    }
+    return { prices: pricesChanged ? keep : null, days: out };
+  }
   // Один день: сумма, сколько байков и сколько каких типов
   function ptDay(list) {
     let sum = 0; const by = {};
@@ -211,6 +244,6 @@
     return out;
   }
 
-  G.SmenyCalc = { PT_PRICES, PT_NAMES, ptPrices, ptDay, ptMonth, ptWeek, ptNextPay, ptWeeks, VERSION, key, ord, opts, tp, pay, inBonus, isShift, pctFor, level, calc, periodOf, goalDay,
+  G.SmenyCalc = { PT_PRICES, PT_RATES, PT_NAMES, ptRate, ptPrices, ptFix, ptDay, ptMonth, ptWeek, ptNextPay, ptWeeks, VERSION, key, ord, opts, tp, pay, inBonus, isShift, pctFor, level, calc, periodOf, goalDay,
     PAYDEF, payCfg, netv, advance, salary, HOLI, payDay, payDates, dim };
 })(typeof globalThis !== "undefined" ? globalThis : this);
