@@ -3637,7 +3637,7 @@ window.LOOK = (function(){
   // Добавить ремонт: тип + цена на сегодня (цена запоминается вместе с ремонтом)
   const PT_BIG = 5000;   // от этой суммы за день — праздник
   function ptAdd(id, c){
-    const L=ptList(id), before=SC.ptDay(L).sum; L.push([c, ptCfg().prices[c]]); ptSave(id, L);
+    const L=ptList(id), before=SC.ptDay(L).sum; L.push([c, SC.ptPrices(settings, id)[c]]); ptSave(id, L);
     const after=SC.ptDay(L).sum;
     try{ haptic("i","light"); sfx.click(); }catch(e){}
     if(before<PT_BIG && after>=PT_BIG){
@@ -3645,11 +3645,18 @@ window.LOOK = (function(){
       setTimeout(()=>celebrate({key:"pt:"+id, from:before, to:after, count:true, fmt:fmtFull, label:"Огонь! За день на парт-тайме", sub: bikesW(t.bikes)+" · больше "+fmtFull(PT_BIG)}), 120);
     }
   }
+  // Переход на новые ставки парт-тайма (calc.js → PT_RATES): ремонты с даты новой ставки, записанные по старой цене, пересчитываются
+  function ptMigrate(){
+    const r=SC.ptFix(dayx, settings); let n=0;
+    if(r.prices){ settings.pt=Object.assign({}, settings.pt||{}, {prices:r.prices}); saveSettings(); }
+    for(const id in r.days){ ptSave(id, r.days[id]); n++; }
+    if(r.prices || n){ renderPtBtn(); render(); }
+  }
   function ptUndo(id){ const L=ptList(id); if(!L.length) return; L.pop(); ptSave(id, L); try{ haptic("i","soft"); }catch(e){} }
 
   // Кнопки типов ремонта
   function ptButtons(id, after){
-    const P=ptCfg().prices, box=el("div","pt-btns");
+    const P=SC.ptPrices(settings, id), box=el("div","pt-btns");
     PT_ORDER.forEach(c=>{ const b=el("button","pt-add"); b.type="button";
       b.append(el("b","", "+"+P[c]), el("span","", PT_SHORT[c]));
       b.setAttribute("aria-label","Добавить ремонт: "+PT_SHORT[c]+", "+P[c]+" рублей");
@@ -3995,7 +4002,8 @@ window.LOOK = (function(){
     closeEditor(); render(); sfx.unmark(); $("dMsg").textContent="Все данные удалены. Настройки остались."; status("Данные удалены");
   };
   // Помощь: что нового, написать разработчику
-  const NEWS = [{v:"3.2", d:"26 октября 2026", items:[
+  const NEWS = [{v:"3.3", d:"12 ноября 2026", items:[
+    "Парт-тайм: новые ставки с 12 ноября — без типа 90 ₽, лёгкий 200, средний 400, тяжёлый 800, сверхтяжёлый 1 250. Ремонты до 12 ноября остаются по старым ценам, а записанные с 12 ноября по старым — пересчитаны"]},{v:"3.2", d:"26 октября 2026", items:[
     "Новый вид «Тёплое стекло»: матовые карточки, приветствие, график баллов по сменам, плавающее меню и переходы из размытия. Другие темы — в «Настройки» → «Оформление», раскладка у всех одна",
     "Парт-тайм — прямо в нижнем меню. «Статистика» начинается с отчёта за месяц или год: заработано, баллы, премия, линия баллов и «откуда баллы»",
     "Награды и итоги месяца убраны — приложение стало проще",
@@ -4194,6 +4202,7 @@ window.LOOK = (function(){
     pullServer();
     // Отметка «календарь открыт» — для статистики владельца бота (имя и время входа, без баллов и зарплаты)
     if(API_URL && miniApp){ try{ fetch(API_URL.replace(/\/$/,"")+"/hello", {method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({initData: tg.initData, appUrl: location.origin+location.pathname})}).catch(()=>{}); }catch(e){} }
+    try{ ptMigrate(); }catch(e){}
     dataReady = true;
     setupNotice(); hideSplash();
     try{ seasonal(); }catch(e){}
