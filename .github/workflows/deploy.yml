@@ -35,6 +35,11 @@ jobs:
           node --test "${files[@]}"
       - name: Сборка сайта
         run: node build.js
+      - name: Проверка в браузере (smoke.js)
+        run: |
+          npm install --no-save --no-package-lock playwright@1.63.0
+          npx playwright install --with-deps chromium
+          node smoke.js
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site

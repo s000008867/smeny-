@@ -9,5 +9,7 @@
 - `sw.js` — service worker; имя кэша подменяется при сборке.
 - Выкладка: push в `main` → `.github/workflows/deploy.yml` (тесты → GitHub Pages smeny-, репозиторий smeny-team, бот). Ветки кроме `main` не выкладываются.
 
-Проверка перед коммитом: `node --test "calc test.js" && node build.js`.
+- `smoke.js` — проверка собранного `_site` в браузере (Playwright): открытие, вкладки, ошибки в консоли. В CI идёт после сборки.
+
+Проверка перед коммитом: `node --test "calc test.js" && node build.js && node smoke.js`.
 Интерфейс на русском, пользователь — механик, грузит файлы с iPhone через веб-интерфейс GitHub.
