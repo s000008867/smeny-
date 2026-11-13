@@ -16,7 +16,10 @@
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,-apple-system,sans-serif;-webkit-tap-highlight-color:transparent}img{max-width:100%}[hidden]{display:none!important}html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}button,label,.day,.tabbar,summary{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}input:not(#edInput):not(#tqPts),select,textarea{font-size:16px!important}</style>
 <title>Календарь смен</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Unbounded:wght@500;700&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Шрифты не задерживают первую отрисовку: таблица подключается после загрузки (под заставкой этого не видно) -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Unbounded:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Unbounded:wght@500;700&family=Inter:wght@400;500;600;700&display=swap"></noscript>
 <style>
 @font-face{font-family:Runa;src:url(data:font/woff;base64,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) format('woff');font-display:swap}
 /* Layout: одна колонка — итог месяца, выбор отметки, сетка дней, расшифровка, год, настройки. */
@@ -978,7 +981,7 @@ window.LOOK = (function(){
     runes:{nm:"Руны", d:"Runa", b:"Alegreya Sans"},
     pixel:{nm:"Пиксели", d:"Press Start 2P", b:"JetBrains Mono"}
   };
-  const LOADED = {"Golos Text":1, "Unbounded":1};
+  const LOADED = {"Golos Text":1, "Unbounded":1, "Inter":1};   // эти три уже подключены в <head>
   function loadFonts(list){
     const need = list.filter(f=>f && GF[f] && !LOADED[f]); if(!need.length) return;
     need.forEach(f=>LOADED[f]=1);
@@ -2484,10 +2487,11 @@ window.LOOK = (function(){
     const nav=document.querySelector("nav.tabbar"), hi=$("tbHiIn"); if(!nav || !hi || !nav.offsetWidth) return;
     const btns=[...nav.querySelectorAll("button")].filter(b=>b.querySelector("svg"));
     if(hi.childElementCount!==btns.length){ hi.textContent=""; for(const b of btns) hi.appendChild(b.querySelector("svg").cloneNode(true)); }
-    const nr=nav.getBoundingClientRect();
-    btns.forEach((b,k)=>{ const sv=b.querySelector("svg"), r=sv.getBoundingClientRect(), cs=getComputedStyle(sv);
-      const x=r.left-nr.left-nav.clientLeft+parseFloat(cs.paddingLeft), y=r.top-nr.top-nav.clientTop+parseFloat(cs.paddingTop);
-      hi.children[k].style.transform="translate("+x.toFixed(1)+"px,"+y.toFixed(1)+"px)"; });   // ставим копию ровно на место значка
+    // Сначала все замеры, потом все записи — иначе браузер пересчитывает раскладку на каждой кнопке
+    const nr=nav.getBoundingClientRect(), cl=nav.clientLeft, ct=nav.clientTop;
+    const pos=btns.map(b=>{ const sv=b.querySelector("svg"), r=sv.getBoundingClientRect(), cs=getComputedStyle(sv);
+      return [r.left-nr.left-cl+parseFloat(cs.paddingLeft), r.top-nr.top-ct+parseFloat(cs.paddingTop)]; });
+    pos.forEach(([x,y],k)=>{ hi.children[k].style.transform="translate("+x.toFixed(1)+"px,"+y.toFixed(1)+"px)"; });   // ставим копию ровно на место значка
   }
   function moveInd(){
     const ind=$("tbInd"), hi=$("tbHi"), b=document.querySelector('.tabbar button[aria-selected="true"]'); if(!ind || !b) return;
@@ -2830,7 +2834,8 @@ window.LOOK = (function(){
   function lkUpdate(){
     const car=$("lookThemes"); if(!car || !car.clientWidth) return;
     const mid=car.scrollLeft+car.clientWidth/2; let best=null, bd=1e9;
-    for(const c of car.children){ const cx=c.offsetLeft+c.offsetWidth/2, dx=(cx-mid)/c.offsetWidth, ad=Math.min(Math.abs(dx),2);
+    const geo=[...car.children].map(c=>[c, c.offsetLeft+c.offsetWidth/2, c.offsetWidth]);   // замеры до записей
+    for(const [c,cx,w] of geo){ const dx=(cx-mid)/w, ad=Math.min(Math.abs(dx),2);
       c.style.transform="rotateY("+(-dx*32).toFixed(1)+"deg) scale("+(1-ad*0.13).toFixed(3)+")";
       c.style.zIndex=String(10-Math.round(ad*3)); c.style.opacity=String(1-ad*0.25);
       if(Math.abs(dx)<bd){ bd=Math.abs(dx); best=c; } }
@@ -4178,7 +4183,7 @@ window.LOOK = (function(){
   }
   $("noticeClose").onclick = ()=>{ $("notice").hidden=true; noticeSeen(); };
 
-  renderBrushes(); renderTypeSettings(); renderQuick(); render();
+  renderBrushes(); renderTypeSettings(); renderQuick();   // render() — ниже, сразу после загрузки данных
   // Отдельное приложение: всё хранится на телефоне каждого пользователя, у каждого свои данные.
   (async ()=>{
     loadLocal(); render();
