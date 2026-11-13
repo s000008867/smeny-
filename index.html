@@ -2063,12 +2063,15 @@ window.LOOK = (function(){
     busy[k] = false;
   }
 
+  // Правило про опоздания — с 14 ноября 2026: раньше этой даты «Опоздание» не ставится (ограничение снимается само)
+  const LATE_MSG = "Опоздание можно отметить с 14 ноября 2026 — с этого дня действует правило.";
   function tap(d){
     const k = key(view.y, view.m), days = Object.assign({}, months[k]||{});
     if(brush==="p"){
       if(!isShift(days[d])){ status("Баллы ставятся только на смены. Сначала отметьте этот день как смену.", true); return; }
       sfx.click(); openEditor(d); return;
     }
+    if(brush==="l" && days[d]!=="l" && !SC.lateOk(view.y, view.m, d)){ status(LATE_MSG, true); return; }
     if(days[d]===brush){ delete days[d]; sfx.unmark(); } else { days[d] = brush; sfx.mark(brush); }
     if(!isShift(days[d]) && pts[k] && pts[k][d]!=null){ pts[k]=Object.assign({},pts[k]); delete pts[k][d]; }
     months[k] = days; render(); scheduleSave(k);
@@ -3248,7 +3251,8 @@ window.LOOK = (function(){
     const shade=el("div","pop-shade"), m=el("div","pop-menu"); m.setAttribute("role","dialog"); m.setAttribute("aria-label","День "+d);
     const h=el("div","pm-h"); h.append(el("b","", d+" "+GEN[view.m]), el("span","", wd+(t ? " · "+T[t].name.toLowerCase() : ""))); m.appendChild(h);
     const types=el("div","pm-types");
-    TYPES.forEach(tp=>{ const b=el("button","t-"+tp.k); b.innerHTML='<i></i>'; b.appendChild(document.createTextNode(tp.name)); b.setAttribute("aria-pressed", String(t===tp.k));
+    TYPES.forEach(tp=>{ if(tp.k==="l" && t!=="l" && !SC.lateOk(view.y, view.m, d)) return;
+      const b=el("button","t-"+tp.k); b.innerHTML='<i></i>'; b.appendChild(document.createTextNode(tp.name)); b.setAttribute("aria-pressed", String(t===tp.k));
       b.onclick=()=>{ const S0=snap([k],[]); setTimeout(()=>{ const t2=(months[k]||{})[d]; offerUndo(t2 ? d+" "+GEN[view.m]+": "+T[t2].name.toLowerCase() : d+" "+GEN[view.m]+": отметка снята", S0); }, 0); const days=Object.assign({}, months[k]||{}); if(days[d]===tp.k){ delete days[d]; sfx.unmark(); } else { days[d]=tp.k; sfx.mark(tp.k); }
         if(!isShift(days[d]) && pts[k] && pts[k][d]!=null){ pts[k]=Object.assign({},pts[k]); delete pts[k][d]; }
         months[k]=days; render(); scheduleSave(k); closeDayMenu(); if(isShift(days[d])) openDayMenu(d, anchor); };

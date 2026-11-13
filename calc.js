@@ -19,6 +19,11 @@
   // Старые записи хранили true вместо типа — это обычная смена
   const tp = v => v === true ? "w" : KNOWN[v] ? v : null;
 
+  // Правило про опоздания действует с 14.11.2026: раньше этой даты отметка «опоздание» не ставится,
+  // а если всё же стоит (старая копия, импорт) — считается обычной сменой.
+  const LATE_FROM = "2026-11-14";
+  const lateOk = (y, m, d) => key(y, m) + "-" + String(d).padStart(2, "0") >= LATE_FROM;
+  const tpOn = (v, y, m, d) => { const t = tp(v); return t === "l" && !lateOk(y, m, +d) ? "w" : t; };
   function opts(settings) {
     const s = Object.assign({}, DEF, settings || {});
     s.rate = +s.rate; s.pct = +s.pct; s.minPts = +s.minPts; s.maxPts = +s.maxPts;
@@ -53,12 +58,12 @@
     const py = m === 0 ? y - 1 : y, pm = m === 0 ? 11 : m - 1, prev = months[key(py, pm)] || {};
     const cnt = { w: 0, x: 0, s: 0, a: 0, o: 0, l: 0 };
     let base = 0;
-    for (const d in cur) { const t = tp(cur[d]); if (!t) continue; cnt[t]++; base += pay(st, t); }
+    for (const d in cur) { const t = tpOn(cur[d], y, m, d); if (!t) continue; cnt[t]++; base += pay(st, t); }
     let bonusBase = 0, bonusDays = 0, scored = 0, ptsSum = 0;
     const lv = { full: 0, mid: 0, low: 0 }, list = [], dates = [];
     const add = (days, P, from, to, mo, yy) => {
       for (const d in days) {
-        const t = tp(days[d]);
+        const t = tpOn(days[d], yy, mo, d);
         if (!t || +d < from || +d > to || !inBonus(st, t)) continue;
         const o = ord(yy, mo, +d);
         bonusBase += pay(st, t); bonusDays++; dates.push(o);
@@ -255,6 +260,6 @@
     return out;
   }
 
-  G.SmenyCalc = { steps, PT_PRICES, PT_RATES, PT_NAMES, ptRate, ptPrices, ptFix, ptDay, ptMonth, ptWeek, ptNextPay, ptWeeks, VERSION, key, ord, opts, tp, pay, inBonus, isShift, pctFor, level, calc, periodOf, goalDay,
+  G.SmenyCalc = { steps, LATE_FROM, lateOk, PT_PRICES, PT_RATES, PT_NAMES, ptRate, ptPrices, ptFix, ptDay, ptMonth, ptWeek, ptNextPay, ptWeeks, VERSION, key, ord, opts, tp, pay, inBonus, isShift, pctFor, level, calc, periodOf, goalDay,
     PAYDEF, payCfg, netv, advance, salary, HOLI, payDay, payDates, dim };
 })(typeof globalThis !== "undefined" ? globalThis : this);
