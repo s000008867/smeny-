@@ -56,9 +56,11 @@ test("следующая ступень: сколько баллов не хва
 });
 
 test("опоздание: смена оплачивается, но не идёт в премию и её баллы не считаются", () => {
-  const D = oct({ oct: { 2: 10, 4: 24 } });
-  D.months[k(2026, 9)][2] = "l";
-  const c = S.calc(D, 2026, 9, AFTER);
+  // тот же октябрьский график месяцем позже (период 21 окт – 20 ноя): опоздание 16 ноября
+  const D0 = oct({ oct: { 2: 10, 4: 24 } }), sh = o => ({ [k(2026, 9)]: o[k(2026, 8)], [k(2026, 10)]: o[k(2026, 9)] });
+  const D = { months: sh(D0.months), points: sh(D0.points), totals: {}, settings: ST };
+  D.months[k(2026, 10)][16] = "l"; D.points[k(2026, 10)] = { 16: 10, 4: 24 }; D.months[k(2026, 10)][2] = "w";
+  const c = S.calc(D, 2026, 10, { y: 2026, m: 11, d: 1, hm: 600 });
   assert.equal(c.cnt.l, 1);
   assert.equal(c.base, 15 * 5800);                  // оклад за смену с опозданием платится
   assert.equal(c.bonusDays, 14);                    // а в премию она не входит
@@ -258,4 +260,17 @@ test("парт-тайм: неделя чт–ср, выплата в четве�
   // переход через год: ср 30 дек → выплата чт 31 дек; пт 1 янв → чт 7 янв
   assert.equal(fmt(S.ptNextPay({}, 2026, 11, 30).pay), "2026-12-31");
   assert.equal(fmt(S.ptNextPay({}, 2027, 0, 1).pay), "2027-1-7");
+});
+
+test("опоздание раньше 14 ноября 2026 не ставится, а старая отметка считается обычной сменой", () => {
+  assert.equal(S.lateOk(2026, 10, 13), false);
+  assert.equal(S.lateOk(2026, 10, 14), true);
+  assert.equal(S.lateOk(2027, 0, 1), true);
+  const D = oct({ oct: { 2: 10 } });
+  D.months[k(2026, 9)][2] = "l";                    // 2 октября — до правила
+  const c = S.calc(D, 2026, 9, AFTER);
+  assert.equal(c.cnt.l, 0);
+  assert.equal(c.cnt.w, 15);
+  assert.equal(c.bonusDays, 15);
+  assert.equal(c.pSum, 10);
 });
