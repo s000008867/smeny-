@@ -26,12 +26,43 @@ test("оплата смен за месяц и полная премия без 
   near(c.total, c.base + c.bonus);
 });
 
-test("процент премии: ниже минимума 0, между минимумом и нормой — равномерно", () => {
+test("процент премии ступенями: 20 → 14%, 22 → 20%, 24 → 27%, ниже 20 — 0", () => {
   const st = S.opts(ST);
+  assert.deepEqual(S.steps(st), [{ p: 20, pct: 14 }, { p: 22, pct: 20 }, { p: 24, pct: 27 }]);
   assert.equal(S.pctFor(st, 17.9), 0);
-  near(S.pctFor(st, 21), 27 * 3 / 6);
+  assert.equal(S.pctFor(st, 19.99), 0);
+  assert.equal(S.pctFor(st, 20), 14);
+  assert.equal(S.pctFor(st, 21.9), 14);
+  assert.equal(S.pctFor(st, 22), 20);
+  assert.equal(S.pctFor(st, 23.5), 20);
   assert.equal(S.pctFor(st, 24), 27);
   assert.equal(S.pctFor(st, 40), 27);
+  // пример из правил: 15 смен, норма 270; 300 баллов (+11,11%) → 14%, 330 → 20%, 360 → 27%
+  assert.equal(S.pctFor(st, 300 / 15), 14);
+  assert.equal(S.pctFor(st, 330 / 15), 20);
+  assert.equal(S.pctFor(st, 360 / 15), 27);
+});
+
+test("следующая ступень: сколько баллов не хватает и сколько она добавит", () => {
+  // все 15 смен периода отработаны, по 21 баллу → 315, ступень 14%; до 22 (330) не хватает 15
+  const P = { sep: {}, oct: {} };
+  for (let d = 22; d <= 30; d += 2) P.sep[d] = 21;
+  for (let d = 2; d <= 20; d += 2) P.oct[d] = 21;
+  const c = S.calc(oct(P), 2026, 9, AFTER);
+  assert.equal(c.bonusPct, 14);
+  assert.equal(c.nextStep.pct, 20);
+  assert.equal(c.nextStep.need, 15);
+  near(c.nextStep.gain, 15 * 5800 * 0.06);
+});
+
+test("опоздание: смена оплачивается, но не идёт в премию и её баллы не считаются", () => {
+  const D = oct({ oct: { 2: 10, 4: 24 } });
+  D.months[k(2026, 9)][2] = "l";
+  const c = S.calc(D, 2026, 9, AFTER);
+  assert.equal(c.cnt.l, 1);
+  assert.equal(c.base, 15 * 5800);                  // оклад за смену с опозданием платится
+  assert.equal(c.bonusDays, 14);                    // а в премию она не входит
+  assert.equal(c.pSum, 24);                         // 10 баллов дня с опозданием не учтены
 });
 
 test("средний по дневным баллам", () => {

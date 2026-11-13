@@ -29,7 +29,7 @@ const GEN = ["января","февраля","марта","апреля","мая
 const MONTH_NOM = ["январь","февраль","март","апрель","май","июнь","июль","август","сентябрь","октябрь","ноябрь","декабрь"];
 const WD = ["воскресенье","понедельник","вторник","среду","четверг","пятницу","субботу"];
 const WD_SHORT = ["Вс","Пн","Вт","Ср","Чт","Пт","Сб"];
-const TYPE_NAME = { w: "смена", x: "доп. смена", o: "выходной", s: "больничный", a: "прогул" };
+const TYPE_NAME = { w: "смена", x: "доп. смена", o: "выходной", s: "больничный", a: "прогул", l: "опоздание" };
 
 // ---------- общие помощники ----------
 const enc = s => new TextEncoder().encode(s);
@@ -110,7 +110,7 @@ function makeCalc(data) {
 // ---------- тексты сообщений (HTML-разметка Telegram) ----------
 const esc = s => String(s == null ? "" : s).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
 const bar = (frac, n = 10) => { const k = Math.max(0, Math.min(n, Math.round((frac || 0) * n))); return "▰".repeat(k) + "▱".repeat(n - k); };
-const TYPE_EMO = { w: "🟢", x: "🔵", o: "⚪️", s: "🟣", a: "🔴" };
+const TYPE_EMO = { w: "🟢", x: "🔵", o: "⚪️", s: "🟣", a: "🔴", l: "🟠" };
 const pct = (a, b) => b > 0 ? Math.round(a / b * 100) : 0;
 const dd = day => day.d + " " + GEN[day.m];
 const ddShort = day => day.d + " " + GEN[day.m].slice(0, 3);
@@ -120,7 +120,7 @@ function priceLines(c, s) {
   if (!s.bonusDays || !s.pDone) return out;
   if (s.surplus >= 0) out.push("🛡 Запас: <b>" + pointsN(s.surplus) + "</b> — можно недобрать и сохранить полную премию");
   else {
-    out.push("💎 Цена балла: <b>≈ " + money(s.price) + "</b> премии");
+    if (s.nextStep && s.nextStep.need > 0) out.push("🎯 До премии " + f1(s.nextStep.pct) + "% (норма +" + (Math.round((s.nextStep.p / c.st.minPts - 1) * 10000) / 100).toString().replace(".", ",") + "%): ещё <b>" + pointsN(s.nextStep.need) + "</b> за период — это +" + money(s.nextStep.gain));
     if (s.projBonus < s.bonusMax - 0.5) out.push("🔮 Прогноз, если дальше по норме: " + money(s.projBonus) + " (−" + money(s.bonusMax - s.projBonus) + ")");
   }
   return out;

@@ -4,7 +4,7 @@
    Любое изменение здесь сначала проверяется тестами (calc_test.js) — без них ничего не выкладывается.
 
    Данные D = { months, points, totals, settings } — как их хранит календарь:
-     months["2026-10"] = { 17: "w", 18: "o", ... }   w смена · x доп. смена · o выходной · s больничный · a прогул
+     months["2026-10"] = { 17: "w", 18: "o", ... }   w смена · x доп. смена · o выходной · s больничный · a прогул · l опоздание (>15 мин, не идёт в премию)
      points["2026-10"] = { 17: 26, ... }             баллы за смену
      totals["2026-10"] = { pts, upTo, dp }           общее количество баллов из системы «по число включительно»
    now = { y, m, d, hm } — сегодняшний день (месяц с нуля) и минуты от полуночи; без него смена не считается идущей. */
@@ -14,8 +14,8 @@
   const key = (y, m) => y + "-" + String(m + 1).padStart(2, "0");
   const ord = (y, m, d) => Date.UTC(y, m, d);
   const DEF = { rate: 5800, pct: 27, minPts: 18, maxPts: 24 };
-  const TYPES0 = { x: { pay: null, bonus: true }, s: { pay: 0, bonus: false }, a: { pay: 0, bonus: false } };
-  const KNOWN = { w: 1, x: 1, o: 1, s: 1, a: 1 };
+  const TYPES0 = { x: { pay: null, bonus: true }, s: { pay: 0, bonus: false }, a: { pay: 0, bonus: false }, l: { pay: null, bonus: false } };
+  const KNOWN = { w: 1, x: 1, o: 1, s: 1, a: 1, l: 1 };
   // Старые записи хранили true вместо типа — это обычная смена
   const tp = v => v === true ? "w" : KNOWN[v] ? v : null;
 
@@ -29,13 +29,20 @@
     (st.types[t] && st.types[t].pay != null && st.types[t].pay !== "" ? +st.types[t].pay : st.rate);
   const inBonus = (st, t) => t === "w" ? true : t === "o" ? false : !!(st.types[t] && st.types[t].bonus);
   const isShift = t => t === "w" || t === "x";
-  // Процент премии по среднему баллу: меньше минимума — 0, дальше равномерно до максимума
+  // Премия ступенями. Норма — minPts (18) баллов за смену. Перевыполнение нормы на 11,11% / 22,22% / 33,33%
+  // (средний 20 / 22 / 24) даёт 14% / 20% / 27% к окладу; ниже первой ступени — 0.
+  // Ступени делят отрезок «норма → полная премия» на три равные части; проценты — доли максимальной премии.
+  const STEP_SHARE = [14 / 27, 20 / 27, 1];
+  function steps(st) {
+    const lo = st.minPts, hi = st.maxPts;
+    if (!(hi > lo)) return [{ p: hi, pct: st.pct }];
+    return STEP_SHARE.map((k, i) => ({ p: Math.round((lo + (hi - lo) * (i + 1) / 3) * 100) / 100, pct: Math.round(st.pct * k * 100) / 100 }));
+  }
   function pctFor(st, p) {
     if (p == null) return st.pct;
-    const lo = st.minPts, hi = st.maxPts;
-    if (p >= hi) return st.pct;
-    if (p < lo || hi <= lo) return 0;
-    return st.pct * (p - lo) / (hi - lo);
+    let r = 0;
+    for (const s of steps(st)) if (p >= s.p - 1e-9) r = s.pct;
+    return r;
   }
   const level = (st, p) => p >= st.maxPts ? "full" : p >= st.minPts ? "mid" : "low";
 
@@ -44,7 +51,7 @@
     const st = opts(D.settings), months = D.months || {}, pts = D.points || {}, totals = D.totals || {};
     const cur = months[key(y, m)] || {};
     const py = m === 0 ? y - 1 : y, pm = m === 0 ? 11 : m - 1, prev = months[key(py, pm)] || {};
-    const cnt = { w: 0, x: 0, s: 0, a: 0, o: 0 };
+    const cnt = { w: 0, x: 0, s: 0, a: 0, o: 0, l: 0 };
     let base = 0;
     for (const d in cur) { const t = tp(cur[d]); if (!t) continue; cnt[t]++; base += pay(st, t); }
     let bonusBase = 0, bonusDays = 0, scored = 0, ptsSum = 0;
@@ -91,10 +98,14 @@
     const bonusPct = pctFor(st, avgP), bonus = bonusBase * bonusPct / 100, bonusMax = bonusBase * st.pct / 100;
     const goal = bonusDays * st.maxPts, left = bonusDays - pDone, need = goal - pSum;
     const perDay = need <= 0 ? 0 : left > 0 ? Math.ceil(need / left * 10 - 1e-9) / 10 : null;
-    // Цена балла: сколько рублей премии меняет один балл, когда средний между минимумом и нормой
-    const price = bonusDays && st.maxPts > st.minPts ? bonusBase * st.pct / 100 / (st.maxPts - st.minPts) / bonusDays : 0;
+    // Следующая ступень: сколько баллов за период нужно набрать (при всех сменах периода) и сколько она добавит
+    const STs = steps(st), done = pSum - part;
+    const nx = avgP == null ? null : STs.find(s => s.pct > bonusPct);
+    const nextStep = nx ? { p: nx.p, pct: nx.pct, need: Math.max(0, Math.ceil(nx.p * bonusDays - done - 1e-9)), gain: bonusBase * (nx.pct - bonusPct) / 100 } : null;
+    // Цена балла: средняя прибавка премии на один балл до следующей ступени
+    const price = nextStep && nextStep.need > 0 ? nextStep.gain / nextStep.need : 0;
     // Запас: на сколько баллов можно недобрать и сохранить полную премию
-    const surplus = pDone ? (pSum - part) - pDone * st.maxPts : 0;
+    const surplus = pDone ? done - pDone * st.maxPts : 0;
     // Прогноз, если остальные смены будут ровно по норме
     const projAvg = bonusDays ? (pSum - part + left * st.maxPts) / bonusDays : null;
     const projBonus = bonusBase * pctFor(st, projAvg) / 100;
@@ -102,7 +113,7 @@
       cnt, base, bonus, bonusMax, bonusBase, bonusPct, total: base + bonus,
       bonusDays, scored, ptsSum, avg: scored ? ptsSum / scored : null, lv, list, dates, pm,
       pSum, pDone, avgP, avgSrc: manual ? "manual" : (scored ? "daily" : "none"), live, part,
-      goal, left, need, perDay, price, surplus, projBonus,
+      goal, left, need, perDay, price, surplus, projBonus, nextStep, steps: STs,
     };
   }
   // Какой премиальный период у дня: с 21 числа — уже следующий месяц
@@ -244,6 +255,6 @@
     return out;
   }
 
-  G.SmenyCalc = { PT_PRICES, PT_RATES, PT_NAMES, ptRate, ptPrices, ptFix, ptDay, ptMonth, ptWeek, ptNextPay, ptWeeks, VERSION, key, ord, opts, tp, pay, inBonus, isShift, pctFor, level, calc, periodOf, goalDay,
+  G.SmenyCalc = { steps, PT_PRICES, PT_RATES, PT_NAMES, ptRate, ptPrices, ptFix, ptDay, ptMonth, ptWeek, ptNextPay, ptWeeks, VERSION, key, ord, opts, tp, pay, inBonus, isShift, pctFor, level, calc, periodOf, goalDay,
     PAYDEF, payCfg, netv, advance, salary, HOLI, payDay, payDates, dim };
 })(typeof globalThis !== "undefined" ? globalThis : this);
