@@ -156,7 +156,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline
 .day[data-t="o"]{color:var(--off-fg)}
 .day.today{border-width:2px;border-color:var(--fg)}
 .day.pad{visibility:hidden}
-.t-w{--c:var(--accent)} .t-x{--c:var(--extra)} .t-s{--c:var(--sick)} .t-a{--c:var(--absent)} .t-o{--c:var(--off)}
+.t-w{--c:var(--accent)} .t-x{--c:var(--extra)} .t-s{--c:var(--sick)} .t-a{--c:var(--absent)} .t-l{--c:var(--mid)} .t-o{--c:var(--off)}
 .hint{font-size:13px;color:var(--muted);margin:0 2px}
 .tools{display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center}
 .link-btn{background:none;border:none;padding:4px 0;color:var(--accent);font-weight:500;text-decoration:underline;text-underline-offset:3px}
@@ -1264,10 +1264,10 @@ window.LOOK = (function(){
     <div class="settings">
       <label for="rate">Оплата за смену, ₽<input id="rate" type="number" inputmode="numeric" min="0" step="100" value="5800"></label>
       <label for="pct">Максимальная премия, %<input id="pct" type="number" inputmode="decimal" min="0" step="1" value="27"></label>
-      <label for="minPts">Минимум баллов в день<input id="minPts" type="number" inputmode="numeric" min="0" step="1" value="18"></label>
+      <label for="minPts">Норма баллов за смену<input id="minPts" type="number" inputmode="numeric" min="0" step="1" value="18"></label>
       <label for="maxPts">Баллы для полной премии<input id="maxPts" type="number" inputmode="numeric" min="0" step="1" value="24"></label>
     </div>
-    <p class="hint" style="margin-top:10px">Процент премии зависит от среднего балла за смену за отчётный период (с 21 по 20): меньше минимума — 0%, от минимума до полной — растёт равномерно, от полной и выше — максимум. Пока баллов нет, премия считается по максимуму.</p>
+    <p class="hint" style="margin-top:10px">Премия — ступенями по среднему баллу за смену за отчётный период (с 21 по 20). Месячная норма — смены × норма за смену (18). Перевыполнение на 11,11% (средний 20) — 14% к окладу, на 22,22% (22) — 20%, на 33,33% (24) — 27%. Ниже первой ступени премии нет. Смена с опозданием больше 15 минут оплачивается, но в премию не идёт. Пока баллов нет, премия считается по максимуму.</p>
     <div class="types" id="typeSettings"></div>
     <h3 class="look-h">Смена</h3>
     <div class="settings">
@@ -1537,6 +1537,7 @@ window.LOOK = (function(){
     {k:"x", name:"Доп. смена", plural:"Доп. смены", mark:"Д"},
     {k:"s", name:"Больничный", plural:"Больничные", mark:"Б"},
     {k:"a", name:"Прогул", plural:"Прогулы", mark:"П"},
+    {k:"l", name:"Опоздание", plural:"Опоздания", mark:"О"},
     {k:"o", name:"Выходной", plural:"Выходные", mark:"В"}
   ];
   const T = Object.fromEntries(TYPES.map(t=>[t.k,t]));
@@ -1571,7 +1572,7 @@ window.LOOK = (function(){
   let totals = {};   // "2026-10" -> {pts:343, upTo:"2026-10-15"} общее за период премии, введённое вручную
   let sel = null;    // день, для которого открыт ввод баллов
   let settings = {rate:5800, pct:27, minPts:18, maxPts:24, types:{
-    x:{pay:null, bonus:true}, s:{pay:0, bonus:false}, a:{pay:0, bonus:false}
+    x:{pay:null, bonus:true}, s:{pay:0, bonus:false}, a:{pay:0, bonus:false}, l:{pay:null, bonus:false}
   }};
   let db = null;
 
@@ -1812,6 +1813,7 @@ window.LOOK = (function(){
     if(c.cnt.x) parts.push(c.cnt.x+" доп.");
     if(c.cnt.s) parts.push(c.cnt.s+" больн.");
     if(c.cnt.a) parts.push(c.cnt.a+" прогул"+(c.cnt.a===1?"":c.cnt.a<5?"а":"ов"));
+    if(c.cnt.l) parts.push(c.cnt.l+" опозд.");
     // Парт-тайм добавляется к заработку, если так выбрано в его настройках
     const ptM = (settings.pt && settings.pt.inMoney) ? SC.ptMonth(dayx, y, m).sum : 0;
     if(ptM) parts.push("парт-тайм "+fmt(ptM));
@@ -1909,7 +1911,7 @@ window.LOOK = (function(){
         if(st.perDay===0) facts.push(pill("цель периода набрана","good"));
         if(st.left>0) facts.push(pill(shifts(st.left)+" до 20-го"));
         if(cc.pDone && cc.surplus>=0) facts.push(pill("запас "+cc.surplus,"good"));
-        else if(cc.pDone && cc.price) facts.push(pill("балл ≈ "+fmt(cc.price),"warn"));
+        else if(cc.pDone && cc.nextStep && cc.nextStep.need>0) facts.push(pill("до "+pctTxt(cc.nextStep.pct)+" ещё "+cc.nextStep.need,"warn"));
         btn("Внести баллы", enter, "save-btn");
       } else {
         $("tBig").innerHTML = '<span class="tb-n num">'+f1(p)+'</span><span class="tb-l">'+pW(p)+'<br>'+(cc.live ? "уже сегодня" : "сегодня")+'</span>';
@@ -1940,6 +1942,7 @@ window.LOOK = (function(){
     if(type==="o"){ el.classList.add("rest"); setChip("Сегодня выходной","off"); $("tBig").innerHTML="Отдыхайте"; $("tText").textContent = nextTxt || "Смены впереди пока не отмечены."; }
     else if(type==="s"){ setChip("Больничный","sick"); $("tBig").innerHTML="Выздоравливайте"; $("tText").textContent = nextTxt; }
     else if(type==="a"){ setChip("Прогул","absent"); $("tBig").innerHTML="Сегодня прогул"; $("tText").textContent = nextTxt; }
+    else if(type==="l"){ setChip("Опоздание","absent"); $("tBig").innerHTML="Опоздание"; $("tText").textContent = "Смена оплачивается, но в премию не идёт: баллы за сегодня не учитываются. "+nextTxt; }
     else {
       el.classList.add("rest"); setChip("Сегодня не отмечено","off");
       $("tBig").innerHTML = now.getDate()+" "+GEN[now.getMonth()];
@@ -2098,7 +2101,7 @@ window.LOOK = (function(){
     const savedV = (pts[key(view.y,view.m)]||{})[sel];
     const recTxt = prevTop>=0 && v>prevTop ? (savedV===v ? " · это рекорд смены" : " · новый рекорд смены!") : "";
     const pc = calc(periodOf(new Date(view.y,view.m,sel)).y, periodOf(new Date(view.y,view.m,sel)).m);
-    const priceTxt = pc.pDone && pc.surplus<0 ? " · цена балла ≈ "+fmt(pc.price) : "";
+    const priceTxt = pc.pDone && pc.nextStep && pc.nextStep.need>0 ? " · до премии "+pctTxt(pc.nextStep.pct)+" ещё "+pc.nextStep.need+" "+pW(pc.nextStep.need) : "";
     el.textContent = f1(v)+" "+pW(v)+": "+dayTxt+per+(c.avgSrc==="manual" ? " (по введённому общему количеству)" : "")+recTxt+priceTxt;
   }
   function renderQuick(){
@@ -2635,13 +2638,15 @@ window.LOOK = (function(){
     $("recAvg").textContent = rec.bestAvg ? f1(rec.bestAvg.v) : "—";
     $("recAvgSub").textContent = rec.bestAvg ? "премия за "+MONTHS[rec.bestAvg.m] : "нужно 5+ смен в периоде";
     const t0=new Date(now.getFullYear(), now.getMonth(), now.getDate()), per=periodOf(t0), c=calc(per.y, per.m);
-    if(!c.pDone){ $("priceLbl").textContent="Цена балла"; $("priceVal").textContent="—"; $("priceText").textContent="Внесите баллы хотя бы за одну смену текущего периода."; }
+    if(!c.pDone){ $("priceLbl").textContent="Следующая ступень"; $("priceVal").textContent="—"; $("priceText").textContent="Внесите баллы хотя бы за одну смену текущего периода."; }
     else if(c.surplus>=0){
       $("priceLbl").textContent="Запас до потери полной премии"; $("priceVal").textContent=c.surplus+" "+pW(c.surplus);
-      $("priceText").textContent="Средний за период "+f1(c.avgP)+" — премия полная. Если запас уйдёт в минус, каждый недостающий балл будет стоить ≈ "+fmt(c.price)+".";
+      $("priceText").textContent="Средний за период "+f1(c.avgP)+" — премия полная, "+pctTxt(settings.pct)+". Если средний опустится ниже "+settings.maxPts+", премия упадёт на ступень.";
     } else {
-      $("priceLbl").textContent="Цена балла"; $("priceVal").textContent="≈ "+fmt(c.price);
-      $("priceText").textContent="Средний за период "+f1(c.avgP)+" — ниже нормы, поэтому каждый балл сейчас меняет премию на эту сумму. Если дальше работать по норме, премия будет "+fmt(c.projBonus)+" из "+fmt(c.bonusMax)+".";
+      const nx=c.nextStep, stTxt=c.steps.map(s=>f1(s.p)+" → "+pctTxt(s.pct)).join(", ");
+      $("priceLbl").textContent = nx ? "До премии "+pctTxt(nx.pct) : "Следующая ступень";
+      $("priceVal").textContent = nx ? nx.need+" "+pW(nx.need) : "—";
+      $("priceText").textContent="Средний за период "+f1(c.avgP)+" — сейчас премия "+pctTxt(c.bonusPct)+"."+(nx ? " Наберите за период ещё "+nx.need+" "+pW(nx.need)+" — премия вырастет на "+fmt(nx.gain)+"." : "")+" Ступени по среднему: "+stTxt+".";
     }
     const last=rec.list.slice(-20);
     barChart($("chShifts"), last.map(it=>({v:it.p, vl:f1(it.p), cls:lvCls(it.p), label:it.d+(it.d===1||last.indexOf(it)===0?"."+String(it.m+1).padStart(2,"0"):"")})),
@@ -2944,7 +2949,7 @@ window.LOOK = (function(){
       grid.appendChild(b);
     }
     const parts=[];
-    if(cnt.w) parts.push(shifts(cnt.w)); if(cnt.x) parts.push(cnt.x+" доп."); if(cnt.o) parts.push(plural(cnt.o,"выходной","выходных","выходных")); if(cnt.s) parts.push(cnt.s+" больн."); if(cnt.a) parts.push(cnt.a+" прогул.");
+    if(cnt.w) parts.push(shifts(cnt.w)); if(cnt.x) parts.push(cnt.x+" доп."); if(cnt.o) parts.push(plural(cnt.o,"выходной","выходных","выходных")); if(cnt.s) parts.push(cnt.s+" больн."); if(cnt.a) parts.push(cnt.a+" прогул."); if(cnt.l) parts.push(cnt.l+" опозд.");
     let txt = "Распознано: "+(parts.join(", ")||"ничего")+".";
     if(phData.shifts!=null) txt += (phData.shifts===cnt.w+cnt.x ? " Совпадает со столбцом «Смены» в графике ("+phData.shifts+") ✓" : " ⚠ В графике в столбце «Смены» указано "+phData.shifts+" — проверьте дни.");
     if(vac) txt += " Отпуск ("+dayz(vac)+") отмечен как выходные.";
@@ -3466,7 +3471,7 @@ window.LOOK = (function(){
     out.append(el("span","", same ? Cap1(MONTHS[m])+" по отметкам" : Cap1(MONTHS[m])+" сейчас: "+fmt(a)+" → будет"), el("b","", fmt(b)));
     if(same) out.appendChild(el("span","", "Нажимайте + и −: сколько добавят доп. смены и другой средний балл."));
     if(Math.abs(d)>=1) out.appendChild(el("span", d>0 ? "up" : "dn", (d>0 ? "+" : "−")+fmt(Math.abs(d))+(d>0 ? " к месяцу" : " от месяца")));
-    out.appendChild(el("span","", "Премия "+pctTxt(pc)+(wiA>=settings.maxPts ? " — полная" : wiA<settings.minPts ? " — меньше минимума, премии нет" : "")+(wiX ? " · доп. смена ≈ "+fmt(netv(px*(1+(inBonus("x")?pc/100:0)))) : "")));
+    out.appendChild(el("span","", "Премия "+pctTxt(pc)+(wiA>=settings.maxPts ? " — полная" : pc===0 ? " — ниже первой ступени, премии нет" : "")+(wiX ? " · доп. смена ≈ "+fmt(netv(px*(1+(inBonus("x")?pc/100:0)))) : "")));
     const free=freeDays(y,m); if(wiX>free) out.appendChild(el("span","dn", "Свободных дней в "+MONTHS_PREP[m]+" осталось "+free));
   }
   const wiSet = (dx, da) => { wiX=Math.max(0, Math.min(20, wiX+dx)); wiA=Math.max(0, Math.min(60, (wiA==null?settings.maxPts:wiA)+da)); renderWI(); };
@@ -4002,7 +4007,9 @@ window.LOOK = (function(){
     closeEditor(); render(); sfx.unmark(); $("dMsg").textContent="Все данные удалены. Настройки остались."; status("Данные удалены");
   };
   // Помощь: что нового, написать разработчику
-  const NEWS = [{v:"3.3", d:"12 ноября 2026", items:[
+  const NEWS = [{v:"3.4", d:"13 ноября 2026", items:[
+    "Премия теперь считается ступенями, как в правилах: средний 20 — 14%, 22 — 20%, 24 — 27%, ниже 20 — премии нет. Вместо «цены балла» видно, сколько баллов осталось до следующей ступени",
+    "Новая отметка «Опоздание» (больше 15 минут): смена оплачивается, но в премию не идёт и её баллы не учитываются"]},{v:"3.3", d:"12 ноября 2026", items:[
     "Парт-тайм: новые ставки с 12 ноября — без типа 90 ₽, лёгкий 200, средний 400, тяжёлый 800, сверхтяжёлый 1 250. Ремонты до 12 ноября остаются по старым ценам, а записанные с 12 ноября по старым — пересчитаны"]},{v:"3.2", d:"26 октября 2026", items:[
     "Новый вид «Тёплое стекло»: матовые карточки, приветствие, график баллов по сменам, плавающее меню и переходы из размытия. Другие темы — в «Настройки» → «Оформление», раскладка у всех одна",
     "Парт-тайм — прямо в нижнем меню. «Статистика» начинается с отчёта за месяц или год: заработано, баллы, премия, линия баллов и «откуда баллы»",
