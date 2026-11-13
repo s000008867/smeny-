@@ -120,7 +120,7 @@ function priceLines(c, s) {
   if (!s.bonusDays || !s.pDone) return out;
   if (s.surplus >= 0) out.push("🛡 Запас: <b>" + pointsN(s.surplus) + "</b> — можно недобрать и сохранить полную премию");
   else {
-    if (s.nextStep && s.nextStep.need > 0) out.push("🎯 До премии " + f1(s.nextStep.pct) + "%: ещё <b>" + pointsN(s.nextStep.need) + "</b> за период — это +" + money(s.nextStep.gain));
+    if (s.nextStep && s.nextStep.need > 0) out.push("🎯 До премии " + f1(s.nextStep.pct) + "% (норма +" + (Math.round((s.nextStep.p / c.st.minPts - 1) * 10000) / 100).toString().replace(".", ",") + "%): ещё <b>" + pointsN(s.nextStep.need) + "</b> за период — это +" + money(s.nextStep.gain));
     if (s.projBonus < s.bonusMax - 0.5) out.push("🔮 Прогноз, если дальше по норме: " + money(s.projBonus) + " (−" + money(s.bonusMax - s.projBonus) + ")");
   }
   return out;
