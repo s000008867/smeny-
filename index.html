@@ -2013,7 +2013,7 @@ window.LOOK = (function(){
     $("yearTitle").textContent = "Заработок за "+y+" год"+(payCfg().ndfl ? " · на руки" : "");
     let tw=0, ts=0;
     for(let m=0;m<12;m++){
-      const c = calc(y, m), worked = c.cnt.w + c.cnt.x;
+      const c = calc(y, m), worked = c.cnt.w + c.cnt.x + c.cnt.l;
       if(!worked && !c.total && m!==view.m) continue;
       tw+=worked; ts+=netv(c.total);
       const tr=document.createElement("tr"); if(m===view.m) tr.className="cur";
@@ -2965,7 +2965,7 @@ window.LOOK = (function(){
     const parts=[];
     if(cnt.w) parts.push(shifts(cnt.w)); if(cnt.x) parts.push(cnt.x+" доп."); if(cnt.o) parts.push(plural(cnt.o,"выходной","выходных","выходных")); if(cnt.s) parts.push(cnt.s+" больн."); if(cnt.a) parts.push(cnt.a+" прогул."); if(cnt.l) parts.push(cnt.l+" опозд.");
     let txt = "Распознано: "+(parts.join(", ")||"ничего")+".";
-    if(phData.shifts!=null) txt += (phData.shifts===cnt.w+cnt.x ? " Совпадает со столбцом «Смены» в графике ("+phData.shifts+") ✓" : " ⚠ В графике в столбце «Смены» указано "+phData.shifts+" — проверьте дни.");
+    if(phData.shifts!=null) txt += (phData.shifts===cnt.w+cnt.x+(cnt.l||0) ? " Совпадает со столбцом «Смены» в графике ("+phData.shifts+") ✓" : " ⚠ В графике в столбце «Смены» указано "+phData.shifts+" — проверьте дни.");
     if(vac) txt += " Отпуск ("+dayz(vac)+") отмечен как выходные.";
     if(unread) txt += " Не прочитано дней: "+unread+" — отметьте их сами.";
     txt += " Нажмите на день, чтобы исправить. Изменятся дни с пунктирной рамкой: "+chg+".";
@@ -3883,7 +3883,7 @@ window.LOOK = (function(){
       const c=calc(now.getFullYear(), now.getMonth()), tot=netv(c.total), idx=now.getFullYear()*12+now.getMonth(), t0=new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const nx=payEvents(idx, 2).filter(e=>e.date>=t0 && e.amt>0)[0], st2=periodStats(periodOf(t0).y, periodOf(t0).m);
       sh.innerHTML=dots(3)+'<h2>Готово!</h2>'+
-        '<div class="qs-res"><small>В '+MONTHS_PREP[now.getMonth()]+' ты получишь</small><b class="num">≈ '+fmt(tot)+'</b><span>'+shifts(c.cnt.w+c.cnt.x)+' · премия '+pctTxt(c.bonusPct)+'</span></div>'+
+        '<div class="qs-res"><small>В '+MONTHS_PREP[now.getMonth()]+' ты получишь</small><b class="num">≈ '+fmt(tot)+'</b><span>'+shifts(c.cnt.w+c.cnt.x+c.cnt.l)+' · премия '+pctTxt(c.bonusPct)+'</span></div>'+
         (nx ? '<p class="qs-p">Ближайшая выплата: '+(nx.kind==="adv"?"аванс":"зарплата")+' '+evDate(nx)+' — <b>'+fmt(nx.amt)+'</b></p>' : '')+
         '<p class="qs-p">Для полной премии держи в среднем <b>'+settings.maxPts+' баллов</b> за смену'+(st2.perDay>0 ? ' — сейчас нужно '+f1(st2.perDay)+' в день' : '')+'. После смены жми +1…+6 за каждый ремонт или вноси баллы числом.</p>'+
         '<div class="row qs-row"><button class="save-btn" id="qsDone">Открыть календарь</button><button class="link-btn" id="qsTour">Как пользоваться</button></div>';
@@ -4001,9 +4001,9 @@ window.LOOK = (function(){
     for(const k of keys){ const [yy,mm]=k.split("-").map(Number), D=months[k]||{}, P=pts[k]||{};
       for(let d=1; d<=dimOf(yy,mm-1); d++){ const t=D[d], note=(dayx[ds(yy,mm-1,d)]||{}).note||""; if(!t && !note) continue;
         rows.push([String(d).padStart(2,"0")+"."+String(mm).padStart(2,"0")+"."+yy, WD2[new Date(yy,mm-1,d).getDay()], t ? T[t].name : "", P[d]!=null && isShift(t) ? String(P[d]).replace(".",",") : "", t ? Math.round(pay(t)) : "", note]); } }
-    rows.push([]); rows.push(["Месяц","Смен","Доп. смен","Средний балл за период","Премия, %","Премия, ₽","Итого, ₽"]);
+    rows.push([]); rows.push(["Месяц","Смен","Доп. смен","Опозданий","Средний балл за период","Премия, %","Премия, ₽","Итого, ₽"]);
     for(const k of keys){ const [yy,mm]=k.split("-").map(Number); if(!Object.keys(months[k]||{}).length) continue; const c=calc(yy,mm-1);
-      rows.push([Cap1(MONTHS[mm-1])+" "+yy, c.cnt.w, c.cnt.x, c.avgP!=null ? f1(c.avgP) : "", f1(c.bonusPct), Math.round(c.bonus), Math.round(c.total)]); }
+      rows.push([Cap1(MONTHS[mm-1])+" "+yy, c.cnt.w, c.cnt.x, c.cnt.l, c.avgP!=null ? f1(c.avgP) : "", f1(c.bonusPct), Math.round(c.bonus), Math.round(c.total)]); }
     const q=v=>{ const t=String(v==null ? "" : v); return /[;"\n\r]/.test(t) ? '"'+t.replace(/"/g,'""')+'"' : t; };
     return "﻿"+rows.map(r=>r.map(q).join(";")).join("\r\n");
   }
