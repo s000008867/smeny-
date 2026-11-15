@@ -3400,7 +3400,12 @@ window.LOOK = (function(){
   const evName = e => (e.kind==="adv" ? "Аванс" : "Зарплата")+" за "+MONTHS[e.m];
   const evDate = e => e.date.getDate()+" "+GEN[e.date.getMonth()];
   const evKey = e => key(e.date.getFullYear(), e.date.getMonth());
-  const evGot = e => { const L=(pays[evKey(e)]||[]).filter(p=> e.kind==="adv" ? p.t==="Аванс" : (p.t==="Зарплата" || p.t==="Премия")); return L.length ? L.reduce((s,p)=>s+(+p.a||0),0) : null; };
+  // Две выплаты одного вида в одном месяце (зарплата за ноябрь 4 декабря и за декабрь 31 декабря из-за праздников):
+  // записи «сколько пришло» делятся между ними по дню — запись относится к той выплате, чей день ближе.
+  const evOther = e => { for(const dm of [-1,1]){ const o=payEvents(e.y*12+e.m+dm, 1).find(x=>x.kind===e.kind); if(o && evKey(o)===evKey(e)) return o; } return null; };
+  const evMine = (e, p, o) => !o || p.d==null || Math.abs(p.d-e.date.getDate()) <= Math.abs(p.d-o.date.getDate());
+  const evType = (e, p) => e.kind==="adv" ? p.t==="Аванс" : (p.t==="Зарплата" || p.t==="Премия");
+  const evGot = e => { const o=evOther(e), L=(pays[evKey(e)]||[]).filter(p=> evType(e,p) && evMine(e,p,o)); return L.length ? L.reduce((s,p)=>s+(+p.a||0),0) : null; };
   let ckOpen=null, ckDraft=null;
   function renderMoney(){
     const t0=new Date(now.getFullYear(), now.getMonth(), now.getDate()), idx=now.getFullYear()*12+now.getMonth();
@@ -3441,7 +3446,7 @@ window.LOOK = (function(){
         const kind = e.kind==="adv" ? "Аванс" : "Зарплата", k=evKey(e);
         // Сохранить сумму выплаты: старые записи этой выплаты заменяются новой (так её можно исправить)
         const put = a => {
-          const keep=(pays[k]||[]).filter(p=> e.kind==="adv" ? p.t!=="Аванс" : (p.t!=="Зарплата" && p.t!=="Премия"));
+          const o=evOther(e), keep=(pays[k]||[]).filter(p=> !(evType(e,p) && evMine(e,p,o)));   // вторая выплата того же вида в этом месяце не затирается
           pays[k] = a==null ? keep : keep.concat({d:e.date.getDate(), a:Math.round(a), t:kind});
           if(!pays[k].length) delete pays[k];
           saveX("p",k,pays[k]||null); ckOpen=null; ckDraft=null; sfx.save(); renderMoney(); renderPays();
