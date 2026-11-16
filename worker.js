@@ -229,14 +229,17 @@ function textSchedule(data, today) {
 // Итоги недели: последние 7 дней против предыдущих 7
 function textWeek(data, today) {
   const c = makeCalc(data);
-  const span = (from, to) => { let n = 0, sum = 0, cnt = 0, norm = 0, best = null;
-    for (let i = from; i <= to; i++) { const d = addDays(today, -i), t = c.typeOn(d); if (!c.isShift(t)) continue; n++; const p = c.ptsOn(d);
+  // Опоздание — оплаченная смена без баллов в премию; до LATE_FROM отметка считается обычной сменой (как в calc.js)
+  const span = (from, to) => { let n = 0, late = 0, sum = 0, cnt = 0, norm = 0, best = null;
+    for (let i = from; i <= to; i++) { const d = addDays(today, -i), t = c.typeOn(d);
+      if (t === "l" && SC.lateOk(d.y, d.m, d.d)) { late++; continue; }
+      if (!c.isShift(t === "l" ? "w" : t)) continue; n++; const p = c.ptsOn(d);
       if (p != null) { sum += p; cnt++; if (p >= c.st.maxPts) norm++; if (!best || p > best.p) best = { p, d }; } }
-    return { n, sum, cnt, norm, best, avg: cnt ? sum / cnt : null }; };
+    return { n, late, sum, cnt, norm, best, avg: cnt ? sum / cnt : null }; };
   const a = span(0, 6), b = span(7, 13);
   const lines = ["🗓 <b>Неделя: " + ddShort(addDays(today, -6)) + " – " + ddShort(today) + "</b>", ""];
-  if (!a.n) return lines.concat("Смен на этой неделе не было. Отдохнули — тоже результат 😌").join("\n");
-  lines.push("Смен: <b>" + a.n + "</b>" + (a.cnt < a.n ? " (баллы внесены за " + a.cnt + ")" : ""));
+  if (!(a.n + a.late)) return lines.concat("Смен на этой неделе не было. Отдохнули — тоже результат 😌").join("\n");
+  lines.push("Смен: <b>" + (a.n + a.late) + "</b>" + (a.late ? " (опозданий: " + a.late + ")" : "") + (a.cnt < a.n ? " (баллы внесены за " + a.cnt + ")" : ""));
   if (a.cnt) {
     lines.push("Баллов: <b>" + f1(a.sum) + "</b> · средний <b>" + f1(a.avg) + "</b>");
     lines.push("Норма " + c.st.maxPts + "+: " + a.norm + " из " + a.cnt + "  " + bar(a.norm / a.cnt, 7));
@@ -438,7 +441,9 @@ function parsePoints(text, today) {
 
 async function recordFromChat(env, u, day, p, today) {
   const c = makeCalc(u.data || {});
-  if (!c.isShift(c.typeOn(day))) return { ok: false, text: (ordOf(day) === ordOf(today) ? "Сегодня" : day.d + " " + GEN[day.m]) + " по графику не смена. Отметьте смену в календаре или пришлите баллы с датой: 15.10 26." };
+  const label = ordOf(day) === ordOf(today) ? "Сегодня" : day.d + " " + GEN[day.m];
+  if (c.typeOn(day) === "l" && SC.lateOk(day.y, day.m, day.d)) return { ok: false, text: label + " отмечено опоздание — смена оплачивается, но баллы за неё в премию не идут, записывать их не нужно." };
+  if (!c.isShift(c.typeOn(day))) return { ok: false, text: label + " по графику не смена. Отметьте смену в календаре или пришлите баллы с датой: 15.10 26." };
   if (ordOf(day) > ordOf(today)) return { ok: false, text: "Эта смена ещё не наступила." };
   if (p > 200) return { ok: false, text: "Слишком большое число. Пришлите баллы за смену, например 26." };
   applyPoints(u, day, p);
