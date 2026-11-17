@@ -60,6 +60,11 @@ const money = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, " ") +
 const key = (y, m) => y + "-" + String(m + 1).padStart(2, "0");
 
 // Текущая дата по Москве: {y, m (0-11), d, hm (минуты от полуночи)}
+// Конец смены в минутах от полуночи — из настроек календаря («Смена» → до), по умолчанию 21:30 (как в calc.js)
+function shiftEndMin(data) {
+  const [eh, em] = String((((data || {}).settings || {}).shift || {}).to || "21:30").split(":").map(Number);
+  return (isFinite(eh) ? eh : 21) * 60 + (isFinite(em) ? em : 30);
+}
 function mskNow(ms = Date.now()) {
   const t = new Date(ms + TZ_OFFSET_H * 3600e3);
   return { y: t.getUTCFullYear(), m: t.getUTCMonth(), d: t.getUTCDate(), hm: t.getUTCHours() * 60 + t.getUTCMinutes() };
@@ -765,7 +770,7 @@ export default {
       }
       // Баллы внесли после конца смены — сразу присылаем статистику
       const today = mskNow();
-      if (u.enabled && today.hm >= 21 * 60 + 30) { u.sent = u.sent || {}; sentNow = await endOfShift(env, u, "sync", today); }
+      if (u.enabled && today.hm >= shiftEndMin(u.data)) { u.sent = u.sent || {}; sentNow = await endOfShift(env, u, "sync", today); }
       // Бережём лимит записей: сохраняем, только если что-то поменялось
       const after = JSON.stringify([u.enabled, u.appUrl, u.data, (u.inbox || []).length]);
       if (after !== before || sentNow) {
