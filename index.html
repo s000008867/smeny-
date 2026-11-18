@@ -2864,6 +2864,7 @@ window.LOOK = (function(){
   function mapCell(v){
     const s = String(v==null ? "" : v).trim().toLowerCase().replace(/\s+/g,"").replace(/b/g,"в").replace(/o/g,"о").replace(/p/g,"р");
     if(!s || s==="-" || s==="—") return null;
+    if(/^(до|дод)$/.test(s)) return "o";                         // ДО/ДОД — отпуск без сохранения/доп. отпуск, не доп. смена
     if(/^\d+([.,]\d+)?[дd]$/.test(s) || /^д(оп)?/.test(s)) return "x";
     if(/^\d+([.,]\d+)?[нnч]?$/.test(s)) return parseFloat(s.replace(",","."))>0 ? "w" : "o";
     if(/^в(ых)?/.test(s)) return "o";
