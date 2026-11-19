@@ -281,10 +281,12 @@ function textIf(data, today, n) {
   const c0 = makeCalc(data);
   let day = null; for (let i = 0; i <= 40; i++) { const d = addDays(today, i); if (c0.isShift(c0.typeOn(d)) && c0.ptsOn(d) == null) { day = d; break; } }
   if (!day) return "🔮 Не нашёл ближайшую смену без баллов. Отметьте смены в календаре.";
-  const per = c0.periodOf(day), before = c0.calc(per.y, per.m);
+  // Считаем так, будто смена уже закончилась: иначе баллы идущей сегодня смены — «частичные» и не входят в средний,
+  // и ответ посреди смены был бы «ничего не изменится»
+  const per = c0.periodOf(day), done = Object.assign(mskNow(), { hm: 24 * 60 }), before = SC.calc(data, per.y, per.m, done);
   const copy = JSON.parse(JSON.stringify(data)); copy.points = copy.points || {}; const k = key(day.y, day.m);
   copy.points[k] = Object.assign({}, copy.points[k] || {}, { [day.d]: n });
-  const after = makeCalc(copy).calc(per.y, per.m);
+  const after = SC.calc(copy, per.y, per.m, done);
   const lines = ["🔮 <b>Если " + (ordOf(day) === ordOf(today) ? "сегодня" : dd(day)) + " набрать " + n + "</b>", ""];
   lines.push("Средний: " + (before.avgP != null ? f1(before.avgP) : "—") + " → <b>" + (after.avgP != null ? f1(after.avgP) : "—") + "</b>");
   lines.push("Премия: " + money(before.bonus) + " → <b>" + money(after.bonus) + "</b>" + (after.bonus >= after.bonusMax - 0.5 ? " ✅ полная" : ""));
