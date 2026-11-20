@@ -2230,10 +2230,13 @@ window.LOOK = (function(){
   $("importLabel").addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); $("importFile").click(); } });
   let imported=null;
   function prepareImport(j, src){
-    if(!j || typeof j.months!=="object") throw 0;
+    if(!j || !j.months || typeof j.months!=="object" || Array.isArray(j.months)) throw 0;
     const ms={}; for(const k in j.months) if(/^\d{4}-\d{2}$/.test(k)) ms[k]=norm(j.months[k]);
     const ps={}; for(const k in objOr(j.points)) if(/^\d{4}-\d{2}$/.test(k)) ps[k]=cleanPts(j.points[k]);
-    imported={months:ms, points:ps, totals:objOr(j.totals), settings:objOr(j.settings), days:j.days?objOr(j.days):null, pays:j.pays?objOr(j.pays):null, catalog:Array.isArray(j.catalog)?j.catalog:null};
+    // Общее количество баллов: только с числом и датой «по число» — испорченная запись давала NaN и нулевую премию
+    const ts={}; for(const [k,t] of Object.entries(objOr(j.totals))) if(/^\d{4}-\d{2}$/.test(k) && t && typeof t==="object" && isFinite(+t.pts) && t.pts!==null && t.pts!=="" && /^\d{4}-\d{2}-\d{2}$/.test(t.upTo)){
+      ts[k]={pts:+t.pts, upTo:t.upTo}; if(t.dp!=null && isFinite(+t.dp)) ts[k].dp=+t.dp; if(t.fx) ts[k].fx=1; }
+    imported={months:ms, points:ps, totals:ts, settings:objOr(j.settings), days:j.days?objOr(j.days):null, pays:j.pays?objOr(j.pays):null, catalog:Array.isArray(j.catalog)?j.catalog:null};
     $("importInfo").textContent = src+": "+Object.keys(ms).length+" мес. Текущие отметки за эти месяцы заменятся.";
     $("importConfirm").hidden=false; bmsg("");
     $("importConfirm").scrollIntoView({block:"center"});
@@ -2291,7 +2294,7 @@ window.LOOK = (function(){
     for(const k in imported.months){ months[k]=imported.months[k]; pts[k]=imported.points[k]||{}; if(imported.totals[k]) totals[k]=imported.totals[k]; else delete totals[k]; pending[k]=true; }
     if(imported.settings){ applySettings(imported.settings); setPending=true; }
     if(imported.days) for(const id in imported.days){ if(/^\d{4}-\d{2}-\d{2}$/.test(id)){ const D=cleanDay(imported.days[id]); if(D){ dayx[id]=D; saveX("d", id, D); } } }
-    if(imported.pays) for(const k in imported.pays){ if(PAY_KEY.test(k)){ pays[k]=imported.pays[k]; saveX("p", k, pays[k]); } }
+    if(imported.pays) for(const k in imported.pays){ if(PAY_KEY.test(k)){ const L=arrOr(imported.pays[k]).filter(p=>p && typeof p==="object" && isFinite(+p.a) && p.a!==null && p.a!==""); if(L.length){ pays[k]=L; saveX("p", k, pays[k]); } /* пусто или испорчено — уже внесённые выплаты не трогаем */ } }
     if(imported.catalog && imported.catalog.length){ catalog=imported.catalog; saveX("cat","list",catalog); }
     imported=null; render(); bmsg("Восстанавливаю…");
     await $("saveNow").onclick();
