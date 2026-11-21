@@ -3482,21 +3482,26 @@ window.LOOK = (function(){
     renderWI();
   }
   // «Что если»: доп. смены и средний балл → сумма за текущий месяц
-  let wiX=0, wiA=null;
+  let wiX=0, wiA=null, wiTouched=false;   // wiTouched: средний меняли кнопками; пока нет — берём настоящий процент премии
   function renderWI(){
     const y=now.getFullYear(), m=now.getMonth(), c=calc(y,m);
-    if(wiA==null) wiA = c.avgP!=null ? Math.round(c.avgP) : settings.maxPts;
+    if(wiA==null) wiA = c.avgP!=null ? Math.floor(c.avgP) : settings.maxPts;   // вниз: ступени на целых 20/22/24, так кнопки стартуют с той же ступени, что и настоящий средний
     $("wiX").textContent=wiX; $("wiA").textContent=wiA;
-    const px=pay("x"), base2=c.base+wiX*px, bb2=c.bonusBase+(inBonus("x") ? wiX*px : 0), pc=pctFor(wiA), tot2=base2+bb2*pc/100;
+    // Премия месяца — за 21-е прошлого … 20-е этого. После 20-го период закрыт: средний её уже не изменит,
+    // а премия за новые доп. смены уйдёт в следующий месяц. Пока средний не трогали — настоящий процент, без округления
+    const closed = now.getDate()>20, real = closed || !wiTouched;
+    const px=pay("x"), base2=c.base+wiX*px, bb2=c.bonusBase+(inBonus("x") && !closed ? wiX*px : 0), pc=real ? c.bonusPct : pctFor(wiA), tot2=base2+bb2*pc/100;
     const a=netv(c.total), b=netv(tot2), d=b-a, out=$("wiOut"); out.textContent="";
     const same = !wiX && Math.abs(d)<1;
     out.append(el("span","", same ? Cap1(MONTHS[m])+" по отметкам" : Cap1(MONTHS[m])+" сейчас: "+fmt(a)+" → будет"), el("b","", fmt(b)));
     if(same) out.appendChild(el("span","", "Нажимайте + и −: сколько добавят доп. смены и другой средний балл."));
     if(Math.abs(d)>=1) out.appendChild(el("span", d>0 ? "up" : "dn", (d>0 ? "+" : "−")+fmt(Math.abs(d))+(d>0 ? " к месяцу" : " от месяца")));
-    out.appendChild(el("span","", "Норма "+(wiA>=settings.minPts ? "+" : "")+overTxt(wiA)+" · премия "+pctTxt(pc)+(wiA>=settings.maxPts ? " — полная" : pc===0 ? " — ниже первой ступени, премии нет" : "")+(wiX ? " · доп. смена ≈ "+fmt(netv(px*(1+(inBonus("x")?pc/100:0)))) : "")));
+    const aShow = real && c.avgP!=null ? c.avgP : wiA;
+    out.appendChild(el("span","", "Норма "+(aShow>=settings.minPts ? "+" : "")+overTxt(aShow)+" · премия "+pctTxt(pc)+(pc>=settings.pct ? " — полная" : pc===0 ? " — ниже первой ступени, премии нет" : "")+(wiX ? " · доп. смена ≈ "+fmt(netv(px*(1+(inBonus("x") && !closed ? pc/100 : 0)))) : "")));
+    if(closed) out.appendChild(el("span","", "Период премии за "+MONTHS[m]+" закрылся 20-го: средний её уже не изменит, а премия за доп. смены после 20-го придёт в следующем месяце."));
     const free=freeDays(y,m); if(wiX>free) out.appendChild(el("span","dn", "Свободных дней в "+MONTHS_PREP[m]+" осталось "+free));
   }
-  const wiSet = (dx, da) => { wiX=Math.max(0, Math.min(20, wiX+dx)); wiA=Math.max(0, Math.min(60, (wiA==null?settings.maxPts:wiA)+da)); renderWI(); };
+  const wiSet = (dx, da) => { if(da) wiTouched=true; wiX=Math.max(0, Math.min(20, wiX+dx)); wiA=Math.max(0, Math.min(60, (wiA==null?settings.maxPts:wiA)+da)); renderWI(); };
   $("wiXm").onclick=()=>wiSet(-1,0); $("wiXp").onclick=()=>wiSet(1,0); $("wiAm").onclick=()=>wiSet(0,-1); $("wiAp").onclick=()=>wiSet(0,1);
   // График заработка по месяцам
   function renderMoneyChart(){
