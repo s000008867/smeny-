@@ -179,7 +179,7 @@ function textStats(data, day, title) {
   lines.push(...recordLines(c, day));
   lines.push("", ...periodBlock(c, s, per));
   lines.push(...priceLines(c, s));
-  lines.push("", "💰 За " + MONTH_NOM[day.m] + ": <b>" + money(month.total) + "</b>");
+  lines.push("", "💰 За " + MONTH_NOM[day.m] + ": <b>" + money(SC.netv(data.settings, month.total)) + "</b>" + (SC.payCfg(data.settings).ndfl ? " на руки" : ""));
   return lines.join("\n");
 }
 
@@ -213,11 +213,13 @@ function textPeriod(data, today) {
 function textMoney(data, today) {
   const c = makeCalc(data), s = c.calc(today.y, today.m);
   const pm = today.m === 0 ? 11 : today.m - 1, py = today.m === 0 ? today.y - 1 : today.y, prev = c.calc(py, pm);
-  const lines = ["💰 <b>" + MONTH_NOM[today.m][0].toUpperCase() + MONTH_NOM[today.m].slice(1) + "</b> — по отмеченным сменам", ""];
-  lines.push("Смены: " + money(s.base));
-  lines.push("Премия: " + money(s.bonus) + (s.bonus < s.bonusMax - 0.5 ? " <i>(полная " + money(s.bonusMax) + ")</i>" : " ✅"));
-  lines.push("━━━━━━━━━━━━", "Итого: <b>" + money(s.total) + "</b>");
-  if (prev.total > 0) { const d = s.total - prev.total; lines.push((d >= 0 ? "📈 На " + money(d) + " больше" : "📉 На " + money(-d) + " меньше") + ", чем за " + MONTH_NOM[pm]); }
+  // Как во вкладке «Деньги»: при «Вычитать НДФЛ 13%» — суммы на руки
+  const N = v => SC.netv(data.settings, v), net = SC.payCfg(data.settings).ndfl;
+  const lines = ["💰 <b>" + MONTH_NOM[today.m][0].toUpperCase() + MONTH_NOM[today.m].slice(1) + "</b> — по отмеченным сменам" + (net ? ", на руки" : ""), ""];
+  lines.push("Смены: " + money(N(s.base)));
+  lines.push("Премия: " + money(N(s.bonus)) + (s.bonus < s.bonusMax - 0.5 ? " <i>(полная " + money(N(s.bonusMax)) + ")</i>" : " ✅"));
+  lines.push("━━━━━━━━━━━━", "Итого: <b>" + money(N(s.total)) + "</b>");
+  if (prev.total > 0) { const d = N(s.total) - N(prev.total); lines.push((d >= 0 ? "📈 На " + money(d) + " больше" : "📉 На " + money(-d) + " меньше") + ", чем за " + MONTH_NOM[pm]); }
   return lines.join("\n");
 }
 
