@@ -2094,7 +2094,7 @@ window.LOOK = (function(){
   function setPoints(v){
     setTimeout(()=>{ try{ markChips(); }catch(e){} }, 0);
     const k=key(view.y,view.m); pts[k]=Object.assign({}, pts[k]||{});
-    try{ normCheck(k+"-"+sel, pts[k][sel], v); }catch(e){}
+    try{ normCheck(ds(view.y,view.m,sel), pts[k][sel], v); /* тот же вид дня, что у кнопок ремонтов: 2026-11-05 */ }catch(e){}
     if(v==null) delete pts[k][sel]; else pts[k][sel]=v;
     render(); scheduleSave(k); updatePreview();
   }
@@ -2589,7 +2589,7 @@ window.LOOK = (function(){
     return {y, m, d, id: ds(y,m,d), k: key(y,m)};
   }
   function changeReps(fn){
-    const c=repCtx(), dd=dayData(c.id), hadReps=!!(dd.reps&&dd.reps.length), before=daySum(c.id);
+    const c=repCtx(), dd=dayData(c.id), hadReps=!!(dd.reps&&dd.reps.length), P0=(pts[c.k]||{})[c.d], before=P0!=null ? +P0 : daySum(c.id);
     setTimeout(()=>{ try{ normCheck(c.id, before, daySum(c.id), true); }catch(e){} }, 0);
     const reps=JSON.parse(JSON.stringify(dd.reps||[]));
     fn(reps);
@@ -3112,7 +3112,7 @@ window.LOOK = (function(){
     C.forEach((c,ci)=>{ const b=el("button"); b.append(el("b","", "+"+f1(c.p)), el("small","", c.nm.toLowerCase().replace("сверхтяжёлый","сверх")));
       b.setAttribute("aria-label","Ремонт: "+c.nm+", +"+f1(c.p)+" балла");
       b.onclick=()=>{
-        const S=snap([key(y,m)],[id]), dd=dayData(id), hadReps=!!(dd.reps&&dd.reps.length), before=hadReps ? daySum(id) : 0;
+        const S=snap([key(y,m)],[id]), dd=dayData(id), hadReps=!!(dd.reps&&dd.reps.length), before=ptsOn(t0)!=null ? ptsOn(t0) : (hadReps ? daySum(id) : 0);   // баллы дня, даже если внесены числом или из чата
         let R=JSON.parse(JSON.stringify(dd.reps||[]));
         // Баллы дня уже стоят (внесены числом или из чата) и не совпадают с ремонтами — берём их за основу, ремонт прибавится сверху
         const cur=ptsOn(t0); if(cur!=null && Math.abs(cur-(R.length ? daySum(id) : 0))>0.01) R=[{t:"", it:[], b:cur}];
@@ -3272,7 +3272,7 @@ window.LOOK = (function(){
     if(isShift(t)){
       const ptsRow=el("div","pm-pts"), cur=P[d]!=null ? +P[d] : null, N=settings.maxPts, base=[N-6,N-4,N-2,N,N+2,N+4,N+6].filter(v=>v>0);
       base.forEach(v=>{ const b=el("button","num lv-"+level(v), String(v)); b.setAttribute("aria-pressed", String(cur===v));
-        b.onclick=()=>{ offerUndo(d+" "+GEN[view.m]+": "+v+" баллов", snap([k],[])); pts[k]=Object.assign({}, pts[k]||{}); const old=pts[k][d]; pts[k][d]=v; normCheck(k+"-"+d, old, v); render(); scheduleSave(k); sfx.points(v, N); closeDayMenu(); };
+        b.onclick=()=>{ offerUndo(d+" "+GEN[view.m]+": "+v+" баллов", snap([k],[])); pts[k]=Object.assign({}, pts[k]||{}); const old=pts[k][d]; pts[k][d]=v; normCheck(ds(view.y,view.m,d), old, v); render(); scheduleSave(k); sfx.points(v, N); closeDayMenu(); };
         ptsRow.appendChild(b); });
       m.appendChild(el("span","hint","Баллы за смену"+(cur!=null ? ": сейчас "+f1(cur) : ""))); m.appendChild(ptsRow);
     }
