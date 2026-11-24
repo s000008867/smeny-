@@ -2743,7 +2743,7 @@ window.LOOK = (function(){
   $("rpApply").onclick = ()=>{
     const W=parseInt($("rpWork").value,10), O=parseInt($("rpOff").value,10), sv=$("rpStart").value, M=parseInt($("rpMonths").value,10), keep=$("rpKeep").checked;
     if(!(W>=1 && O>=1 && sv)){ $("rpMsg").textContent="Укажите число рабочих и выходных дней и дату первой смены."; return; }
-    const [yy,mm,dd]=sv.split("-").map(Number), start=new Date(yy,mm-1,dd), end=new Date(yy,mm-1+M,0);
+    const [yy,mm,dd]=sv.split("-").map(Number), start=new Date(yy,mm-1,dd), end=new Date(yy,mm-1+M+(dd>1?1:0),0);   // начали не 1-го — неполный месяц плюс M целых: с 28 ноября «на 1 месяц» = до 31 декабря
     const plan=[]; let w=0, o=0;
     for(let d=new Date(start), i=0; d<=end; d.setDate(d.getDate()+1), i++){
       const k=key(d.getFullYear(), d.getMonth()), t=(months[k]||{})[d.getDate()];
@@ -3885,7 +3885,7 @@ window.LOOK = (function(){
         setTimeout(()=>{ const b=$("phBox"); if(b) b.scrollIntoView({block:"start", behavior:"smooth"}); }, 400); };
       sh.querySelector("#qsPlan").onclick=()=>{ const W=parseInt(sh.querySelector("#qsW").value,10), O=parseInt(sh.querySelector("#qsO").value,10), sv=sh.querySelector("#qsStart").value;
         if(!(W>=1 && O>=1 && sv)){ sfx.error(); return; }
-        const [yy,mm,dd]=sv.split("-").map(Number), start=new Date(yy,mm-1,dd), end=new Date(yy,mm+1,0), touched=new Set();
+        const [yy,mm,dd]=sv.split("-").map(Number), start=new Date(yy,mm-1,dd), end=new Date(yy,mm+1+(dd>1?1:0),0), touched=new Set();   // «на 2 месяца»: неполный месяц старта не считается
         for(let d=new Date(start), i=0; d<=end; d.setDate(d.getDate()+1), i++){ const k=key(d.getFullYear(), d.getMonth()); if((months[k]||{})[d.getDate()]) continue; months[k]=Object.assign({}, months[k]||{}); months[k][d.getDate()] = (i%(W+O))<W ? "w" : "o"; touched.add(k); }
         touched.forEach(k=>scheduleSave(k)); render(); sfx.good(); openQuick(3); };
       sh.querySelector("#qsSelf").onclick=()=>{ qsClose(bg); };
