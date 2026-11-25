@@ -2186,7 +2186,12 @@ window.LOOK = (function(){
   };
   $("clearMonth").onclick = ()=>{ $("confirmClear").hidden=false; };
   $("clearNo").onclick = ()=>{ $("confirmClear").hidden=true; };
-  $("clearYes").onclick = ()=>{ const k=key(view.y,view.m); months[k]={}; pts[k]={}; closeEditor(); $("confirmClear").hidden=true; render(); scheduleSave(k); };
+  // Очистка месяца: отметки, баллы, «общее количество» и ремонты дней (из них считаются баллы).
+  // Заметки и парт-тайм остаются — это не отметки смен.
+  const monthDayIds = k => Object.keys(dayx).filter(id=>id.startsWith(k+"-"));
+  $("clearYes").onclick = ()=>{ const k=key(view.y,view.m); months[k]={}; pts[k]={}; delete totals[k];
+    for(const id of monthDayIds(k)){ const D=dayx[id]; if(D && D.reps){ const R=Object.assign({}, D); delete R.reps; setDay(id, R); } }
+    closeEditor(); $("confirmClear").hidden=true; render(); scheduleSave(k); };
 
   let setTimer=null, setBusy=false, setPending=false;
   function saveSettings(){ setPending=true; clearTimeout(setTimer); setTimer=setTimeout(flushSettings, 700); }
@@ -3092,7 +3097,7 @@ window.LOOK = (function(){
       const t=(months[k]||{})[d]; offerUndo(t ? dayLbl(d)+": "+T[t].name.toLowerCase() : dayLbl(d)+": отметка снята", S); }; }
   const wrapUndo = (id, label, keysFn) => { const b=$(id), f=b.onclick; b.onclick=(...a)=>{ const ks=keysFn(); const S=snap(ks.m, ks.d); const r=f.apply(b,a); offerUndo(typeof label==="function" ? label() : label, S); return r; }; };
   wrapUndo("fillOff", "Пустые дни стали выходными", ()=>({m:[key(view.y,view.m)]}));
-  wrapUndo("clearYes", "Месяц очищен", ()=>({m:[key(view.y,view.m)]}));
+  wrapUndo("clearYes", "Месяц очищен", ()=>({m:[key(view.y,view.m)], d:monthDayIds(key(view.y,view.m))}));
   wrapUndo("rpYes", "График расставлен", ()=>({m:[...new Set((rpPlan||[]).map(x=>x.k))]}));
   wrapUndo("phApply", "График с фото записан", ()=>({m: phData ? [key(phData.y, phData.m)] : []}));
   wrapUndo("tqSave", "Общее количество сохранено", ()=>({m:[$("tqForm").dataset.k]}));
