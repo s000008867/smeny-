@@ -2677,8 +2677,10 @@ window.LOOK = (function(){
     perList.sort((a,b)=>a.kk<b.kk?-1:1);
     barChart($("chPeriods"), perList.slice(-6).map(it=>({v:it.v, vl:f1(it.v), cls:lvCls(it.v), label:MONTHS[it.m].slice(0,3)})),
       {norm:settings.maxPts, minv:settings.minPts, label:"Средний балл по периодам премии", empty:"Появится, когда будут баллы хотя бы за один период."});
-    const wd=[1,2,3,4,5,6,0].map(w=>{ const xs=rec.list.filter(it=>new Date(it.y,it.m,it.d).getDay()===w); return xs.length ? xs.reduce((s,x)=>s+x.p,0)/xs.length : null; });
-    const WDS=["Пн","Вт","Ср","Чт","Пт","Сб","Вс"];
+    // Порядок дней — как в календаре: неделя с понедельника или с воскресенья («Неделя начинается с»)
+    const ORD = settings.wk0===0 ? [0,1,2,3,4,5,6] : [1,2,3,4,5,6,0];
+    const wd=ORD.map(w=>{ const xs=rec.list.filter(it=>new Date(it.y,it.m,it.d).getDay()===w); return xs.length ? xs.reduce((s,x)=>s+x.p,0)/xs.length : null; });
+    const WDS=ORD.map(w=>["Вс","Пн","Вт","Ср","Чт","Пт","Сб"][w]);
     barChart($("chWeek"), rec.list.length ? wd.map((v,i)=>({v, vl:v==null?"":f1(v), cls:v==null?"none":lvCls(v), label:WDS[i]})) : [],
       {norm:settings.maxPts, minv:settings.minPts, label:"Средний балл по дням недели", empty:"Внесите баллы за смены, и здесь появится сравнение дней недели."});
   }
