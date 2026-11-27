@@ -3448,7 +3448,11 @@ window.LOOK = (function(){
         const ed=el("button","ck-edit","изменить"); ed.onclick=()=>{ ckOpen = ckOpen===id ? null : id; ckDraft=null; renderMoney(); }; rt.appendChild(ed);
       } else { const b=el("button","ck-btn","Внести"); b.onclick=()=>{ ckOpen = ckOpen===id ? null : id; ckDraft=null; renderMoney(); }; rt.appendChild(b); }
       row.append(lft, rt);
-      if(got!=null && !P.ndfl && e.amt>0 && Math.abs(got-e.amt*0.87)<=e.amt*0.02) row.appendChild(el("div","ck-hint","Похоже на вычет НДФЛ 13%. Включите его в «Работа» внизу этой вкладки — расчёт станет на руки."));
+      // Сколько было бы «на руки» с НДФЛ: при фиксированном авансе зарплата = 87% всего − аванс, а не 87% от (всё − аванс)
+      const ndflAlt = () => { const D=Object.assign({}, calcData(), {settings: Object.assign({}, settings, {payout: Object.assign({}, P, {ndfl:true})})});
+        return e.kind==="sal" ? SC.salary(D, e.y, e.m, nowParts()) : SC.advance(D, e.y, e.m); };
+      const alt = got!=null && !P.ndfl && e.amt>0 ? ndflAlt() : null;
+      if(alt!=null && Math.abs(alt-e.amt)>1 && Math.abs(got-alt)<=Math.max(50, alt*0.02)) row.appendChild(el("div","ck-hint","Похоже на вычет НДФЛ 13%. Включите его в «Работа» внизу этой вкладки — расчёт станет на руки."));
       else if(got!=null && e.kind==="adv" && Math.abs(got-e.amt)>Math.max(50, e.amt*0.005) && P.mode!=="fixed") row.appendChild(el("div","ck-hint","Если аванс у вас фиксированный — укажите его сумму в «Работа»."));
       if(ckOpen===id){
         const kind = e.kind==="adv" ? "Аванс" : "Зарплата", k=evKey(e);
