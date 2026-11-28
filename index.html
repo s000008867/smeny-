@@ -2731,7 +2731,7 @@ window.LOOK = (function(){
     const got=list.reduce((s,x)=>s+(+x.a),0), cur=calc(view.y,view.m), pm=view.m===0?11:view.m-1, py=view.m===0?view.y-1:view.y, prev=calc(py,pm);
     const out=$("paySum"); out.textContent="";
     out.appendChild(el("b","", "Получено в "+MONTHS_PREP[view.m]+": "+fmt(got)));
-    out.appendChild(el("span","", "Расчёт за "+MONTHS[view.m]+": "+fmt(cur.total)+" · за "+MONTHS[pm]+": "+fmt(prev.total)+"."));
+    out.appendChild(el("span","", "Расчёт за "+MONTHS[view.m]+": "+fmt(netv(cur.total))+" · за "+MONTHS[pm]+": "+fmt(netv(prev.total))+(payCfg().ndfl ? " (на руки)." : ".")));
     out.appendChild(el("span","", "Обычно часть зарплаты приходит в следующем месяце, поэтому сравнивайте выплаты с расчётом за прошлый месяц."));
   }
   $("payAdd").onclick = ()=>{
